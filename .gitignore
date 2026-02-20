@@ -1,3 +1,27 @@
+# flutter && dart
+/build/
+/.dart_tool/
+/.flutter-plugins
+/.flutter-plugins-dependencies
+/.packages
+/pubspec.lock
+# android
+.gradle/
+/android/local.properties
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+# ios
+.generated/
+Pods/
+/.pub-cache/
+# ide
+.idea/
+.vscode/
+*.iml
+*.iws
+# system
+.DS_Store
 .dart_tool
 run.sh
-.idea
+/.metadata
