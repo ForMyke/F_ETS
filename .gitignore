@@ -1,2 +1,3 @@
 .dart_tool
-.run.sh
+run.sh
+.idea
