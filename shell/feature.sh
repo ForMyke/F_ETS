@@ -1,7 +1,7 @@
 #!/bin/bash
 
-FEATURE=${1:-"my_feature"}
-
+FEATURE=${1:-"testiganding"}
+cd "$(dirname "$0")/.." || exit
 echo "Let me cook, I'm working in $FEATURE"
 
 # Crear estructura en lib y test
@@ -16,5 +16,4 @@ find lib/$FEATURE test/$FEATURE -type d -empty -not -path "*.git*" -exec touch {
 
 echo "It's ready"
 echo "--------------------------"
-# Ejecuta tree solo en la carpeta de la nueva feature
-tree -d lib/features/$FEATURE test/features/$FEATURE
+tree -d lib/features/
