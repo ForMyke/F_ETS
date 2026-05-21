@@ -15,4 +15,10 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, void>> logout();
+
+  /// Envía un email con el link de recuperación de contraseña.
+  Future<Either<Failure, void>> forgotPassword({required String email});
+
+  /// Actualiza la contraseña del usuario autenticado vía deep link de Supabase.
+  Future<Either<Failure, void>> resetPassword({required String newPassword});
 }

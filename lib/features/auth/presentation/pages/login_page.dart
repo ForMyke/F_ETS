@@ -140,7 +140,8 @@ class _LoginPageState extends State<LoginPage> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () => Navigator.of(context)
+                                .pushNamed(AppRoutes.forgotPassword),
                             child: RichText(
                               text: TextSpan(
                                 children: [
