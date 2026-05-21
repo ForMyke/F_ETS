@@ -7,116 +7,349 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ETS App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  final List<Widget> _pages = const [
+    DashboardPage(),
+    EstudiantesPage(),
+    PerfilPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (i) => setState(() => _selectedIndex = i),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.dashboard), label: 'Inicio'),
+          NavigationDestination(icon: Icon(Icons.people), label: 'Estudiantes'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('ETS — Sistema Escolar'),
+        backgroundColor: color.primary,
+        foregroundColor: Colors.white,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            const SizedBox(height: 8),
+            Text('Bienvenido',
+                style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 4),
+            Text('Sistema de gestión escolar',
+                style: TextStyle(color: Colors.grey[600])),
+            const SizedBox(height: 24),
+
+            // Tarjetas de estadísticas
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.4,
+              children: [
+                _StatCard(
+                    label: 'Estudiantes',
+                    value: '248',
+                    icon: Icons.people,
+                    color: Colors.blue),
+                _StatCard(
+                    label: 'Materias',
+                    value: '12',
+                    icon: Icons.book,
+                    color: Colors.purple),
+                _StatCard(
+                    label: 'Docentes',
+                    value: '18',
+                    icon: Icons.school,
+                    color: Colors.teal),
+                _StatCard(
+                    label: 'Grupos',
+                    value: '6',
+                    icon: Icons.group_work,
+                    color: Colors.orange),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+            Text('Actividad reciente',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+
+            _ActividadItem(
+                icon: Icons.check_circle,
+                color: Colors.green,
+                texto: 'Lista de asistencia actualizada',
+                hora: 'Hace 5 min'),
+            _ActividadItem(
+                icon: Icons.assignment,
+                color: Colors.blue,
+                texto: 'Nueva tarea publicada en Cálculo',
+                hora: 'Hace 20 min'),
+            _ActividadItem(
+                icon: Icons.notification_important,
+                color: Colors.orange,
+                texto: 'Examen parcial programado',
+                hora: 'Hace 1 hora'),
+            _ActividadItem(
+                icon: Icons.person_add,
+                color: Colors.purple,
+                texto: 'Nuevo estudiante inscrito',
+                hora: 'Hace 2 horas'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard(
+      {required this.label,
+      required this.value,
+      required this.icon,
+      required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade200)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Icon(icon, color: color, size: 28),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(value,
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: color)),
+                Text(label,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              ],
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+class _ActividadItem extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String texto;
+  final String hora;
+
+  const _ActividadItem(
+      {required this.icon,
+      required this.color,
+      required this.texto,
+      required this.hora});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+          backgroundColor: color.withOpacity(0.1),
+          child: Icon(icon, color: color, size: 20)),
+      title: Text(texto, style: const TextStyle(fontSize: 14)),
+      subtitle:
+          Text(hora, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+    );
+  }
+}
+
+// ── Estudiantes ────────────────────────────────────────────────────────
+class EstudiantesPage extends StatelessWidget {
+  const EstudiantesPage({super.key});
+
+  static const _estudiantes = [
+    {'nombre': 'Ana García', 'materia': 'Cálculo II', 'promedio': '9.2'},
+    {'nombre': 'Luis Martínez', 'materia': 'Física I', 'promedio': '8.5'},
+    {'nombre': 'María López', 'materia': 'Programación', 'promedio': '9.8'},
+    {'nombre': 'Carlos Pérez', 'materia': 'Álgebra', 'promedio': '7.4'},
+    {'nombre': 'Sofía Hernández', 'materia': 'Cálculo II', 'promedio': '8.9'},
+    {'nombre': 'Diego Ramírez', 'materia': 'Física I', 'promedio': '6.8'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Estudiantes')),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _estudiantes.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (context, i) {
+          final e = _estudiantes[i];
+          final promedio = double.parse(e['promedio']!);
+          final color = promedio >= 9
+              ? Colors.green
+              : promedio >= 8
+                  ? Colors.blue
+                  : promedio >= 7
+                      ? Colors.orange
+                      : Colors.red;
+
+          return Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade200)),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+                child: Text(e['nombre']![0],
+                    style: const TextStyle(
+                        color: Color(0xFF6C63FF), fontWeight: FontWeight.bold)),
+              ),
+              title: Text(e['nombre']!),
+              subtitle: Text(e['materia']!),
+              trailing: Chip(
+                label: Text(e['promedio']!,
+                    style:
+                        TextStyle(color: color, fontWeight: FontWeight.bold)),
+                backgroundColor: color.withOpacity(0.1),
+                side: BorderSide.none,
+              ),
+            ),
+          );
+        },
       ),
+    );
+  }
+}
+
+// ── Perfil ─────────────────────────────────────────────────────────────
+class PerfilPage extends StatelessWidget {
+  const PerfilPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Perfil')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            CircleAvatar(
+              radius: 48,
+              backgroundColor: color.primary,
+              child: const Text('AD',
+                  style: TextStyle(
+                      fontSize: 32,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 16),
+            const Text('Admin Docente',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('admin@ets.edu.mx', style: TextStyle(color: Colors.grey[600])),
+            const SizedBox(height: 32),
+            _InfoTile(
+                icon: Icons.school,
+                label: 'Institución',
+                value: 'Instituto ETS'),
+            _InfoTile(icon: Icons.badge, label: 'Rol', value: 'Administrador'),
+            _InfoTile(
+                icon: Icons.calendar_today,
+                label: 'Ciclo',
+                value: '2025 - Primavera'),
+            _InfoTile(
+                icon: Icons.email, label: 'Correo', value: 'admin@ets.edu.mx'),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.logout),
+              label: const Text('Cerrar sesión'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red,
+                minimumSize: const Size(double.infinity, 48),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoTile(
+      {required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      title:
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+      subtitle: Text(value,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
     );
   }
 }
