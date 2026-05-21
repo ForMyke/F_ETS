@@ -6,7 +6,6 @@
 F_ETS/          ← raíz del proyecto Flutter (donde está pubspec.yaml)
 ├── Dockerfile
 ├── docker-compose.yml
-├── nginx.conf
 ├── lib/
 ├── web/
 ├── pubspec.yaml
