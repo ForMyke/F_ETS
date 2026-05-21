@@ -2,35 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../bloc/login_bloc.dart';
+import '../bloc/register_bloc.dart';
 import '../widgets/labeled_text_field.dart';
 import '../widgets/login_background.dart';
-import '../widgets/login_header.dart';
 import '../widgets/or_divider.dart';
+import '../widgets/password_strength_bar.dart';
+import '../widgets/register_header.dart';
 import '../widgets/social_login_button.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
-  final _shakeKey = GlobalKey();
   bool _hasError = false;
+  String _passwordValue = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(() {
+      setState(() => _passwordValue = _passwordController.text);
+    });
+  }
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -40,7 +52,8 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _hasError = !_hasError);
       return;
     }
-    context.read<LoginBloc>().add(LoginSubmitted(
+    context.read<RegisterBloc>().add(RegisterSubmitted(
+          name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
         ));
@@ -54,12 +67,12 @@ class _LoginPageState extends State<LoginPage> {
         isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
 
     return Scaffold(
-      body: BlocConsumer<LoginBloc, LoginState>(
+      body: BlocConsumer<RegisterBloc, RegisterState>(
         listener: (context, state) {
-          if (state is LoginSuccess) {
-            // TODO: navegar a home
+          if (state is RegisterSuccess) {
+            // TODO: navegar a home o hacer login automático
           }
-          if (state is LoginFailure) {
+          if (state is RegisterFailure) {
             HapticFeedback.mediumImpact();
             setState(() => _hasError = !_hasError);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
         builder: (context, state) {
-          final isLoading = state is LoginLoading;
+          final isLoading = state is RegisterLoading;
 
           return LoginBackground(
             child: SafeArea(
@@ -90,7 +103,40 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const LoginHeader()
+                        // Back button
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkBgSurface
+                                  : AppColors.bgSurface,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderLight,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        )
+                            .animate()
+                            .fadeIn(duration: 400.ms)
+                            .slideX(begin: -0.1, curve: Curves.easeOutCubic),
+                        const SizedBox(height: 20),
+
+                        // Header
+                        const RegisterHeader()
                             .animate()
                             .fadeIn(duration: 500.ms)
                             .slideY(
@@ -98,19 +144,39 @@ class _LoginPageState extends State<LoginPage> {
                               curve: Curves.easeOutCubic,
                             ),
                         const SizedBox(height: 32),
+
+                        // Campos con shake en error
                         Column(
-                          key: _shakeKey,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            LabeledTextField(
+                              label: 'Nombre completo',
+                              hint: 'Juan García',
+                              controller: _nameController,
+                              prefixIcon: Icons.person_outline_rounded,
+                              keyboardType: TextInputType.name,
+                              textInputAction: TextInputAction.next,
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty)
+                                  return 'Campo requerido';
+                                if (v.trim().length < 3)
+                                  return 'Mínimo 3 caracteres';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
                             LabeledTextField(
                               label: 'Correo electrónico',
                               hint: 'usuario@email.com',
                               controller: _emailController,
                               prefixIcon: Icons.mail_outline_rounded,
                               keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
                               validator: (v) {
                                 if (v == null || v.isEmpty)
                                   return 'Campo requerido';
-                                if (!v.contains('@')) return 'Correo inválido';
+                                if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$')
+                                    .hasMatch(v)) return 'Correo inválido';
                                 return null;
                               },
                             ),
@@ -121,11 +187,34 @@ class _LoginPageState extends State<LoginPage> {
                               controller: _passwordController,
                               prefixIcon: Icons.lock_outline_rounded,
                               obscureText: true,
-                              textInputAction: TextInputAction.done,
+                              textInputAction: TextInputAction.next,
                               validator: (v) {
                                 if (v == null || v.isEmpty)
                                   return 'Campo requerido';
                                 if (v.length < 6) return 'Mínimo 6 caracteres';
+                                return null;
+                              },
+                            ),
+                            // Indicador de fortaleza
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 2),
+                              child:
+                                  PasswordStrengthBar(password: _passwordValue),
+                            ),
+                            const SizedBox(height: 16),
+                            LabeledTextField(
+                              label: 'Confirmar contraseña',
+                              hint: '••••••••',
+                              controller: _confirmPasswordController,
+                              prefixIcon: Icons.lock_outline_rounded,
+                              obscureText: true,
+                              textInputAction: TextInputAction.done,
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Campo requerido';
+                                if (v != _passwordController.text)
+                                  return 'Las contraseñas no coinciden';
                                 return null;
                               },
                             ),
@@ -136,33 +225,9 @@ class _LoginPageState extends State<LoginPage> {
                             .animate()
                             .fadeIn(delay: 100.ms, duration: 500.ms)
                             .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: '¿Olvidaste tu contraseña? ',
-                                    style: AppTextStyles.caption
-                                        .copyWith(color: captionColor),
-                                  ),
-                                  TextSpan(
-                                    text: 'Recuperar',
-                                    style: AppTextStyles.link
-                                        .copyWith(color: linkColor),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                            .animate()
-                            .fadeIn(delay: 180.ms, duration: 500.ms)
-                            .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                         const SizedBox(height: 28),
+
+                        // Botón de registro
                         AnimatedContainer(
                           duration: 250.ms,
                           curve: Curves.easeInOut,
@@ -189,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                                     )
                                   : const Text(
-                                      'Entrar',
+                                      'Crear cuenta',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15,
@@ -204,6 +269,8 @@ class _LoginPageState extends State<LoginPage> {
                             .fadeIn(delay: 260.ms, duration: 500.ms)
                             .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                         const SizedBox(height: 24),
+
+                        // Or divider + Google + ya tienes cuenta
                         Column(
                           children: [
                             const OrDivider(),
@@ -212,18 +279,17 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 32),
                             Center(
                               child: GestureDetector(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed(AppRoutes.register),
+                                onTap: () => Navigator.of(context).pop(),
                                 child: RichText(
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '¿No tienes cuenta? ',
+                                        text: '¿Ya tienes cuenta? ',
                                         style: AppTextStyles.caption
                                             .copyWith(color: captionColor),
                                       ),
                                       TextSpan(
-                                        text: 'Regístrate',
+                                        text: 'Inicia sesión',
                                         style: AppTextStyles.link
                                             .copyWith(color: linkColor),
                                       ),
