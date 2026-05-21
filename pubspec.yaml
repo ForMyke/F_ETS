@@ -8,6 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    uses-material-design: true
   # Service locator
   get_it: ^9.2.0
   # Bloc for state management
@@ -17,7 +18,6 @@ dependencies:
   # Functional programming thingies
   dartz: ^0.10.1
   # Remote API
-  data_connection_checker_nulls: ^0.0.2
   http: ^1.6.0
   # Local cache
   shared_preferences: ^2.5.4

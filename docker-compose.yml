@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # ── Producción: build + serve con dhttpd ──────────────────────────
   flutter-web:
     image: debian:12-slim
     container_name: f_ets_web
@@ -26,7 +25,6 @@ services:
         ~/.pub-cache/bin/dhttpd --path build/web --host 0.0.0.0 --port 8080
       "
 
-  # ── Desarrollo: hot-reload ─────────────────────────────────────────
   flutter-dev:
     image: debian:12-slim
     container_name: f_ets_dev
@@ -51,3 +49,9 @@ services:
 
 volumes:
   flutter_cache:
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: f_ets_br0
