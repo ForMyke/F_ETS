@@ -6,7 +6,7 @@ class LabeledTextField extends StatefulWidget {
   final String label;
   final String hint;
   final bool obscureText;
-  final Widget? suffixIcon;
+  final IconData prefixIcon;
   final TextEditingController controller;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
@@ -17,8 +17,8 @@ class LabeledTextField extends StatefulWidget {
     required this.label,
     required this.hint,
     required this.controller,
+    required this.prefixIcon,
     this.obscureText = false,
-    this.suffixIcon,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.textInputAction = TextInputAction.next,
@@ -38,19 +38,19 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
   }
 
   @override
-  void didUpdateWidget(LabeledTextField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _obscure = widget.obscureText;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isPassword = widget.obscureText || widget.suffixIcon != null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor = isDark ? AppColors.darkBlueMid : AppColors.blueMid;
+    final iconColor = isDark ? AppColors.darkBlueMid : AppColors.blueMid;
+    final mutedColor = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label.toUpperCase(), style: AppTextStyles.fieldLabel),
+        Text(
+          widget.label.toUpperCase(),
+          style: AppTextStyles.fieldLabel.copyWith(color: labelColor),
+        ),
         const SizedBox(height: 6),
         TextFormField(
           controller: widget.controller,
@@ -58,19 +58,21 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           validator: widget.validator,
-          style: AppTextStyles.body,
+          style: AppTextStyles.body.copyWith(
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+          ),
           decoration: InputDecoration(
             hintText: widget.hint,
-            suffixIcon: isPassword
-                ? InkWell(
-                    onTap: () => setState(() => _obscure = !_obscure),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Icon(
-                        _obscure ? Icons.lock : Icons.lock_open,
-                        color: AppColors.blueMid,
-                        size: 20,
-                      ),
+            prefixIcon: Icon(widget.prefixIcon, color: iconColor, size: 20),
+            suffixIcon: widget.obscureText
+                ? IconButton(
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                    icon: Icon(
+                      _obscure
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: mutedColor,
+                      size: 20,
                     ),
                   )
                 : null,

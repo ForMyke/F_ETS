@@ -25,7 +25,9 @@ class EtsApp extends StatelessWidget {
     return MaterialApp(
       title: 'ETS',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system, // sigue el sistema automáticamente
       initialRoute: AppRoutes.login,
       onGenerateRoute: (settings) {
         switch (settings.name) {

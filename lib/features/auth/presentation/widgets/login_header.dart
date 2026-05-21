@@ -7,26 +7,76 @@ class LoginHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Bienvenido de vuelta', style: AppTextStyles.labelCaps),
-        const SizedBox(height: 6),
-        RichText(
-          text: const TextSpan(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              TextSpan(text: 'Inicia ', style: AppTextStyles.displayLarge),
-              TextSpan(text: 'sesión', style: AppTextStyles.displayItalic),
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                ),
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'BIENVENIDO DE VUELTA',
+                style: AppTextStyles.labelCaps.copyWith(
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Inicia ',
+                style: AppTextStyles.displayLarge.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+              TextSpan(
+                text: 'sesión',
+                style: AppTextStyles.displayItalic.copyWith(
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                ),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 6),
-        const Text('Accede a tu cuenta', style: AppTextStyles.bodyMuted),
-        const SizedBox(height: 24),
+        Text(
+          'Accede a tu cuenta ETS',
+          style: AppTextStyles.bodyMuted.copyWith(
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 20),
         Container(
           width: 36,
-          height: 1,
-          color: AppColors.blueLight,
+          height: 2,
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkBlueLight : AppColors.blueLight,
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
       ],
     );
