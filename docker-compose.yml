@@ -1,53 +1,34 @@
-version: '3.8'
-
 services:
   flutter-web:
-    image: debian:12-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    image: f_ets_web:prod
     container_name: f_ets_web
-    working_dir: /app
-    volumes:
-      - .:/app
-      - flutter_cache:/opt/flutter
     ports:
-      - '8080:8080'
+      - '8080:80'
     restart: unless-stopped
-    command: >
-      bash -c "
-        apt-get update -q && apt-get install -y -q curl git unzip xz-utils &&
-        if [ ! -f /opt/flutter/bin/flutter ]; then
-          git clone --depth 1 --branch 3.27.4 https://github.com/flutter/flutter.git /opt/flutter;
-        fi &&
-        export PATH=/opt/flutter/bin:$$PATH &&
-        flutter config --no-analytics &&
-        flutter pub get &&
-        flutter build web --release &&
-        dart pub global activate dhttpd &&
-        ~/.pub-cache/bin/dhttpd --path build/web --host 0.0.0.0 --port 8080
-      "
 
   flutter-dev:
-    image: debian:12-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: f_ets_web:dev
     container_name: f_ets_dev
-    profiles: ['dev']
-    working_dir: /app
+    profiles:
+      - dev
     volumes:
       - .:/app
+      - flutter_pub:/app/.dart_tool
       - flutter_cache:/opt/flutter
     ports:
       - '5000:5000'
-    command: >
-      bash -c "
-        apt-get update -q && apt-get install -y -q curl git unzip xz-utils &&
-        if [ ! -f /opt/flutter/bin/flutter ]; then
-          git clone --depth 1 --branch 3.27.4 https://github.com/flutter/flutter.git /opt/flutter;
-        fi &&
-        export PATH=/opt/flutter/bin:$$PATH &&
-        flutter config --no-analytics &&
-        flutter pub get &&
-        flutter run -d web-server --web-port=5000 --web-hostname=0.0.0.0
-      "
+    restart: unless-stopped
 
 volumes:
+  flutter_pub:
   flutter_cache:
 
 networks:
