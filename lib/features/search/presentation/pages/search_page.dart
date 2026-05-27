@@ -9,6 +9,7 @@ import '../../domain/usecases/get_exams_usecase.dart';
 import '../bloc/search_bloc.dart';
 import '../widgets/exam_card.dart';
 import '../widgets/filter_sheet.dart';
+import '../widgets/pdf_export_button.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import 'package:flutter/services.dart';
 
@@ -339,6 +340,38 @@ class _SearchViewState extends State<_SearchView> {
                       return Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: Wrap(spacing: 8, runSpacing: 8, children: chips),
+                      );
+                    },
+                  ),
+
+                  // Contador + botón exportar PDF
+                  BlocBuilder<SearchBloc, SearchState>(
+                    builder: (context, state) {
+                      if (state is! SearchSuccess || state.exams.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${state.exams.length} examen${state.exams.length != 1 ? 'es' : ''} encontrado${state.exams.length != 1 ? 's' : ''}',
+                              style: AppTextStyles.caption.copyWith(
+                                color: isDark
+                                    ? AppColors.darkTextMuted
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                            PdfExportButton(
+                              exams: state.exams,
+                              carrera: state.carrera,
+                              semestre: state.semestre,
+                              plan: state.plan,
+                              isDark: isDark,
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),

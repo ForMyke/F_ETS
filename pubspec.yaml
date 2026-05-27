@@ -23,6 +23,8 @@ dependencies:
   # Geolocation
   url_launcher: ^6.3.2
   flutter_animate: ^4.5.2
+  pdf: ^3.11.1
+  printing: ^5.13.1
 
 dev_dependencies:
   flutter_test:

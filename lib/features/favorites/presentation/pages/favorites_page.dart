@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../search/presentation/widgets/exam_card.dart';
+import '../../../search/presentation/widgets/pdf_export_button.dart';
 import '../bloc/favorites_bloc.dart';
 
 class FavoritesPage extends StatelessWidget {
@@ -87,7 +88,34 @@ class FavoritesPage extends StatelessWidget {
                       .animate()
                       .fadeIn(delay: 100.ms, duration: 500.ms)
                       .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+
+                  // Contador + botón exportar PDF
+                  BlocBuilder<FavoritesBloc, FavoritesState>(
+                    builder: (context, state) {
+                      if (state is! FavoritesSuccess || state.exams.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${state.exams.length} examen${state.exams.length != 1 ? 'es' : ''} guardado${state.exams.length != 1 ? 's' : ''}',
+                            style: AppTextStyles.caption.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextMuted
+                                  : AppColors.textMuted,
+                            ),
+                          ),
+                          PdfExportButton(
+                            exams: state.exams,
+                            isDark: isDark,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
