@@ -48,73 +48,77 @@ class ErrorSnackbar {
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
         duration: Duration(seconds: onRetry != null ? 5 : 3),
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A2433),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 1,
+        content: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A2433),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 1,
+              ),
             ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color, size: 18),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: AppTextStyles.caption.copyWith(
-                    color: const Color(0xFFE8F0FE),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  child: Icon(icon, color: color, size: 18),
                 ),
-              ),
-              if (onRetry != null) ...[
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    onRetry();
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: color.withOpacity(0.3),
-                        width: 1,
-                      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: AppTextStyles.caption.copyWith(
+                      color: const Color(0xFFE8F0FE),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
                     ),
-                    child: Text(
-                      'Reintentar',
-                      style: AppTextStyles.caption.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                      ),
-                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (onRetry != null) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      onRetry();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: color.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        'Reintentar',
+                        style: AppTextStyles.caption.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -128,47 +132,51 @@ class ErrorSnackbar {
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
         duration: const Duration(seconds: 2),
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A2433),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: AppColors.success.withOpacity(0.3),
-              width: 1,
+        content: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A2433),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.success.withOpacity(0.3),
+                width: 1,
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.check_rounded,
-                  color: AppColors.success,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: AppTextStyles.caption.copyWith(
-                    color: const Color(0xFFE8F0FE),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
+            child: Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: AppColors.success,
+                    size: 18,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: AppTextStyles.caption.copyWith(
+                      color: const Color(0xFFE8F0FE),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
