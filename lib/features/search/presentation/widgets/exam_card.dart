@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/exam.dart';
+import 'notification_button.dart';
 
 class ExamCard extends StatelessWidget {
   final Exam exam;
@@ -144,7 +145,7 @@ class ExamCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   _InfoRow(
-                    icon: Icons.access_time_rounded, // ← nueva fila
+                    icon: Icons.access_time_rounded,
                     label: 'Hora',
                     value: exam.hora,
                     isDark: isDark,
@@ -170,6 +171,16 @@ class ExamCard extends StatelessWidget {
                     value:
                         '${exam.carrera} · Plan ${exam.plan} · Sem. ${exam.semestre}',
                     isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      NotificationButton(
+                        exam: exam,
+                        isDark: isDark,
+                      ),
+                    ],
                   ),
                 ],
               ),
