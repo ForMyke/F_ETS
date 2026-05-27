@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/theme/app_text_styles.dart';
@@ -8,12 +9,16 @@ class ExamCard extends StatelessWidget {
   final Exam exam;
   final int index;
   final bool isDark;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteTap;
 
   const ExamCard({
     super.key,
     required this.exam,
     required this.index,
     required this.isDark,
+    this.isFavorite = false,
+    this.onFavoriteTap,
   });
 
   String _formatDate(DateTime date) {
@@ -90,6 +95,39 @@ class ExamCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (onFavoriteTap != null) ...[
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onFavoriteTap!();
+                      },
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        switchInCurve: Curves.elasticOut,
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (child, animation) =>
+                            ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        ),
+                        child: Icon(
+                          isFavorite
+                              ? Icons.bookmark_rounded
+                              : Icons.bookmark_border_rounded,
+                          key: ValueKey(isFavorite),
+                          size: 20,
+                          color: isFavorite
+                              ? (isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid)
+                              : (isDark
+                                  ? AppColors.darkTextMuted
+                                  : AppColors.textMuted),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -156,29 +194,24 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-        ),
+        Icon(icon,
+            size: 16,
+            color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
         const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: AppTextStyles.caption.copyWith(
-            color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-            fontSize: 12,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
+        Text('$label: ',
             style: AppTextStyles.caption.copyWith(
-              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
+              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
               fontSize: 12,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
+            )),
+        Expanded(
+          child: Text(value,
+              style: AppTextStyles.caption.copyWith(
+                color:
+                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+              overflow: TextOverflow.ellipsis),
         ),
       ],
     );

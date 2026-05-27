@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import '../../../search/presentation/pages/search_page.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
 
@@ -15,11 +17,6 @@ class PublicShellPage extends StatefulWidget {
 
 class _PublicShellPageState extends State<PublicShellPage> {
   int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    SearchPage(),
-    FavoritesPage(),
-  ];
 
   final List<_NavItem> _navItems = const [
     _NavItem(
@@ -44,31 +41,44 @@ class _PublicShellPageState extends State<PublicShellPage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      body: AnimatedSwitcher(
-        duration: 350.ms,
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) => FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.04),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          ),
-        ),
-        child: KeyedSubtree(
-          key: ValueKey(_currentIndex),
-          child: _pages[_currentIndex],
-        ),
-      ),
-      bottomNavigationBar: _AnimatedBottomNav(
-        currentIndex: _currentIndex,
-        items: _navItems,
-        onTap: _onTap,
-        isDark: isDark,
+    // FavoritesBloc compartido entre SearchPage y FavoritesPage
+    return BlocProvider(
+      create: (_) => FavoritesBloc.create()..add(const FavoritesStarted()),
+      child: Builder(
+        builder: (context) {
+          final pages = [
+            const SearchPage(),
+            const FavoritesPage(),
+          ];
+
+          return Scaffold(
+            body: AnimatedSwitcher(
+              duration: 350.ms,
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.04),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: KeyedSubtree(
+                key: ValueKey(_currentIndex),
+                child: pages[_currentIndex],
+              ),
+            ),
+            bottomNavigationBar: _AnimatedBottomNav(
+              currentIndex: _currentIndex,
+              items: _navItems,
+              onTap: _onTap,
+              isDark: isDark,
+            ),
+          );
+        },
       ),
     );
   }

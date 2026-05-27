@@ -9,6 +9,8 @@ import '../../domain/usecases/get_exams_usecase.dart';
 import '../bloc/search_bloc.dart';
 import '../widgets/exam_card.dart';
 import '../widgets/filter_sheet.dart';
+import '../../../favorites/presentation/bloc/favorites_bloc.dart';
+import 'package:flutter/services.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -366,11 +368,32 @@ class _SearchViewState extends State<_SearchView> {
                     return ListView.builder(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                       itemCount: state.exams.length,
-                      itemBuilder: (_, i) => ExamCard(
-                        exam: state.exams[i],
-                        index: i,
-                        isDark: isDark,
-                      ),
+                      itemBuilder: (_, i) {
+                        final exam = state.exams[i];
+                        final favState = context.watch<FavoritesBloc>().state;
+                        final isFav = favState is FavoritesSuccess
+                            ? favState.exams.any((e) => e.id == exam.id)
+                            : false;
+
+                        return ExamCard(
+                          exam: exam,
+                          index: i,
+                          isDark: isDark,
+                          isFavorite: isFav,
+                          onFavoriteTap: () {
+                            HapticFeedback.lightImpact();
+                            if (isFav) {
+                              context
+                                  .read<FavoritesBloc>()
+                                  .add(FavoriteRemoved(examId: exam.id));
+                            } else {
+                              context
+                                  .read<FavoritesBloc>()
+                                  .add(FavoriteAdded(exam: exam));
+                            }
+                          },
+                        );
+                      },
                     );
                   }
                   return _InitialState(isDark: isDark);
