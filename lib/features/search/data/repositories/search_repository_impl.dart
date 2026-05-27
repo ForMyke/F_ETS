@@ -13,12 +13,14 @@ class SearchRepositoryImpl implements SearchRepository {
   Future<Either<Failure, List<Exam>>> getExams({
     String? carrera,
     int? semestre,
+    int? plan,
     String? materia,
   }) async {
     try {
       final exams = await localDataSource.getExams(
         carrera: carrera,
         semestre: semestre,
+        plan: plan,
         materia: materia,
       );
       return Right(exams);

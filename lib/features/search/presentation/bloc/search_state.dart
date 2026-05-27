@@ -3,12 +3,13 @@ part of 'search_bloc.dart';
 abstract class SearchState extends Equatable {
   final String? carrera;
   final int? semestre;
+  final int? plan;
   final String? materia;
 
-  const SearchState({this.carrera, this.semestre, this.materia});
+  const SearchState({this.carrera, this.semestre, this.plan, this.materia});
 
   @override
-  List<Object?> get props => [carrera, semestre, materia];
+  List<Object?> get props => [carrera, semestre, plan, materia];
 }
 
 class SearchInitial extends SearchState {
@@ -16,7 +17,8 @@ class SearchInitial extends SearchState {
 }
 
 class SearchLoading extends SearchState {
-  const SearchLoading({super.carrera, super.semestre, super.materia});
+  const SearchLoading(
+      {super.carrera, super.semestre, super.plan, super.materia});
 }
 
 class SearchSuccess extends SearchState {
@@ -26,11 +28,12 @@ class SearchSuccess extends SearchState {
     required this.exams,
     super.carrera,
     super.semestre,
+    super.plan,
     super.materia,
   });
 
   @override
-  List<Object?> get props => [exams, carrera, semestre, materia];
+  List<Object?> get props => [exams, carrera, semestre, plan, materia];
 }
 
 class SearchFailure extends SearchState {
@@ -40,9 +43,10 @@ class SearchFailure extends SearchState {
     required this.message,
     super.carrera,
     super.semestre,
+    super.plan,
     super.materia,
   });
 
   @override
-  List<Object?> get props => [message, carrera, semestre, materia];
+  List<Object?> get props => [message, carrera, semestre, plan, materia];
 }

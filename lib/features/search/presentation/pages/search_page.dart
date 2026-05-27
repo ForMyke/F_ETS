@@ -37,7 +37,7 @@ class _SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<_SearchView> {
   final _searchController = TextEditingController();
-  final List<String> _carreras = ['ISC', 'LCD'];
+  final List<String> _carreras = ['ISC', 'LCD', 'IIA'];
 
   @override
   void dispose() {
@@ -50,6 +50,7 @@ class _SearchViewState extends State<_SearchView> {
     context.read<SearchBloc>().add(SearchFiltersChanged(
           carrera: state.carrera,
           semestre: state.semestre,
+          plan: state.plan,
           materia: value.isEmpty ? null : value,
         ));
   }
@@ -63,20 +64,17 @@ class _SearchViewState extends State<_SearchView> {
         carreras: _carreras,
         selectedCarrera: state.carrera,
         selectedSemestre: state.semestre,
-        onApply: (carrera, semestre) {
+        selectedPlan: state.plan,
+        onApply: (carrera, semestre, plan) {
           context.read<SearchBloc>().add(SearchFiltersChanged(
                 carrera: carrera,
                 semestre: semestre,
+                plan: plan,
                 materia: state.materia,
               ));
         },
       ),
     );
-  }
-
-  bool get _hasActiveFilters {
-    final state = context.read<SearchBloc>().state;
-    return state.carrera != null || state.semestre != null;
   }
 
   @override
@@ -118,15 +116,13 @@ class _SearchViewState extends State<_SearchView> {
                           ),
                         ),
                         const SizedBox(width: 7),
-                        Text(
-                          'ESCOM · IPN',
-                          style: AppTextStyles.labelCaps.copyWith(
-                            color: isDark
-                                ? AppColors.darkBlueMid
-                                : AppColors.blueMid,
-                            fontSize: 10,
-                          ),
-                        ),
+                        Text('ESCOM · IPN',
+                            style: AppTextStyles.labelCaps.copyWith(
+                              color: isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid,
+                              fontSize: 10,
+                            )),
                       ],
                     ),
                   )
@@ -178,8 +174,9 @@ class _SearchViewState extends State<_SearchView> {
                   // Barra búsqueda + filtro
                   BlocBuilder<SearchBloc, SearchState>(
                     builder: (context, state) {
-                      final hasFilters =
-                          state.carrera != null || state.semestre != null;
+                      final hasFilters = state.carrera != null ||
+                          state.semestre != null ||
+                          state.plan != null;
                       return Row(
                         children: [
                           Expanded(
@@ -200,13 +197,11 @@ class _SearchViewState extends State<_SearchView> {
                               child: Row(
                                 children: [
                                   const SizedBox(width: 14),
-                                  Icon(
-                                    Icons.search_rounded,
-                                    color: isDark
-                                        ? AppColors.darkBlueMid
-                                        : AppColors.blueMid,
-                                    size: 20,
-                                  ),
+                                  Icon(Icons.search_rounded,
+                                      color: isDark
+                                          ? AppColors.darkBlueMid
+                                          : AppColors.blueMid,
+                                      size: 20),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: TextField(
@@ -240,13 +235,11 @@ class _SearchViewState extends State<_SearchView> {
                                       child: Padding(
                                         padding:
                                             const EdgeInsets.only(right: 10),
-                                        child: Icon(
-                                          Icons.close_rounded,
-                                          size: 18,
-                                          color: isDark
-                                              ? AppColors.darkTextMuted
-                                              : AppColors.textMuted,
-                                        ),
+                                        child: Icon(Icons.close_rounded,
+                                            size: 18,
+                                            color: isDark
+                                                ? AppColors.darkTextMuted
+                                                : AppColors.textMuted),
                                       ),
                                     ),
                                 ],
@@ -278,15 +271,13 @@ class _SearchViewState extends State<_SearchView> {
                                   width: 1.5,
                                 ),
                               ),
-                              child: Icon(
-                                Icons.tune_rounded,
-                                size: 20,
-                                color: hasFilters
-                                    ? Colors.white
-                                    : (isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.textSecondary),
-                              ),
+                              child: Icon(Icons.tune_rounded,
+                                  size: 20,
+                                  color: hasFilters
+                                      ? Colors.white
+                                      : (isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textSecondary)),
                             ),
                           ),
                         ],
@@ -301,38 +292,51 @@ class _SearchViewState extends State<_SearchView> {
                   BlocBuilder<SearchBloc, SearchState>(
                     builder: (context, state) {
                       final chips = <Widget>[];
+
                       if (state.carrera != null) {
                         chips.add(_ActiveChip(
                           label: state.carrera!,
                           isDark: isDark,
-                          onRemove: () {
-                            context.read<SearchBloc>().add(
-                                  SearchFiltersChanged(
-                                    semestre: state.semestre,
-                                    materia: state.materia,
-                                  ),
-                                );
-                          },
+                          onRemove: () => context.read<SearchBloc>().add(
+                                SearchFiltersChanged(
+                                  semestre: state.semestre,
+                                  plan: state.plan,
+                                  materia: state.materia,
+                                ),
+                              ),
+                        ));
+                      }
+                      if (state.plan != null) {
+                        chips.add(_ActiveChip(
+                          label: 'Plan ${state.plan}',
+                          isDark: isDark,
+                          onRemove: () => context.read<SearchBloc>().add(
+                                SearchFiltersChanged(
+                                  carrera: state.carrera,
+                                  semestre: state.semestre,
+                                  materia: state.materia,
+                                ),
+                              ),
                         ));
                       }
                       if (state.semestre != null) {
                         chips.add(_ActiveChip(
                           label: 'Sem. ${state.semestre}',
                           isDark: isDark,
-                          onRemove: () {
-                            context.read<SearchBloc>().add(
-                                  SearchFiltersChanged(
-                                    carrera: state.carrera,
-                                    materia: state.materia,
-                                  ),
-                                );
-                          },
+                          onRemove: () => context.read<SearchBloc>().add(
+                                SearchFiltersChanged(
+                                  carrera: state.carrera,
+                                  plan: state.plan,
+                                  materia: state.materia,
+                                ),
+                              ),
                         ));
                       }
+
                       if (chips.isEmpty) return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 12),
-                        child: Wrap(spacing: 8, children: chips),
+                        child: Wrap(spacing: 8, runSpacing: 8, children: chips),
                       );
                     },
                   ),
@@ -354,15 +358,11 @@ class _SearchViewState extends State<_SearchView> {
                       ),
                     );
                   }
-
                   if (state is SearchFailure) {
                     return _ErrorState(message: state.message, isDark: isDark);
                   }
-
                   if (state is SearchSuccess) {
-                    if (state.exams.isEmpty) {
-                      return _EmptyState(isDark: isDark);
-                    }
+                    if (state.exams.isEmpty) return _EmptyState(isDark: isDark);
                     return ListView.builder(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                       itemCount: state.exams.length,
@@ -373,7 +373,6 @@ class _SearchViewState extends State<_SearchView> {
                       ),
                     );
                   }
-
                   return _InitialState(isDark: isDark);
                 },
               ),
@@ -390,11 +389,8 @@ class _ActiveChip extends StatelessWidget {
   final bool isDark;
   final VoidCallback onRemove;
 
-  const _ActiveChip({
-    required this.label,
-    required this.isDark,
-    required this.onRemove,
-  });
+  const _ActiveChip(
+      {required this.label, required this.isDark, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -415,22 +411,18 @@ class _ActiveChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-              fontWeight: FontWeight.w500,
-              fontSize: 12,
-            ),
-          ),
+          Text(label,
+              style: AppTextStyles.caption.copyWith(
+                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              )),
           const SizedBox(width: 6),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(
-              Icons.close_rounded,
-              size: 14,
-              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-            ),
+            child: Icon(Icons.close_rounded,
+                size: 14,
+                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
           ),
         ],
       ),
@@ -457,38 +449,34 @@ class _InitialState extends StatelessWidget {
                 color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.search_rounded,
-                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-                size: 32,
-              ),
+              child: Icon(Icons.search_rounded,
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                  size: 32),
             )
                 .animate()
                 .scale(
-                  begin: const Offset(0.7, 0.7),
-                  duration: 500.ms,
-                  curve: Curves.elasticOut,
-                )
+                    begin: const Offset(0.7, 0.7),
+                    duration: 500.ms,
+                    curve: Curves.elasticOut)
                 .fadeIn(delay: 200.ms),
             const SizedBox(height: 20),
-            Text(
-              'Busca tu examen',
-              style: AppTextStyles.displayLarge.copyWith(
-                fontSize: 20,
-                color:
-                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              ),
-            ).animate().fadeIn(delay: 300.ms),
+            Text('Busca tu examen',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 20,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                )).animate().fadeIn(delay: 300.ms),
             const SizedBox(height: 8),
-            Text(
-              'Usa los filtros o escribe el nombre de la materia.',
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ).animate().fadeIn(delay: 380.ms),
+            Text('Usa los filtros o escribe el nombre de la materia.',
+                    style: AppTextStyles.bodyMuted.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center)
+                .animate()
+                .fadeIn(delay: 380.ms),
           ],
         ),
       ),
@@ -515,31 +503,26 @@ class _EmptyState extends StatelessWidget {
                 color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.assignment_outlined,
-                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-                size: 32,
-              ),
+              child: Icon(Icons.assignment_outlined,
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                  size: 32),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Sin resultados',
-              style: AppTextStyles.displayLarge.copyWith(
-                fontSize: 20,
-                color:
-                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              ),
-            ),
+            Text('Sin resultados',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 20,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                )),
             const SizedBox(height: 8),
-            Text(
-              'No encontramos exámenes con esos filtros. Intenta con otros.',
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            Text('No encontramos exámenes con esos filtros. Intenta con otros.',
+                style: AppTextStyles.bodyMuted.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -567,31 +550,25 @@ class _ErrorState extends StatelessWidget {
                 color: AppColors.error.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.error_outline_rounded,
-                color: AppColors.error,
-                size: 32,
-              ),
+              child: const Icon(Icons.error_outline_rounded,
+                  color: AppColors.error, size: 32),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Algo salió mal',
-              style: AppTextStyles.displayLarge.copyWith(
-                fontSize: 20,
-                color:
-                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              ),
-            ),
+            Text('Algo salió mal',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 20,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                )),
             const SizedBox(height: 8),
-            Text(
-              message,
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            Text(message,
+                style: AppTextStyles.bodyMuted.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center),
           ],
         ),
       ),

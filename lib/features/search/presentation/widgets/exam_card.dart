@@ -122,7 +122,8 @@ class ExamCard extends StatelessWidget {
                   _InfoRow(
                     icon: Icons.school_outlined,
                     label: 'Carrera',
-                    value: '${exam.carrera} · Sem. ${exam.semestre}',
+                    value:
+                        '${exam.carrera} · Plan ${exam.plan} · Sem. ${exam.semestre}',
                     isDark: isDark,
                   ),
                 ],

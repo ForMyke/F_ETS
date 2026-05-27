@@ -6,6 +6,7 @@ abstract class SearchRepository {
   Future<Either<Failure, List<Exam>>> getExams({
     String? carrera,
     int? semestre,
+    int? plan,
     String? materia,
   });
 

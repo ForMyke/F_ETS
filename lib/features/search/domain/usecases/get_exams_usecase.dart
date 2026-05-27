@@ -14,6 +14,7 @@ class GetExamsUseCase implements UseCase<List<Exam>, GetExamsParams> {
       repository.getExams(
         carrera: params.carrera,
         semestre: params.semestre,
+        plan: params.plan,
         materia: params.materia,
       );
 }
@@ -21,10 +22,11 @@ class GetExamsUseCase implements UseCase<List<Exam>, GetExamsParams> {
 class GetExamsParams extends Equatable {
   final String? carrera;
   final int? semestre;
+  final int? plan;
   final String? materia;
 
-  const GetExamsParams({this.carrera, this.semestre, this.materia});
+  const GetExamsParams({this.carrera, this.semestre, this.plan, this.materia});
 
   @override
-  List<Object?> get props => [carrera, semestre, materia];
+  List<Object?> get props => [carrera, semestre, plan, materia];
 }

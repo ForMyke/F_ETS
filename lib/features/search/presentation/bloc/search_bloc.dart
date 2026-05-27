@@ -34,11 +34,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     emit(SearchLoading(
       carrera: event.carrera,
       semestre: event.semestre,
+      plan: event.plan,
       materia: event.materia,
     ));
     final result = await getExamsUseCase(GetExamsParams(
       carrera: event.carrera,
       semestre: event.semestre,
+      plan: event.plan,
       materia: event.materia,
     ));
     result.fold(
@@ -46,21 +48,20 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         message: failure.message,
         carrera: event.carrera,
         semestre: event.semestre,
+        plan: event.plan,
         materia: event.materia,
       )),
       (exams) => emit(SearchSuccess(
         exams: exams,
         carrera: event.carrera,
         semestre: event.semestre,
+        plan: event.plan,
         materia: event.materia,
       )),
     );
   }
 
-  void _onCleared(
-    SearchCleared event,
-    Emitter<SearchState> emit,
-  ) {
+  void _onCleared(SearchCleared event, Emitter<SearchState> emit) {
     emit(const SearchInitial());
   }
 }
