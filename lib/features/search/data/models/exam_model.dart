@@ -9,6 +9,7 @@ class ExamModel extends Exam {
     required super.plan,
     required super.fecha,
     required super.turno,
+    required super.hora, // ← nuevo
     required super.salon,
     required super.profesor,
   });
@@ -22,6 +23,7 @@ class ExamModel extends Exam {
       plan: json['plan'] as int,
       fecha: DateTime.parse(json['fecha'] as String),
       turno: json['turno'] as String,
+      hora: json['hora'] as String, // ← nuevo
       salon: json['salon'] as String,
       profesor: json['profesor'] as String,
     );
@@ -35,6 +37,7 @@ class ExamModel extends Exam {
         'plan': plan,
         'fecha': fecha.toIso8601String(),
         'turno': turno,
+        'hora': hora, // ← nuevo
         'salon': salon,
         'profesor': profesor,
       };

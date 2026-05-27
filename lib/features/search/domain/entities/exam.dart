@@ -8,6 +8,7 @@ class Exam extends Equatable {
   final int plan;
   final DateTime fecha;
   final String turno;
+  final String hora; // ← nuevo
   final String salon;
   final String profesor;
 
@@ -19,11 +20,22 @@ class Exam extends Equatable {
     required this.plan,
     required this.fecha,
     required this.turno,
+    required this.hora, // ← nuevo
     required this.salon,
     required this.profesor,
   });
 
   @override
-  List<Object> get props =>
-      [id, materia, carrera, semestre, plan, fecha, turno, salon, profesor];
+  List<Object> get props => [
+        id,
+        materia,
+        carrera,
+        semestre,
+        plan,
+        fecha,
+        turno,
+        hora,
+        salon,
+        profesor
+      ];
 }

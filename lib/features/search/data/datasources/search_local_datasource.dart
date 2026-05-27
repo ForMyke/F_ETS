@@ -21,6 +21,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 10),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
         salon: '1001',
         profesor: 'Dr. García López'),
     ExamModel(
@@ -31,6 +32,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 11),
         turno: 'Vespertino',
+        hora: '16:00', // ← nuevo
         salon: '2114',
         profesor: 'Mtra. Ramírez Torres'),
     ExamModel(
@@ -41,6 +43,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 12),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
         salon: '3208',
         profesor: 'Ing. Hernández Cruz'),
     ExamModel(
@@ -51,6 +54,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 13),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
         salon: '1102',
         profesor: 'Dr. Martínez Ruiz'),
     ExamModel(
@@ -61,6 +65,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 14),
         turno: 'Vespertino',
+        hora: '16:00', // ← nuevo
         salon: '4201',
         profesor: 'Mtra. López Sánchez'),
     ExamModel(
@@ -71,6 +76,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2009,
         fecha: DateTime(2026, 6, 15),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
         salon: '2010',
         profesor: 'Dr. Pérez Mendoza'),
     ExamModel(
@@ -81,6 +87,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 16),
         turno: 'Vespertino',
+        hora: '16:00', // ← nuevo
         salon: '3114',
         profesor: 'Dr. Flores Vega'),
     ExamModel(
@@ -91,6 +98,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2009,
         fecha: DateTime(2026, 6, 17),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
         salon: '1205',
         profesor: 'Ing. Castro Díaz'),
     ExamModel(
@@ -101,6 +109,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2009,
         fecha: DateTime(2026, 6, 18),
         turno: 'Vespertino',
+        hora: '16:00', // ← nuevo
         salon: '4001',
         profesor: 'Mtra. Morales Reyes'),
     ExamModel(
@@ -111,6 +120,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 19),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
         salon: '2213',
         profesor: 'Dr. Gutiérrez Ávila'),
     ExamModel(
@@ -121,6 +131,8 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 20),
         turno: 'Matutino',
+        hora: '08:00', // ← nuevo
+
         salon: '3101',
         profesor: 'Dr. Reyes Montes'),
     ExamModel(
@@ -131,6 +143,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         plan: 2020,
         fecha: DateTime(2026, 6, 21),
         turno: 'Vespertino',
+        hora: '16:00', // ← nuevo
         salon: '1204',
         profesor: 'Mtra. Vargas Díaz'),
   ];

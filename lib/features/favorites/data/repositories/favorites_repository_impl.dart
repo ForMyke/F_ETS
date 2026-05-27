@@ -31,6 +31,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
         plan: exam.plan,
         fecha: exam.fecha,
         turno: exam.turno,
+        hora: exam.hora,
         salon: exam.salon,
         profesor: exam.profesor,
       );

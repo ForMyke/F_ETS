@@ -116,6 +116,7 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
     const headers = [
       'Materia',
       'Fecha',
+      'Hora',
       'Turno',
       'Salón',
       'Profesor',
@@ -126,11 +127,12 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
       border: pw.TableBorder.all(color: PdfColors.blue100, width: 0.5),
       columnWidths: {
         0: const pw.FlexColumnWidth(3),
-        1: const pw.FlexColumnWidth(1.5),
-        2: const pw.FlexColumnWidth(1.2),
-        3: const pw.FlexColumnWidth(1),
-        4: const pw.FlexColumnWidth(2.5),
-        5: const pw.FlexColumnWidth(1.2),
+        1: const pw.FlexColumnWidth(1.4),
+        2: const pw.FlexColumnWidth(1),
+        3: const pw.FlexColumnWidth(1.2),
+        4: const pw.FlexColumnWidth(1),
+        5: const pw.FlexColumnWidth(2.5),
+        6: const pw.FlexColumnWidth(1.2),
       },
       children: [
         // Header row
@@ -164,6 +166,7 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
             children: [
               exam.materia,
               _formatDate(exam.fecha),
+              exam.hora,
               exam.turno,
               exam.salon,
               exam.profesor,

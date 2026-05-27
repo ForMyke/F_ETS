@@ -144,6 +144,13 @@ class ExamCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   _InfoRow(
+                    icon: Icons.access_time_rounded, // ← nueva fila
+                    label: 'Hora',
+                    value: exam.hora,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 10),
+                  _InfoRow(
                     icon: Icons.room_outlined,
                     label: 'Salón',
                     value: exam.salon,
