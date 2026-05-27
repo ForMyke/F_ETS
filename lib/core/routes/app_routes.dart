@@ -5,25 +5,24 @@ import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
-import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/bloc/forgot_password_bloc.dart';
 import '../../features/auth/presentation/bloc/login_bloc.dart';
-import '../../features/auth/presentation/bloc/register_bloc.dart';
 import '../../features/auth/presentation/bloc/reset_password_bloc.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
+import '../../features/shell/presentation/pages/public_shell_page.dart';
+import '../../features/shell/presentation/pages/admin_shell_page.dart';
 
 class AppRoutes {
   AppRoutes._();
 
-  static const String login = '/login';
-  static const String register = '/register';
+  static const String home = '/';
+  static const String adminLogin = '/admin-login';
+  static const String adminHome = '/admin';
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
-  static const String home = '/home';
 
   static AuthRepositoryImpl _buildRepo() => AuthRepositoryImpl(
         remoteDataSource: AuthRemoteDataSourceImpl(client: http.Client()),
@@ -31,13 +30,19 @@ class AppRoutes {
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case register:
+      case home:
+        return _fadeRoute(const PublicShellPage());
+
+      case adminHome:
+        return _fadeRoute(const AdminShellPage());
+
+      case adminLogin:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => RegisterBloc(
-              registerUseCase: RegisterUseCase(_buildRepo()),
+            create: (_) => LoginBloc(
+              loginUseCase: LoginUseCase(_buildRepo()),
             ),
-            child: const RegisterPage(),
+            child: const LoginPage(),
           ),
         );
 
@@ -61,16 +66,24 @@ class AppRoutes {
           ),
         );
 
-      case login:
       default:
-        return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => LoginBloc(
-              loginUseCase: LoginUseCase(_buildRepo()),
-            ),
-            child: const LoginPage(),
-          ),
-        );
+        return _fadeRoute(const PublicShellPage());
     }
+  }
+
+  static PageRouteBuilder _fadeRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (_, animation, __, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ),
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 350),
+    );
   }
 }

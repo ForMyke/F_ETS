@@ -72,7 +72,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           if (state is ResetPasswordSuccess) {
             // Navega a login y limpia el stack
             Navigator.of(context).pushNamedAndRemoveUntil(
-              AppRoutes.login,
+              AppRoutes.adminLogin,
               (_) => false,
             );
           }

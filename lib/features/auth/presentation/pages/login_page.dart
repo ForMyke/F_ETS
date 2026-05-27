@@ -57,7 +57,10 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            // TODO: navegar a home
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.adminHome,
+              (_) => false,
+            );
           }
           if (state is LoginFailure) {
             HapticFeedback.mediumImpact();
@@ -90,13 +93,41 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Back button
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkBgSurface
+                                  : AppColors.bgSurface,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderLight,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        )
+                            .animate()
+                            .fadeIn(duration: 400.ms)
+                            .slideX(begin: -0.1, curve: Curves.easeOutCubic),
+                        const SizedBox(height: 20),
                         const LoginHeader()
                             .animate()
                             .fadeIn(duration: 500.ms)
-                            .slideY(
-                              begin: 0.2,
-                              curve: Curves.easeOutCubic,
-                            ),
+                            .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                         const SizedBox(height: 32),
                         Column(
                           key: _shakeKey,
@@ -210,29 +241,6 @@ class _LoginPageState extends State<LoginPage> {
                             const OrDivider(),
                             const SizedBox(height: 16),
                             SocialLoginButton(onTap: () {}),
-                            const SizedBox(height: 32),
-                            Center(
-                              child: GestureDetector(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed(AppRoutes.register),
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '¿No tienes cuenta? ',
-                                        style: AppTextStyles.caption
-                                            .copyWith(color: captionColor),
-                                      ),
-                                      TextSpan(
-                                        text: 'Regístrate',
-                                        style: AppTextStyles.link
-                                            .copyWith(color: linkColor),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
                           ],
                         )
                             .animate()
