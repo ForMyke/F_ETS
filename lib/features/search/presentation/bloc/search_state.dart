@@ -3,7 +3,7 @@ part of 'search_bloc.dart';
 abstract class SearchState extends Equatable {
   final String? carrera;
   final int? semestre;
-  final int? plan;
+  final String? plan;
   final String? materia;
 
   const SearchState({this.carrera, this.semestre, this.plan, this.materia});
@@ -17,8 +17,12 @@ class SearchInitial extends SearchState {
 }
 
 class SearchLoading extends SearchState {
-  const SearchLoading(
-      {super.carrera, super.semestre, super.plan, super.materia});
+  const SearchLoading({
+    super.carrera,
+    super.semestre,
+    super.plan,
+    super.materia,
+  });
 }
 
 class SearchSuccess extends SearchState {

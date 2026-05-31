@@ -10,7 +10,7 @@ class PdfExportButton extends StatefulWidget {
   final List<Exam> exams;
   final String? carrera;
   final int? semestre;
-  final int? plan;
+  final String? plan;
   final bool isDark;
 
   const PdfExportButton({

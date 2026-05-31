@@ -5,12 +5,16 @@ class Exam extends Equatable {
   final String materia;
   final String carrera;
   final int semestre;
-  final int plan;
-  final DateTime fecha;
+  final String plan;
+  final DateTime fechaInicio;
+  final DateTime fechaFin;
   final String turno;
-  final String hora; // ← nuevo
+  final String hora;
   final String salon;
+  final String edificio;
   final String profesor;
+  final String periodoETS;
+  final String estado;
 
   const Exam({
     required this.id,
@@ -18,24 +22,35 @@ class Exam extends Equatable {
     required this.carrera,
     required this.semestre,
     required this.plan,
-    required this.fecha,
+    required this.fechaInicio,
+    required this.fechaFin,
     required this.turno,
-    required this.hora, // ← nuevo
+    required this.hora,
     required this.salon,
+    required this.edificio,
     required this.profesor,
+    required this.periodoETS,
+    required this.estado,
   });
+
+  // Mantiene compatibilidad con el código que usa exam.fecha
+  DateTime get fecha => fechaInicio;
 
   @override
   List<Object> get props => [
-        id,
-        materia,
-        carrera,
-        semestre,
-        plan,
-        fecha,
-        turno,
-        hora,
-        salon,
-        profesor
-      ];
+    id,
+    materia,
+    carrera,
+    semestre,
+    plan,
+    fechaInicio,
+    fechaFin,
+    turno,
+    hora,
+    salon,
+    edificio,
+    profesor,
+    periodoETS,
+    estado,
+  ];
 }

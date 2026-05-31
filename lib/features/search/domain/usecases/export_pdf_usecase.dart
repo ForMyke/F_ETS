@@ -226,7 +226,7 @@ class ExportPdfParams extends Equatable {
   final List<Exam> exams;
   final String? carrera;
   final int? semestre;
-  final int? plan;
+  final String? plan;
 
   const ExportPdfParams({
     required this.exams,

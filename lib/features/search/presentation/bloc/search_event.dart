@@ -14,11 +14,15 @@ class SearchStarted extends SearchEvent {
 class SearchFiltersChanged extends SearchEvent {
   final String? carrera;
   final int? semestre;
-  final int? plan;
+  final String? plan;
   final String? materia;
 
-  const SearchFiltersChanged(
-      {this.carrera, this.semestre, this.plan, this.materia});
+  const SearchFiltersChanged({
+    this.carrera,
+    this.semestre,
+    this.plan,
+    this.materia,
+  });
 
   @override
   List<Object?> get props => [carrera, semestre, plan, materia];

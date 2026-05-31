@@ -22,7 +22,7 @@ class GetExamsUseCase implements UseCase<List<Exam>, GetExamsParams> {
 class GetExamsParams extends Equatable {
   final String? carrera;
   final int? semestre;
-  final int? plan;
+  final String? plan;
   final String? materia;
 
   const GetExamsParams({this.carrera, this.semestre, this.plan, this.materia});
