@@ -14,6 +14,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/shell/presentation/pages/public_shell_page.dart';
 import '../../features/shell/presentation/pages/admin_shell_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -25,8 +26,10 @@ class AppRoutes {
   static const String resetPassword = '/reset-password';
 
   static AuthRepositoryImpl _buildRepo() => AuthRepositoryImpl(
-        remoteDataSource: AuthRemoteDataSourceImpl(client: http.Client()),
-      );
+    remoteDataSource: AuthRemoteDataSourceImpl(
+      client: Supabase.instance.client,
+    ),
+  );
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
