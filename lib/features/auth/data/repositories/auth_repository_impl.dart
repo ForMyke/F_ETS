@@ -15,8 +15,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final user =
-          await remoteDataSource.login(email: email, password: password);
+      final user = await remoteDataSource.login(
+          email: email, password: password);
       return Right(user);
     } on InvalidCredentialsFailure catch (e) {
       return Left(e);
@@ -27,21 +27,14 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  // Register no aplica en este proyecto — solo admins creados desde Supabase.
   @override
   Future<Either<Failure, User>> register({
     required String name,
     required String email,
     required String password,
   }) async {
-    try {
-      final user = await remoteDataSource.register(
-          name: name, email: email, password: password);
-      return Right(user);
-    } on ServerFailure catch (e) {
-      return Left(e);
-    } catch (_) {
-      return const Left(NetworkFailure());
-    }
+    return const Left(ServerFailure('Registro no disponible.'));
   }
 
   @override
