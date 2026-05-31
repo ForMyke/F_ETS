@@ -29,11 +29,15 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
         carrera: exam.carrera,
         semestre: exam.semestre,
         plan: exam.plan,
-        fecha: exam.fecha,
+        fechaInicio: exam.fechaInicio,
+        fechaFin: exam.fechaFin,
         turno: exam.turno,
         hora: exam.hora,
         salon: exam.salon,
+        edificio: exam.edificio,
         profesor: exam.profesor,
+        periodoETS: exam.periodoETS,
+        estado: exam.estado,
       );
       await localDataSource.addFavorite(model);
       return const Right(null);
