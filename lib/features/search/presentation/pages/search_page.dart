@@ -15,6 +15,8 @@ import '../widgets/exam_card.dart';
 import '../widgets/filter_sheet.dart';
 import '../widgets/pdf_export_button.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../widgets/ics_export_button.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -372,20 +374,27 @@ class _SearchViewState extends State<_SearchView> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                '${state.exams.length} examen${state.exams.length != 1 ? 'es' : ''} encontrado${state.exams.length != 1 ? 's' : ''}',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: isDark
-                                      ? AppColors.darkTextMuted
-                                      : AppColors.textMuted,
+                              Flexible(
+                                child: Text(
+                                  '${state.exams.length} examen${state.exams.length != 1 ? 'es' : ''} encontrado${state.exams.length != 1 ? 's' : ''}',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              PdfExportButton(
-                                exams: state.exams,
-                                carrera: state.carrera,
-                                semestre: state.semestre,
-                                plan: state.plan,
-                                isDark: isDark,
+                              Row(
+                                children: [
+                                  IcsExportButton(exams: state.exams, isDark: isDark),
+                                  const SizedBox(width: 8),
+                                  PdfExportButton(
+                                    exams: state.exams,
+                                    carrera: state.carrera,
+                                    semestre: state.semestre,
+                                    plan: state.plan,
+                                    isDark: isDark,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -417,36 +426,80 @@ class _SearchViewState extends State<_SearchView> {
                       if (state.exams.isEmpty) {
                         return _EmptyState(isDark: isDark);
                       }
-                      return ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                        itemCount: state.exams.length,
-                        itemBuilder: (_, i) {
-                          final exam = state.exams[i];
-                          final favState =
-                              context.watch<FavoritesBloc>().state;
-                          final isFav = favState is FavoritesSuccess
-                              ? favState.exams.any((e) => e.id == exam.id)
-                              : false;
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                            child: GestureDetector(
+                              onTap: () => launchUrl(
+                                Uri.parse('mailto:soporte@escom.ipn.mx?subject=Ayuda%20con%20mi%20ETS'),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppColors.darkBgSurface : AppColors.bgSurface,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isDark ? AppColors.darkBorder : AppColors.borderLight,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.support_agent_rounded,
+                                      size: 18,
+                                      color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        '¿Necesitas ayuda para encontrar tu salón?',
+                                        style: AppTextStyles.caption.copyWith(
+                                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 12,
+                                      color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                              itemCount: state.exams.length,
+                              itemBuilder: (_, i) {
+                                final exam = state.exams[i];
+                                final favState = context.watch<FavoritesBloc>().state;
+                                final isFav = favState is FavoritesSuccess
+                                    ? favState.exams.any((e) => e.id == exam.id)
+                                    : false;
 
-                          return ExamCard(
-                            exam: exam,
-                            index: i,
-                            isDark: isDark,
-                            isFavorite: isFav,
-                            onFavoriteTap: () {
-                              HapticFeedback.lightImpact();
-                              if (isFav) {
-                                context
-                                    .read<FavoritesBloc>()
-                                    .add(FavoriteRemoved(examId: exam.id));
-                              } else {
-                                context
-                                    .read<FavoritesBloc>()
-                                    .add(FavoriteAdded(exam: exam));
-                              }
-                            },
-                          );
-                        },
+                                return ExamCard(
+                                  exam: exam,
+                                  index: i,
+                                  isDark: isDark,
+                                  isFavorite: isFav,
+                                  onFavoriteTap: () {
+                                    HapticFeedback.lightImpact();
+                                    if (isFav) {
+                                      context.read<FavoritesBloc>().add(FavoriteRemoved(examId: exam.id));
+                                    } else {
+                                      context.read<FavoritesBloc>().add(FavoriteAdded(exam: exam));
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       );
                     }
                     return _InitialState(isDark: isDark);
