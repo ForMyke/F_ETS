@@ -5,6 +5,7 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/exam.dart';
 import 'notification_button.dart';
+import '../../../../../features/campus_map/presentation/pages/campus_map_page.dart';
 
 class ExamCard extends StatelessWidget {
   final Exam exam;
@@ -108,10 +109,7 @@ class ExamCard extends StatelessWidget {
                         switchInCurve: Curves.elasticOut,
                         switchOutCurve: Curves.easeIn,
                         transitionBuilder: (child, animation) =>
-                            ScaleTransition(
-                          scale: animation,
-                          child: child,
-                        ),
+                            ScaleTransition(scale: animation, child: child),
                         child: Icon(
                           isFavorite
                               ? Icons.bookmark_rounded
@@ -132,6 +130,7 @@ class ExamCard extends StatelessWidget {
                 ],
               ),
             ),
+
             // Body
             Padding(
               padding: const EdgeInsets.all(16),
@@ -154,7 +153,7 @@ class ExamCard extends StatelessWidget {
                   _InfoRow(
                     icon: Icons.room_outlined,
                     label: 'Salón',
-                    value: exam.salon,
+                    value: '${exam.salon} · Edif. ${exam.edificio}',
                     isDark: isDark,
                   ),
                   const SizedBox(height: 10),
@@ -173,9 +172,64 @@ class ExamCard extends StatelessWidget {
                     isDark: isDark,
                   ),
                   const SizedBox(height: 12),
+
+                  // Fila de acciones
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Botón Ver salón → abre el mapa
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CampusMapPage(
+                                edificioResaltado: exam.edificio,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBgOverlay
+                                : AppColors.bgSurface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.borderLight,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 14,
+                                color: isDark
+                                    ? AppColors.darkBlueMid
+                                    : AppColors.blueMid,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Ver salón',
+                                style: AppTextStyles.caption.copyWith(
+                                  color: isDark
+                                      ? AppColors.darkBlueMid
+                                      : AppColors.blueMid,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Botón notificación (ya existente)
                       NotificationButton(
                         exam: exam,
                         isDark: isDark,
@@ -216,20 +270,23 @@ class _InfoRow extends StatelessWidget {
             size: 16,
             color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
         const SizedBox(width: 8),
-        Text('$label: ',
-            style: AppTextStyles.caption.copyWith(
-              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-              fontSize: 12,
-            )),
+        Text(
+          '$label: ',
+          style: AppTextStyles.caption.copyWith(
+            color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+            fontSize: 12,
+          ),
+        ),
         Expanded(
-          child: Text(value,
-              style: AppTextStyles.caption.copyWith(
-                color:
-                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
-                fontSize: 12,
-              ),
-              overflow: TextOverflow.ellipsis),
+          child: Text(
+            value,
+            style: AppTextStyles.caption.copyWith(
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
