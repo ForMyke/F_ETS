@@ -28,6 +28,6 @@ linter:
 # https://dart.dev/guides/language/analysis-options
 
 
-analyzer:
-  enable-experiment:
-    - dot-shorthands
+#analyzer:
+#  enable-experiment:
+#    - dot-shorthands
