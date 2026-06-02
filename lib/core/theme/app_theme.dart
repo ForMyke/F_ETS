@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
-import 'app_text_styles.dart';
 
 class AppTheme {
   AppTheme._();
@@ -44,8 +44,7 @@ class AppTheme {
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
-        textStyle: const TextStyle(
-          fontFamily: AppTextStyles.fontSans,
+        textStyle: GoogleFonts.dmSans(
           fontSize: 15,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.4,
@@ -58,7 +57,7 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.bgPrimary,
-      fontFamily: AppTextStyles.fontSans,
+      textTheme: GoogleFonts.dmSansTextTheme(),
       colorScheme: const ColorScheme.light(
         primary: AppColors.blue,
         onPrimary: Colors.white,
@@ -84,7 +83,9 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBgPrimary,
-      fontFamily: AppTextStyles.fontSans,
+      textTheme: GoogleFonts.dmSansTextTheme(
+        ThemeData(brightness: Brightness.dark).textTheme,
+      ),
       colorScheme: const ColorScheme.dark(
         primary: AppColors.darkBlueMid,
         onPrimary: Colors.white,

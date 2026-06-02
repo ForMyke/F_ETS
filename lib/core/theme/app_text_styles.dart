@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String fontSans  = 'DMSans';
-  static const String fontSerif = 'PlayfairDisplay';
-
-  static const TextStyle displayLarge = TextStyle(
-    fontFamily: fontSerif,
+  static TextStyle get displayLarge => GoogleFonts.playfairDisplay(
     fontSize: 30,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
     height: 1.2,
   );
 
-  static const TextStyle displayItalic = TextStyle(
-    fontFamily: fontSerif,
+  static TextStyle get displayItalic => GoogleFonts.playfairDisplay(
     fontSize: 30,
     fontWeight: FontWeight.w400,
     fontStyle: FontStyle.italic,
@@ -24,45 +20,39 @@ class AppTextStyles {
     height: 1.2,
   );
 
-  static const TextStyle labelCaps = TextStyle(
-    fontFamily: fontSans,
+  static TextStyle get labelCaps => GoogleFonts.dmSans(
     fontSize: 11,
     fontWeight: FontWeight.w500,
     letterSpacing: 1.8,
     color: AppColors.blueMid,
   );
 
-  static const TextStyle fieldLabel = TextStyle(
-    fontFamily: fontSans,
+  static TextStyle get fieldLabel => GoogleFonts.dmSans(
     fontSize: 10,
     fontWeight: FontWeight.w500,
     letterSpacing: 1.2,
     color: AppColors.textSecondary,
   );
 
-  static const TextStyle body = TextStyle(
-    fontFamily: fontSans,
+  static TextStyle get body => GoogleFonts.dmSans(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle bodyMuted = TextStyle(
-    fontFamily: fontSans,
+  static TextStyle get bodyMuted => GoogleFonts.dmSans(
     fontSize: 13,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
-  static const TextStyle link = TextStyle(
-    fontFamily: fontSans,
+  static TextStyle get link => GoogleFonts.dmSans(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.blueMid,
   );
 
-  static const TextStyle caption = TextStyle(
-    fontFamily: fontSans,
+  static TextStyle get caption => GoogleFonts.dmSans(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.textMuted,
