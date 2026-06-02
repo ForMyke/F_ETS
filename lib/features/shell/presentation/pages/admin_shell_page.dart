@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../exams/presentation/pages/exams_page.dart';
 import '../../../catalogs/presentation/pages/catalogs_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShellPage extends StatefulWidget {
   const AdminShellPage({super.key});
@@ -52,9 +53,12 @@ class _AdminShellPageState extends State<AdminShellPage> {
     showDialog(
       context: context,
       builder: (ctx) => _LogoutDialog(
-        onConfirm: () {
+        onConfirm: () async {
           Navigator.of(ctx).pop();
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+          await Supabase.instance.client.auth.signOut();
+          if (mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+          }
         },
       ),
     );
