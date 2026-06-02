@@ -3,29 +3,23 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/exam.dart';
-import '../../domain/usecases/export_pdf_usecase.dart';
+import '../../domain/usecases/export_ics_usecase.dart';
 
-class PdfExportButton extends StatefulWidget {
+class IcsExportButton extends StatefulWidget {
   final List<Exam> exams;
-  final String? carrera;
-  final int? semestre;
-  final String? plan;
   final bool isDark;
 
-  const PdfExportButton({
+  const IcsExportButton({
     super.key,
     required this.exams,
     required this.isDark,
-    this.carrera,
-    this.semestre,
-    this.plan,
   });
 
   @override
-  State<PdfExportButton> createState() => _PdfExportButtonState();
+  State<IcsExportButton> createState() => _IcsExportButtonState();
 }
 
-class _PdfExportButtonState extends State<PdfExportButton> {
+class _IcsExportButtonState extends State<IcsExportButton> {
   bool _isLoading = false;
 
   Future<void> _onExport() async {
@@ -34,13 +28,8 @@ class _PdfExportButtonState extends State<PdfExportButton> {
 
     setState(() => _isLoading = true);
 
-    final useCase = const ExportPdfUseCase();
-    final result = await useCase(ExportPdfParams(
-      exams: widget.exams,
-      carrera: widget.carrera,
-      semestre: widget.semestre,
-      plan: widget.plan,
-    ));
+    final useCase = const ExportIcsUseCase();
+    final result = await useCase(ExportIcsParams(exams: widget.exams));
 
     if (!mounted) return;
     setState(() => _isLoading = false);
@@ -56,7 +45,7 @@ class _PdfExportButtonState extends State<PdfExportButton> {
       ),
           (_) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('PDF generado correctamente'),
+          content: const Text('Calendario exportado correctamente'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -78,12 +67,12 @@ class _PdfExportButtonState extends State<PdfExportButton> {
         decoration: BoxDecoration(
           color: isEmpty
               ? (widget.isDark ? AppColors.darkBgOverlay : AppColors.bgSurface)
-              : (widget.isDark ? AppColors.blueMid : AppColors.blue),
+              : (widget.isDark ? AppColors.darkBgSurface : AppColors.bgSurface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isEmpty
                 ? (widget.isDark ? AppColors.darkBorder : AppColors.borderLight)
-                : Colors.transparent,
+                : (widget.isDark ? AppColors.darkBlueMid : AppColors.blueMid),
             width: 1.5,
           ),
         ),
@@ -95,17 +84,17 @@ class _PdfExportButtonState extends State<PdfExportButton> {
             strokeWidth: 2,
             color: isEmpty
                 ? (widget.isDark ? AppColors.darkTextMuted : AppColors.textMuted)
-                : Colors.white,
+                : (widget.isDark ? AppColors.darkBlueMid : AppColors.blueMid),
           ),
         )
             : Icon(
-          Icons.picture_as_pdf_rounded,
+          Icons.calendar_month_outlined,
           size: 20,
           color: isEmpty
               ? (widget.isDark ? AppColors.darkTextMuted : AppColors.textMuted)
-              : Colors.white,
+              : (widget.isDark ? AppColors.darkBlueMid : AppColors.blueMid),
         ),
       ),
-    ).animate().fadeIn(delay: 300.ms, duration: 400.ms);
+    ).animate().fadeIn(delay: 350.ms, duration: 400.ms);
   }
 }
