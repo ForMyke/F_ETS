@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/exam.dart';
 import '../../domain/usecases/get_exams_usecase.dart';
 
@@ -16,14 +17,23 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Future<void> _onStarted(
-    SearchStarted event,
-    Emitter<SearchState> emit,
-  ) async {
+      SearchStarted event,
+      Emitter<SearchState> emit,
+      ) async {
     emit(const SearchLoading());
     final result = await getExamsUseCase(const GetExamsParams());
     result.fold(
-      (failure) => emit(SearchFailure(message: failure.message)),
-      (exams) => emit(SearchSuccess(exams: exams)),
+          (failure) {
+        if (failure is CachedExamsFailure) {
+          emit(SearchSuccess(
+            exams: List<Exam>.from(failure.exams),
+            fromCache: true,
+          ));
+        } else {
+          emit(SearchFailure(message: failure.message));
+        }
+      },
+          (exams) => emit(SearchSuccess(exams: exams, fromCache: false)),
     );
   }
 

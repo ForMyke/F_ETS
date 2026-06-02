@@ -3,20 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/error_snackbar.dart';
-import '../../../../core/error/failures.dart';
+import '../../data/datasources/search_local_datasource.dart';
 import '../../data/datasources/search_remote_datasource.dart';
 import '../../data/repositories/search_repository_impl.dart';
 import '../../domain/usecases/get_exams_usecase.dart';
 import '../bloc/search_bloc.dart';
 import '../widgets/exam_card.dart';
 import '../widgets/filter_sheet.dart';
+import '../widgets/ics_export_button.dart';
 import '../widgets/pdf_export_button.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../widgets/ics_export_button.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -30,6 +31,7 @@ class SearchPage extends StatelessWidget {
             remoteDataSource: SearchRemoteDataSourceImpl(
               client: Supabase.instance.client,
             ),
+            localDataSource: SearchLocalDataSourceImpl(),
           ),
         ),
       )..add(const SearchStarted()),
@@ -113,13 +115,11 @@ class _SearchViewState extends State<_SearchView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Chip header
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkBlueLight
-                            : AppColors.blueSurface,
+                        color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -130,18 +130,14 @@ class _SearchViewState extends State<_SearchView> {
                             height: 7,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isDark
-                                  ? AppColors.darkBlueMid
-                                  : AppColors.blueMid,
+                              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
                             ),
                           ),
                           const SizedBox(width: 7),
                           Text(
                             'ESCOM · IPN',
                             style: AppTextStyles.labelCaps.copyWith(
-                              color: isDark
-                                  ? AppColors.darkBlueMid
-                                  : AppColors.blueMid,
+                              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
                               fontSize: 10,
                             ),
                           ),
@@ -152,23 +148,21 @@ class _SearchViewState extends State<_SearchView> {
                         .fadeIn(duration: 400.ms)
                         .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                     const SizedBox(height: 12),
+
+                    // Título
                     RichText(
                       text: TextSpan(
                         children: [
                           TextSpan(
                             text: 'Consulta tu ',
                             style: AppTextStyles.displayLarge.copyWith(
-                              color: isDark
-                                  ? AppColors.darkTextPrimary
-                                  : AppColors.textPrimary,
+                              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                             ),
                           ),
                           TextSpan(
                             text: 'ETS',
                             style: AppTextStyles.displayItalic.copyWith(
-                              color: isDark
-                                  ? AppColors.darkBlueMid
-                                  : AppColors.blueMid,
+                              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
                             ),
                           ),
                         ],
@@ -178,18 +172,56 @@ class _SearchViewState extends State<_SearchView> {
                         .fadeIn(delay: 100.ms, duration: 500.ms)
                         .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                     const SizedBox(height: 6),
+
+                    // Subtítulo
                     Text(
                       'Encuentra tu examen a titulo de suficiencia',
                       style: AppTextStyles.bodyMuted.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
+                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                       ),
                     )
                         .animate()
                         .fadeIn(delay: 160.ms, duration: 500.ms)
                         .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
+
+                    // Banner offline
+                    BlocBuilder<SearchBloc, SearchState>(
+                      builder: (context, state) {
+                        if (state is! SearchSuccess || !state.fromCache) {
+                          return const SizedBox.shrink();
+                        }
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF59E0B).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFFF59E0B).withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.wifi_off_rounded, size: 16, color: Color(0xFFF59E0B)),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Sin conexión. Mostrando datos guardados.',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: const Color(0xFFF59E0B),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
+                    // Barra de búsqueda + filtros
                     BlocBuilder<SearchBloc, SearchState>(
                       builder: (context, state) {
                         final hasFilters = state.carrera != null ||
@@ -201,44 +233,31 @@ class _SearchViewState extends State<_SearchView> {
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppColors.darkBgSurface
-                                      : AppColors.bgSurface,
+                                  color: isDark ? AppColors.darkBgSurface : AppColors.bgSurface,
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: isDark
-                                        ? AppColors.darkBorder
-                                        : AppColors.borderLight,
+                                    color: isDark ? AppColors.darkBorder : AppColors.borderLight,
                                     width: 1.5,
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     const SizedBox(width: 14),
-                                    Icon(
-                                      Icons.search_rounded,
-                                      color: isDark
-                                          ? AppColors.darkBlueMid
-                                          : AppColors.blueMid,
-                                      size: 20,
-                                    ),
+                                    Icon(Icons.search_rounded,
+                                        color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                                        size: 20),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: TextField(
                                         controller: _searchController,
                                         onChanged: _onSearchChanged,
                                         style: AppTextStyles.body.copyWith(
-                                          color: isDark
-                                              ? AppColors.darkTextPrimary
-                                              : AppColors.textPrimary,
+                                          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                                         ),
                                         decoration: InputDecoration(
                                           hintText: 'Buscar materia...',
-                                          hintStyle:
-                                          AppTextStyles.body.copyWith(
-                                            color: isDark
-                                                ? AppColors.darkTextMuted
-                                                : AppColors.textHint,
+                                          hintStyle: AppTextStyles.body.copyWith(
+                                            color: isDark ? AppColors.darkTextMuted : AppColors.textHint,
                                           ),
                                           border: InputBorder.none,
                                           enabledBorder: InputBorder.none,
@@ -254,15 +273,10 @@ class _SearchViewState extends State<_SearchView> {
                                           _onSearchChanged('');
                                         },
                                         child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              right: 10),
-                                          child: Icon(
-                                            Icons.close_rounded,
-                                            size: 18,
-                                            color: isDark
-                                                ? AppColors.darkTextMuted
-                                                : AppColors.textMuted,
-                                          ),
+                                          padding: const EdgeInsets.only(right: 10),
+                                          child: Icon(Icons.close_rounded,
+                                              size: 18,
+                                              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
                                         ),
                                       ),
                                   ],
@@ -278,31 +292,21 @@ class _SearchViewState extends State<_SearchView> {
                                 height: 50,
                                 decoration: BoxDecoration(
                                   color: hasFilters
-                                      ? (isDark
-                                      ? AppColors.blueMid
-                                      : AppColors.blue)
-                                      : (isDark
-                                      ? AppColors.darkBgSurface
-                                      : AppColors.bgSurface),
+                                      ? (isDark ? AppColors.blueMid : AppColors.blue)
+                                      : (isDark ? AppColors.darkBgSurface : AppColors.bgSurface),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
                                     color: hasFilters
                                         ? Colors.transparent
-                                        : (isDark
-                                        ? AppColors.darkBorder
-                                        : AppColors.borderLight),
+                                        : (isDark ? AppColors.darkBorder : AppColors.borderLight),
                                     width: 1.5,
                                   ),
                                 ),
-                                child: Icon(
-                                  Icons.tune_rounded,
-                                  size: 20,
-                                  color: hasFilters
-                                      ? Colors.white
-                                      : (isDark
-                                      ? AppColors.darkTextSecondary
-                                      : AppColors.textSecondary),
-                                ),
+                                child: Icon(Icons.tune_rounded,
+                                    size: 20,
+                                    color: hasFilters
+                                        ? Colors.white
+                                        : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
                               ),
                             ),
                           ],
@@ -312,58 +316,53 @@ class _SearchViewState extends State<_SearchView> {
                         .animate()
                         .fadeIn(delay: 220.ms, duration: 500.ms)
                         .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+
+                    // Chips de filtros activos
                     BlocBuilder<SearchBloc, SearchState>(
                       builder: (context, state) {
                         final chips = <Widget>[];
-
                         if (state.carrera != null) {
                           chips.add(_ActiveChip(
                             label: state.carrera!,
                             isDark: isDark,
-                            onRemove: () => context.read<SearchBloc>().add(
-                              SearchFiltersChanged(
-                                semestre: state.semestre,
-                                plan: state.plan,
-                                materia: state.materia,
-                              ),
-                            ),
+                            onRemove: () => context.read<SearchBloc>().add(SearchFiltersChanged(
+                              semestre: state.semestre,
+                              plan: state.plan,
+                              materia: state.materia,
+                            )),
                           ));
                         }
                         if (state.plan != null) {
                           chips.add(_ActiveChip(
                             label: state.plan!,
                             isDark: isDark,
-                            onRemove: () => context.read<SearchBloc>().add(
-                              SearchFiltersChanged(
-                                carrera: state.carrera,
-                                semestre: state.semestre,
-                                materia: state.materia,
-                              ),
-                            ),
+                            onRemove: () => context.read<SearchBloc>().add(SearchFiltersChanged(
+                              carrera: state.carrera,
+                              semestre: state.semestre,
+                              materia: state.materia,
+                            )),
                           ));
                         }
                         if (state.semestre != null) {
                           chips.add(_ActiveChip(
                             label: 'Sem. ${state.semestre}',
                             isDark: isDark,
-                            onRemove: () => context.read<SearchBloc>().add(
-                              SearchFiltersChanged(
-                                carrera: state.carrera,
-                                plan: state.plan,
-                                materia: state.materia,
-                              ),
-                            ),
+                            onRemove: () => context.read<SearchBloc>().add(SearchFiltersChanged(
+                              carrera: state.carrera,
+                              plan: state.plan,
+                              materia: state.materia,
+                            )),
                           ));
                         }
-
                         if (chips.isEmpty) return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(top: 12),
-                          child: Wrap(
-                              spacing: 8, runSpacing: 8, children: chips),
+                          child: Wrap(spacing: 8, runSpacing: 8, children: chips),
                         );
                       },
                     ),
+
+                    // Contador + botones exportar
                     BlocBuilder<SearchBloc, SearchState>(
                       builder: (context, state) {
                         if (state is! SearchSuccess || state.exams.isEmpty) {
@@ -405,22 +404,21 @@ class _SearchViewState extends State<_SearchView> {
                   ],
                 ),
               ),
+
+              // Lista de exámenes
               Expanded(
                 child: BlocBuilder<SearchBloc, SearchState>(
                   builder: (context, state) {
                     if (state is SearchLoading) {
                       return Center(
                         child: CircularProgressIndicator(
-                          color: isDark
-                              ? AppColors.darkBlueMid
-                              : AppColors.blueMid,
+                          color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
                           strokeWidth: 2.5,
                         ),
                       );
                     }
                     if (state is SearchFailure) {
-                      return _ErrorState(
-                          message: state.message, isDark: isDark);
+                      return _ErrorState(message: state.message, isDark: isDark);
                     }
                     if (state is SearchSuccess) {
                       if (state.exams.isEmpty) {
@@ -447,11 +445,9 @@ class _SearchViewState extends State<_SearchView> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.support_agent_rounded,
-                                      size: 18,
-                                      color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-                                    ),
+                                    Icon(Icons.support_agent_rounded,
+                                        size: 18,
+                                        color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
@@ -461,11 +457,9 @@ class _SearchViewState extends State<_SearchView> {
                                         ),
                                       ),
                                     ),
-                                    Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 12,
-                                      color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-                                    ),
+                                    Icon(Icons.arrow_forward_ios_rounded,
+                                        size: 12,
+                                        color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
                                   ],
                                 ),
                               ),
@@ -481,7 +475,6 @@ class _SearchViewState extends State<_SearchView> {
                                 final isFav = favState is FavoritesSuccess
                                     ? favState.exams.any((e) => e.id == exam.id)
                                     : false;
-
                                 return ExamCard(
                                   exam: exam,
                                   index: i,
@@ -530,14 +523,10 @@ class _ActiveChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkBlueMid.withOpacity(0.15)
-            : AppColors.blueSurface,
+        color: isDark ? AppColors.darkBlueMid.withOpacity(0.15) : AppColors.blueSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark
-              ? AppColors.darkBlueMid.withOpacity(0.3)
-              : AppColors.blueLight,
+          color: isDark ? AppColors.darkBlueMid.withOpacity(0.3) : AppColors.blueLight,
           width: 1,
         ),
       ),
@@ -555,11 +544,9 @@ class _ActiveChip extends StatelessWidget {
           const SizedBox(width: 6),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(
-              Icons.close_rounded,
-              size: 14,
-              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-            ),
+            child: Icon(Icons.close_rounded,
+                size: 14,
+                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
           ),
         ],
       ),
@@ -583,41 +570,27 @@ class _InitialState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color:
-                isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
+                color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.search_rounded,
-                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-                size: 32,
-              ),
+              child: Icon(Icons.search_rounded,
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid, size: 32),
             )
                 .animate()
-                .scale(
-                begin: const Offset(0.7, 0.7),
-                duration: 500.ms,
-                curve: Curves.elasticOut)
+                .scale(begin: const Offset(0.7, 0.7), duration: 500.ms, curve: Curves.elasticOut)
                 .fadeIn(delay: 200.ms),
             const SizedBox(height: 20),
-            Text(
-              'Busca tu examen',
-              style: AppTextStyles.displayLarge.copyWith(
-                fontSize: 20,
-                color:
-                isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              ),
-            ).animate().fadeIn(delay: 300.ms),
+            Text('Busca tu examen',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 20,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                )).animate().fadeIn(delay: 300.ms),
             const SizedBox(height: 8),
-            Text(
-              'Usa los filtros o escribe el nombre de la materia.',
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ).animate().fadeIn(delay: 380.ms),
+            Text('Usa los filtros o escribe el nombre de la materia.',
+                style: AppTextStyles.bodyMuted.copyWith(
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center).animate().fadeIn(delay: 380.ms),
           ],
         ),
       ),
@@ -641,35 +614,24 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color:
-                isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
+                color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.assignment_outlined,
-                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-                size: 32,
-              ),
+              child: Icon(Icons.assignment_outlined,
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blueMid, size: 32),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Sin resultados',
-              style: AppTextStyles.displayLarge.copyWith(
-                fontSize: 20,
-                color:
-                isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              ),
-            ),
+            Text('Sin resultados',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 20,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                )),
             const SizedBox(height: 8),
-            Text(
-              'No encontramos examenes con esos filtros. Intenta con otros.',
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            Text('No encontramos examenes con esos filtros. Intenta con otros.',
+                style: AppTextStyles.bodyMuted.copyWith(
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -697,31 +659,20 @@ class _ErrorState extends StatelessWidget {
                 color: AppColors.error.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.error_outline_rounded,
-                color: AppColors.error,
-                size: 32,
-              ),
+              child: const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 32),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Algo salio mal',
-              style: AppTextStyles.displayLarge.copyWith(
-                fontSize: 20,
-                color:
-                isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              ),
-            ),
+            Text('Algo salio mal',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 20,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                )),
             const SizedBox(height: 8),
-            Text(
-              message,
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            Text(message,
+                style: AppTextStyles.bodyMuted.copyWith(
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center),
           ],
         ),
       ),

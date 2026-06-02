@@ -27,9 +27,11 @@ class SearchLoading extends SearchState {
 
 class SearchSuccess extends SearchState {
   final List<Exam> exams;
+  final bool fromCache;
 
   const SearchSuccess({
     required this.exams,
+    this.fromCache = false,
     super.carrera,
     super.semestre,
     super.plan,
@@ -37,7 +39,7 @@ class SearchSuccess extends SearchState {
   });
 
   @override
-  List<Object?> get props => [exams, carrera, semestre, plan, materia];
+  List<Object?> get props => [exams, fromCache, carrera, semestre, plan, materia];
 }
 
 class SearchFailure extends SearchState {

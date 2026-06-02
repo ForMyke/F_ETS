@@ -23,3 +23,11 @@ class InvalidCredentialsFailure extends Failure {
 class CacheFailure extends Failure {
   const CacheFailure([super.message = 'Error al acceder a datos locales.']);
 }
+
+class CachedExamsFailure extends Failure {
+  final List<dynamic> exams;
+  const CachedExamsFailure(this.exams) : super('Sin conexión. Mostrando datos guardados.');
+
+  @override
+  List<Object> get props => [message, exams];
+}

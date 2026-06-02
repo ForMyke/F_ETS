@@ -3,12 +3,18 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/error/network_error_handler.dart';
 import '../../domain/entities/exam.dart';
 import '../../domain/repositories/search_repository.dart';
+import '../datasources/search_local_datasource.dart';
 import '../datasources/search_remote_datasource.dart';
+import '../models/exam_model.dart';
 
 class SearchRepositoryImpl implements SearchRepository {
   final SearchRemoteDataSource remoteDataSource;
+  final SearchLocalDataSource localDataSource;
 
-  const SearchRepositoryImpl({required this.remoteDataSource});
+  const SearchRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
 
   @override
   Future<Either<Failure, List<Exam>>> getExams({
@@ -24,9 +30,21 @@ class SearchRepositoryImpl implements SearchRepository {
         plan: plan,
         materia: materia,
       );
+      // Cachea solo cuando no hay filtros activos
+      if (carrera == null && semestre == null && plan == null && materia == null) {
+        await localDataSource.cacheExams(exams.cast<ExamModel>());
+      }
       return Right(exams);
     } catch (e) {
-      return Left(NetworkErrorHandler.handle(e));
+      final failure = NetworkErrorHandler.handle(e);
+      if (failure is NetworkFailure) {
+        final hasCached = await localDataSource.hasCachedExams();
+        if (hasCached) {
+          final cached = await localDataSource.getCachedExams();
+          return Left(CachedExamsFailure(cached));
+        }
+      }
+      return Left(failure);
     }
   }
 
