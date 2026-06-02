@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:dartz/dartz.dart';
 import 'failures.dart';
 
 class NetworkErrorHandler {

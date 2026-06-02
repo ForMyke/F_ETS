@@ -19,13 +19,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     try {
-      print('Intentando login con: $email');
       final response = await client.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
-      print('Respuesta auth: ${response.user}');
       final user = response.user;
       if (user == null) throw const InvalidCredentialsFailure();
 
@@ -36,7 +34,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         token: response.session?.accessToken ?? '',
       );
     } catch (e) {
-      print('Error login: $e');
       rethrow;
     }
   }

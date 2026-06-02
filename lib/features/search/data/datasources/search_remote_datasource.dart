@@ -77,7 +77,6 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
         return matchCarrera && matchSemestre && matchPlan && matchMateria;
       }).toList();
     } catch (e) {
-      print('Error Supabase: $e');
       rethrow;
     }
   }
@@ -92,7 +91,6 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
 
       return response.map((row) => row['acronimo'] as String).toList();
     } catch (e) {
-      print('Error getCarreras: $e');
       rethrow;
     }
   }
