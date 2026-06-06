@@ -32,8 +32,6 @@ class CampusMapPainter extends CustomPainter {
   Color get _labelSel => Colors.white;
   Color get _mutedLabel =>
       isDark ? AppColors.darkTextMuted : const Color(0xFF777777);
-  Color get _salonTagBg =>
-      isDark ? const Color(0xFF0D47A1) : const Color(0xFF3A6B9E);
   Color get _entranceBg =>
       isDark ? const Color(0xFF1E3A5F) : const Color(0xFF2C4A6E);
 
@@ -52,7 +50,6 @@ class CampusMapPainter extends CustomPainter {
     _drawBg(canvas);
     _drawZones(canvas);
     _drawBuildings(canvas);
-    _drawSalonTags(canvas);
     _drawEntrance(canvas);
     canvas.restore();
   }
@@ -101,7 +98,7 @@ class CampusMapPainter extends CustomPainter {
 
     // Área deportiva izquierda (abajo izq)
     _zone(canvas,
-        rect: const Rect.fromLTWH(28, 380, 100, 70), // comparte con estudio
+        rect: const Rect.fromLTWH(28, 380, 100, 70),
         fill: _grassFill,
         label: '',
         labelColor: _mutedLabel,
@@ -139,13 +136,6 @@ class CampusMapPainter extends CustomPainter {
     }
   }
 
-  // Layout basado en el mapa oficial:
-  //
-  //  [  E/S  ]
-  //  [ Edif2 ][       ][ Edif4 ][       ]
-  //  [  Aud  ][ EdGob ][ Expl  ][ EdLab ][ Edif5 ]
-  //  [       ][       ][ Edif1 ][ Edif3 ][       ]
-  //
   Map<String, Rect> _buildingRects() => {
         // ── Fila superior ──────────────────────────────────────────
         '2': const Rect.fromLTWH(222, 34, 168, 110),
@@ -201,26 +191,27 @@ class CampusMapPainter extends CustomPainter {
     // Ventanas cuando no está seleccionado
     if (!selected) _windows(canvas, rect);
 
-    // Texto
+    // Texto — solo número/clave del edificio
     _text(
       canvas,
       label: _buildingLabel(key),
       center: rect.center,
       color: selected ? _labelSel : _labelColor,
-      size: (key == 'Lab' || key == 'Gob') ? 9.5 : 11.0,
-      bold: selected,
+      size: (key == 'Lab' || key == 'Gob') ? 9.5 : 18.0,
+      bold: true,
       maxW: rect.width - 10,
     );
   }
 
+  /// Devuelve solo el número o clave corta del edificio
   String _buildingLabel(String k) {
     switch (k) {
       case 'Lab':
-        return 'Edificio de\nLaboratorios';
+        return 'Lab';
       case 'Gob':
-        return 'Edificio de\nGobierno';
+        return 'Gob';
       default:
-        return 'Edificio $k';
+        return k; // '1', '2', '3', '4', '5'
     }
   }
 
@@ -243,49 +234,6 @@ class CampusMapPainter extends CustomPainter {
       }
       x += wW + gap;
     }
-  }
-
-  // ── Tags "Salones XYZ" ───────────────────────────────────────────
-  void _drawSalonTags(Canvas canvas) {
-    // Edificio 2 → Salones 2XYZ (debajo)
-    _salonTag(canvas, label: 'Salones 2XYZ', cx: 306, cy: 150);
-    // Edificio 4 → Salones 2XYZ (debajo)
-    _salonTag(canvas, label: 'Salones 2XYZ', cx: 516, cy: 150);
-    // Edificio 5 → Salones 4XYZ (derecha, arriba)
-    _salonTag(canvas, label: 'Salones 4XYZ', cx: 694, cy: 148);
-    // Edificio 5 → Salones 3XYZ (derecha, abajo)
-    _salonTag(canvas, label: 'Salones 3XYZ', cx: 694, cy: 306);
-    // Edificio 1 → Salones 1XYZ (debajo)
-    _salonTag(canvas, label: 'Salones 1XYZ', cx: 306, cy: 426);
-    // Edificio 3 → Salones 1XYZ (debajo)
-    _salonTag(canvas, label: 'Salones 1XYZ', cx: 502, cy: 426);
-  }
-
-  void _salonTag(Canvas canvas,
-      {required String label, required double cx, required double cy}) {
-    final tp = TextPainter(
-      text: TextSpan(
-        text: label,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 7.5,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-      textAlign: TextAlign.center,
-    )..layout();
-
-    const padH = 6.0, padV = 3.0;
-    final w = tp.width + padH * 2;
-    final h = tp.height + padV * 2;
-    final rect = Rect.fromCenter(center: Offset(cx, cy), width: w, height: h);
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(3)),
-      Paint()..color = _salonTagBg,
-    );
-    tp.paint(canvas, Offset(rect.left + padH, rect.top + padV));
   }
 
   // ── Entrada / salida ─────────────────────────────────────────────

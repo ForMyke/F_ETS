@@ -47,13 +47,54 @@ class _CampusMapPageState extends State<CampusMapPage>
       duration: const Duration(milliseconds: 350),
     )..forward();
 
-    // Centrar el mapa al abrir: calcular offset inicial tras el primer frame
-    WidgetsBinding.instance.addPostFrameCallback((_) => _centerMap());
+    // Zoom al edificio seleccionado tras el primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _zoomToSelected());
+  }
+
+  /// Centra y hace zoom al edificio actualmente seleccionado.
+  /// Si no hay ubicación conocida, hace zoom general al mapa.
+  void _zoomToSelected() {
+    final loc = getLocation(_selected);
+    if (loc == null) {
+      _centerMap();
+      return;
+    }
+
+    final screenSize = MediaQuery.of(context).size;
+    // Ancho disponible descontando padding horizontal (14*2)
+    final availableW = screenSize.width - 28;
+
+    // Escala para hacer zoom al edificio (factor 2.2 — ajusta a gusto)
+    const double zoomScale = 2.2;
+
+    // Coordenadas del pin en el canvas del mapa
+    final pinX = loc.svgOffset.dx;
+    final pinY = loc.svgOffset.dy;
+
+    // Escala base para que el mapa quepa en pantalla
+    final baseScale = availableW / _mapW;
+
+    // Escala final
+    final scale = baseScale * zoomScale;
+
+    // Queremos que el pin quede centrado en la vista.
+    // La vista tiene tamaño (availableW, viewportH).
+    // viewportH: usamos aprox 60% de la altura de pantalla para el mapa.
+    final viewportH = screenSize.height * 0.60;
+
+    // Offset de traslación para centrar el pin
+    final tx = (availableW / 2) - (pinX * scale);
+    final ty = (viewportH / 2) - (pinY * scale);
+
+    final matrix = Matrix4.identity()
+      ..translate(tx, ty)
+      ..scale(scale);
+
+    _transformController.value = matrix;
   }
 
   void _centerMap() {
-    // Escala inicial para que el mapa ocupe ~90% del ancho disponible
-    final screenW = MediaQuery.of(context).size.width - 28; // padding 14*2
+    final screenW = MediaQuery.of(context).size.width - 28;
     final scale = (screenW / _mapW).clamp(0.5, 1.5);
     final matrix = Matrix4.identity()..scale(scale);
     _transformController.value = matrix;
@@ -74,6 +115,8 @@ class _CampusMapPageState extends State<CampusMapPage>
     setState(() => _selected = key);
     _fadeController.reset();
     _fadeController.forward();
+    // Al tocar un pin también hacemos zoom a ese edificio
+    _zoomToSelected();
   }
 
   Future<void> _openMaps() async {
@@ -210,8 +253,7 @@ class _CampusMapPageState extends State<CampusMapPage>
                       transformationController: _transformController,
                       minScale: 0.4,
                       maxScale: 4.0,
-                      constrained:
-                          false, // ← clave: el hijo define su propio tamaño
+                      constrained: false,
                       child: SizedBox(
                         width: _mapW,
                         height: _mapH,
@@ -230,7 +272,7 @@ class _CampusMapPageState extends State<CampusMapPage>
                               ),
                             ),
 
-                            // Pines — usan coordenadas del viewBox directamente
+                            // Pines
                             ...campusLocations.entries.map((e) {
                               final isActive = _isMatch(e.key);
                               final dx = e.value.svgOffset.dx;
@@ -391,7 +433,6 @@ class _CampusMapPageState extends State<CampusMapPage>
   }
 
   void _handleTap(Offset localPos) {
-    // localPos ya está en coordenadas del SizedBox (800×480), sin escalar
     String? closest;
     double minDist = 60.0 * 60.0;
 
