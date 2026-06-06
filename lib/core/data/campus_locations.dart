@@ -5,6 +5,7 @@ class EdificioLocation {
   final double lat;
   final double lng;
   final String nombre;
+  final String nombreCorto;
   final Offset svgOffset;
 
   const EdificioLocation({
@@ -12,6 +13,7 @@ class EdificioLocation {
     required this.lat,
     required this.lng,
     required this.nombre,
+    required this.nombreCorto,
     required this.svgOffset,
   });
 }
@@ -19,35 +21,40 @@ class EdificioLocation {
 const Map<String, EdificioLocation> campusLocations = {
   '1': EdificioLocation(
     numeroEdificio: '1',
-    nombre: 'Edificio 1 — Salones 1XYZ',
+    nombre: 'Edificio 1',
+    nombreCorto: 'Edif. 1',
     lat: 19.504350,
     lng: -99.146700,
     svgOffset: Offset(306, 365),
   ),
   '2': EdificioLocation(
     numeroEdificio: '2',
-    nombre: 'Edificio 2 — Salones 2XYZ',
+    nombre: 'Edificio 2',
+    nombreCorto: 'Edif. 2',
     lat: 19.504850,
     lng: -99.146600,
     svgOffset: Offset(306, 89),
   ),
   '3': EdificioLocation(
     numeroEdificio: '3',
-    nombre: 'Edificio 3 — Salones 1XYZ',
+    nombre: 'Edificio 3',
+    nombreCorto: 'Edif. 3',
     lat: 19.504350,
     lng: -99.146300,
     svgOffset: Offset(502, 365),
   ),
   '4': EdificioLocation(
     numeroEdificio: '4',
-    nombre: 'Edificio 4 — Salones 2XYZ',
+    nombre: 'Edificio 4',
+    nombreCorto: 'Edif. 4',
     lat: 19.504850,
     lng: -99.146300,
     svgOffset: Offset(516, 89),
   ),
   '5': EdificioLocation(
     numeroEdificio: '5',
-    nombre: 'Edificio 5 — Salones 3XYZ / 4XYZ',
+    nombre: 'Edificio 5',
+    nombreCorto: 'Edif. 5',
     lat: 19.504550,
     lng: -99.145900,
     svgOffset: Offset(694, 167),
@@ -55,6 +62,7 @@ const Map<String, EdificioLocation> campusLocations = {
   'Lab': EdificioLocation(
     numeroEdificio: 'Lab',
     nombre: 'Edificio de Laboratorios',
+    nombreCorto: 'Laboratorios',
     lat: 19.504550,
     lng: -99.146300,
     svgOffset: Offset(512, 226),
@@ -62,6 +70,7 @@ const Map<String, EdificioLocation> campusLocations = {
   'Gob': EdificioLocation(
     numeroEdificio: 'Gob',
     nombre: 'Edificio de Gobierno',
+    nombreCorto: 'Gobierno',
     lat: 19.504550,
     lng: -99.147000,
     svgOffset: Offset(170, 226),

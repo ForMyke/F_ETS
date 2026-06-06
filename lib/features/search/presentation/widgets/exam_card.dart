@@ -177,16 +177,28 @@ class ExamCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Botón Ver salón → abre el mapa
+                      // Botón Ver salón → abre el mapa pasando salón y hora
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => CampusMapPage(
+                            PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => CampusMapPage(
                                 edificioResaltado: exam.edificio,
+                                salonCodigo: exam.salon,
+                                horaExamen: exam.hora,
                               ),
+                              transitionsBuilder: (_, animation, __, child) =>
+                                  FadeTransition(
+                                opacity: CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOut,
+                                ),
+                                child: child,
+                              ),
+                              transitionDuration:
+                                  const Duration(milliseconds: 300),
                             ),
                           );
                         },
@@ -229,7 +241,7 @@ class ExamCard extends StatelessWidget {
                         ),
                       ),
 
-                      // Botón notificación (ya existente)
+                      // Botón notificación
                       NotificationButton(
                         exam: exam,
                         isDark: isDark,

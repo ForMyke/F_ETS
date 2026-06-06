@@ -14,9 +14,17 @@ const double _mapH = 480;
 class CampusMapPage extends StatefulWidget {
   final String edificioResaltado;
 
+  /// Código del salón donde se aplica el examen (ej: "3CB1")
+  final String? salonCodigo;
+
+  /// Hora del examen (ej: "09:00")
+  final String? horaExamen;
+
   const CampusMapPage({
     super.key,
     required this.edificioResaltado,
+    this.salonCodigo,
+    this.horaExamen,
   });
 
   @override
@@ -27,6 +35,11 @@ class _CampusMapPageState extends State<CampusMapPage>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _fadeController;
+  // Controlador para la animación de entrada de la página completa
+  late AnimationController _entryController;
+  late Animation<double> _entryFade;
+  late Animation<Offset> _entrySlide;
+
   late String _selected;
 
   final TransformationController _transformController =
@@ -47,12 +60,31 @@ class _CampusMapPageState extends State<CampusMapPage>
       duration: const Duration(milliseconds: 350),
     )..forward();
 
-    // Zoom al edificio seleccionado tras el primer frame
-    WidgetsBinding.instance.addPostFrameCallback((_) => _zoomToSelected());
+    // Animación de entrada suave
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+    _entryFade = CurvedAnimation(
+      parent: _entryController,
+      curve: Curves.easeOut,
+    );
+    _entrySlide = Tween<Offset>(
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _entryController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Iniciar animación de entrada tras el primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _entryController.forward();
+      _zoomToSelected();
+    });
   }
 
   /// Centra y hace zoom al edificio actualmente seleccionado.
-  /// Si no hay ubicación conocida, hace zoom general al mapa.
   void _zoomToSelected() {
     final loc = getLocation(_selected);
     if (loc == null) {
@@ -61,28 +93,18 @@ class _CampusMapPageState extends State<CampusMapPage>
     }
 
     final screenSize = MediaQuery.of(context).size;
-    // Ancho disponible descontando padding horizontal (14*2)
     final availableW = screenSize.width - 28;
 
-    // Escala para hacer zoom al edificio (factor 2.2 — ajusta a gusto)
     const double zoomScale = 2.2;
 
-    // Coordenadas del pin en el canvas del mapa
     final pinX = loc.svgOffset.dx;
     final pinY = loc.svgOffset.dy;
 
-    // Escala base para que el mapa quepa en pantalla
     final baseScale = availableW / _mapW;
-
-    // Escala final
     final scale = baseScale * zoomScale;
 
-    // Queremos que el pin quede centrado en la vista.
-    // La vista tiene tamaño (availableW, viewportH).
-    // viewportH: usamos aprox 60% de la altura de pantalla para el mapa.
     final viewportH = screenSize.height * 0.60;
 
-    // Offset de traslación para centrar el pin
     final tx = (availableW / 2) - (pinX * scale);
     final ty = (viewportH / 2) - (pinY * scale);
 
@@ -104,6 +126,7 @@ class _CampusMapPageState extends State<CampusMapPage>
   void dispose() {
     _pulseController.dispose();
     _fadeController.dispose();
+    _entryController.dispose();
     _transformController.dispose();
     super.dispose();
   }
@@ -115,7 +138,6 @@ class _CampusMapPageState extends State<CampusMapPage>
     setState(() => _selected = key);
     _fadeController.reset();
     _fadeController.forward();
-    // Al tocar un pin también hacemos zoom a ese edificio
     _zoomToSelected();
   }
 
@@ -134,289 +156,399 @@ class _CampusMapPageState extends State<CampusMapPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final loc = _loc;
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBgPrimary : AppColors.bgPrimary,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Header ──────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkBgSurface
-                            : AppColors.bgSurface,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.borderLight,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Campus ESCOM',
-                          style: AppTextStyles.displayLarge.copyWith(
-                            fontSize: 20,
+    // Determinar si el edificio mostrado es el seleccionado originalmente
+    final isOriginalBuilding =
+        _isMatch(_selected) && _selected == widget.edificioResaltado ||
+            getLocation(_selected)?.numeroEdificio ==
+                getLocation(widget.edificioResaltado)?.numeroEdificio;
+
+    return FadeTransition(
+      opacity: _entryFade,
+      child: SlideTransition(
+        position: _entrySlide,
+        child: Scaffold(
+          backgroundColor:
+              isDark ? AppColors.darkBgPrimary : AppColors.bgPrimary,
+          body: SafeArea(
+            child: Column(
+              children: [
+                // ── Header ──────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
                             color: isDark
-                                ? AppColors.darkTextPrimary
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: Text(
-                            loc?.nombre ?? 'Selecciona un edificio',
-                            key: ValueKey(_selected),
-                            style: AppTextStyles.caption.copyWith(
+                                ? AppColors.darkBgSurface
+                                : AppColors.bgSurface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
                               color: isDark
-                                  ? AppColors.darkBlueMid
-                                  : AppColors.blueMid,
+                                  ? AppColors.darkBorder
+                                  : AppColors.borderLight,
+                              width: 1.5,
                             ),
-                            overflow: TextOverflow.ellipsis,
+                          ),
+                          child: Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 16,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  // Botón reset zoom
-                  GestureDetector(
-                    onTap: _centerMap,
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkBgSurface
-                            : AppColors.bgSurface,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.borderLight,
-                          width: 1.5,
-                        ),
                       ),
-                      child: Icon(
-                        Icons.center_focus_strong_outlined,
-                        size: 18,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1),
-
-            const SizedBox(height: 14),
-
-            // ── Mapa con pan/zoom ────────────────────────────────────
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.darkBorder
-                            : AppColors.borderLight,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: InteractiveViewer(
-                      transformationController: _transformController,
-                      minScale: 0.4,
-                      maxScale: 4.0,
-                      constrained: false,
-                      child: SizedBox(
-                        width: _mapW,
-                        height: _mapH,
-                        child: Stack(
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Painter
-                            Positioned.fill(
-                              child: GestureDetector(
-                                onTapUp: (d) => _handleTap(d.localPosition),
-                                child: CustomPaint(
-                                  painter: CampusMapPainter(
-                                    isDark: isDark,
-                                    selectedEdificio: _selected,
-                                  ),
-                                ),
+                            Text(
+                              'Campus ESCOM',
+                              style: AppTextStyles.displayLarge.copyWith(
+                                fontSize: 20,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
                               ),
                             ),
-
-                            // Pines
-                            ...campusLocations.entries.map((e) {
-                              final isActive = _isMatch(e.key);
-                              final dx = e.value.svgOffset.dx;
-                              final dy = e.value.svgOffset.dy;
-                              return Positioned(
-                                left: dx - 25,
-                                top: dy - 30,
-                                child: PulsingPin(
-                                  controller: _pulseController,
-                                  isActive: isActive,
-                                  isDark: isDark,
-                                  label: e.key,
-                                  onTap: () => _selectEdificio(e.key),
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: Text(
+                                loc?.nombre ?? 'Selecciona un edificio',
+                                key: ValueKey(_selected),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: isDark
+                                      ? AppColors.darkBlueMid
+                                      : AppColors.blueMid,
                                 ),
-                              );
-                            }),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ).animate().fadeIn(delay: 120.ms, duration: 500.ms),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Info card ────────────────────────────────────────────
-            if (loc != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: FadeTransition(
-                  opacity: _fadeController,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkBgSurface
-                          : AppColors.bgPrimary,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.darkBorder
-                            : AppColors.borderLight,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
+                      // Botón reset zoom
+                      GestureDetector(
+                        onTap: _centerMap,
+                        child: Container(
+                          width: 38,
+                          height: 38,
                           decoration: BoxDecoration(
                             color: isDark
-                                ? AppColors.darkBlueLight
-                                : AppColors.blueSurface,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              loc.numeroEdificio,
-                              style: AppTextStyles.body.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: isDark
-                                    ? AppColors.darkBlueMid
-                                    : AppColors.blueMid,
-                              ),
+                                ? AppColors.darkBgSurface
+                                : AppColors.bgSurface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.borderLight,
+                              width: 1.5,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                loc.nombre,
-                                style: AppTextStyles.body.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? AppColors.darkTextPrimary
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              Text(
-                                '${loc.lat.toStringAsFixed(5)}, '
-                                '${loc.lng.toStringAsFixed(5)}',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: isDark
-                                      ? AppColors.darkTextMuted
-                                      : AppColors.textMuted,
-                                ),
-                              ),
-                            ],
+                          child: Icon(
+                            Icons.center_focus_strong_outlined,
+                            size: 18,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
-                        ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: isDark
-                              ? AppColors.darkTextMuted
-                              : AppColors.textMuted,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-            const SizedBox(height: 10),
-
-            // ── Botón Google Maps ────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
-              child: GestureDetector(
-                onTap: _openMaps,
-                child: Container(
-                  width: double.infinity,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.blueMid : AppColors.blue,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.map_rounded,
-                          color: Colors.white, size: 20),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Abrir en Google Maps',
-                        style: AppTextStyles.body.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
+                )
+                    .animate()
+                    .fadeIn(duration: 400.ms)
+                    .slideY(begin: -0.08, curve: Curves.easeOutCubic),
+
+                const SizedBox(height: 14),
+
+                // ── Mapa con pan/zoom ────────────────────────────────
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.borderLight,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: InteractiveViewer(
+                          transformationController: _transformController,
+                          minScale: 0.4,
+                          maxScale: 4.0,
+                          constrained: false,
+                          child: SizedBox(
+                            width: _mapW,
+                            height: _mapH,
+                            child: Stack(
+                              children: [
+                                // Painter
+                                Positioned.fill(
+                                  child: GestureDetector(
+                                    onTapUp: (d) => _handleTap(d.localPosition),
+                                    child: CustomPaint(
+                                      painter: CampusMapPainter(
+                                        isDark: isDark,
+                                        selectedEdificio: _selected,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Pines
+                                ...campusLocations.entries.map((e) {
+                                  final isActive = _isMatch(e.key);
+                                  final dx = e.value.svgOffset.dx;
+                                  final dy = e.value.svgOffset.dy;
+                                  return Positioned(
+                                    left: dx - 25,
+                                    top: dy - 30,
+                                    child: PulsingPin(
+                                      controller: _pulseController,
+                                      isActive: isActive,
+                                      isDark: isDark,
+                                      label: e.key,
+                                      onTap: () => _selectEdificio(e.key),
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 120.ms, duration: 500.ms),
                 ),
-              ).animate().fadeIn(delay: 250.ms, duration: 400.ms).slideY(
-                    begin: 0.2,
-                    curve: Curves.easeOutCubic,
+
+                const SizedBox(height: 12),
+
+                // ── Info card mejorada ──────────────────────────────
+                if (loc != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: FadeTransition(
+                      opacity: _fadeController,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkBgSurface
+                              : AppColors.bgPrimary,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.borderLight,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Ícono de edificio
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkBlueLight
+                                    : AppColors.blueSurface,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  loc.numeroEdificio,
+                                  style: AppTextStyles.body.copyWith(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? AppColors.darkBlueMid
+                                        : AppColors.blueMid,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Nombre del edificio
+                                  Text(
+                                    loc.nombre,
+                                    style: AppTextStyles.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      color: isDark
+                                          ? AppColors.darkTextPrimary
+                                          : AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  // Fila de datos: salón y hora
+                                  Row(
+                                    children: [
+                                      // Salón
+                                      if (widget.salonCodigo != null) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? AppColors.darkBlueLight
+                                                : AppColors.blueSurface,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.meeting_room_outlined,
+                                                size: 12,
+                                                color: isDark
+                                                    ? AppColors.darkBlueMid
+                                                    : AppColors.blueMid,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                'Salón ${widget.salonCodigo}',
+                                                style: AppTextStyles.caption
+                                                    .copyWith(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark
+                                                      ? AppColors.darkBlueMid
+                                                      : AppColors.blueMid,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
+                                      // Hora
+                                      if (widget.horaExamen != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? AppColors.darkBgOverlay
+                                                : AppColors.bgSurface,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: isDark
+                                                  ? AppColors.darkBorder
+                                                  : AppColors.borderLight,
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.access_time_rounded,
+                                                size: 12,
+                                                color: isDark
+                                                    ? AppColors
+                                                        .darkTextSecondary
+                                                    : AppColors.textSecondary,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                widget.horaExamen!,
+                                                style: AppTextStyles.caption
+                                                    .copyWith(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: isDark
+                                                      ? AppColors
+                                                          .darkTextSecondary
+                                                      : AppColors.textSecondary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  // Si no hay salón ni hora, mostrar texto de apoyo
+                                  if (widget.salonCodigo == null &&
+                                      widget.horaExamen == null)
+                                    Text(
+                                      'Toca los pines para explorar',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: isDark
+                                            ? AppColors.darkTextMuted
+                                            : AppColors.textMuted,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideY(
+                        begin: 0.12,
+                        curve: Curves.easeOutCubic,
+                      ),
+
+                const SizedBox(height: 10),
+
+                // ── Botón Google Maps ────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
+                  child: GestureDetector(
+                    onTap: _openMaps,
+                    child: Container(
+                      width: double.infinity,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.blueMid : AppColors.blue,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.map_rounded,
+                              color: Colors.white, size: 20),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Abrir en Google Maps',
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                )
+                    .animate()
+                    .fadeIn(delay: 280.ms, duration: 400.ms)
+                    .slideY(begin: 0.15, curve: Curves.easeOutCubic),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
