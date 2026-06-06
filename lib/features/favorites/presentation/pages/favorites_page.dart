@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/error_snackbar.dart';
 import '../../../search/presentation/widgets/exam_card.dart';
 import '../../../search/presentation/widgets/pdf_export_button.dart';
+import '../../../search/presentation/widgets/ics_export_button.dart';
 import '../bloc/favorites_bloc.dart';
 
 class FavoritesPage extends StatelessWidget {
@@ -103,7 +104,7 @@ class FavoritesPage extends StatelessWidget {
                         .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                     const SizedBox(height: 16),
 
-                    // Contador + botón exportar PDF
+                    // Contador + botones exportar ICS y PDF
                     BlocBuilder<FavoritesBloc, FavoritesState>(
                       builder: (context, state) {
                         if (state is! FavoritesSuccess || state.exams.isEmpty) {
@@ -120,9 +121,18 @@ class FavoritesPage extends StatelessWidget {
                                     : AppColors.textMuted,
                               ),
                             ),
-                            PdfExportButton(
-                              exams: state.exams,
-                              isDark: isDark,
+                            Row(
+                              children: [
+                                IcsExportButton(
+                                  exams: state.exams,
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(width: 8),
+                                PdfExportButton(
+                                  exams: state.exams,
+                                  isDark: isDark,
+                                ),
+                              ],
                             ),
                           ],
                         );

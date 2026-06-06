@@ -11,170 +11,162 @@ class CampusMapPainter extends CustomPainter {
   });
 
   // ── Paleta ──────────────────────────────────────────────────────
-  Color get _bg => isDark ? const Color(0xFF162030) : const Color(0xFFF2F5F0);
-  Color get _grass =>
-      isDark ? const Color(0xFF1A3020) : const Color(0xFFCFE8BB);
-  Color get _path => isDark ? const Color(0xFF243545) : const Color(0xFFD8D2C8);
-  // FIX 1: Renombrado de _building a _buildingColor para evitar conflicto con el método _building()
-  Color get _buildingColor =>
-      isDark ? const Color(0xFF1E3A5F) : const Color(0xFFB8D4EA);
+  Color get _bg => isDark ? const Color(0xFF162030) : const Color(0xFFF7F7F7);
+  Color get _borderOuter =>
+      isDark ? const Color(0xFF2A3F55) : const Color(0xFFBBBBBB);
+  Color get _buildingFill =>
+      isDark ? const Color(0xFF1E3A5F) : const Color(0xFFFFFFFF);
   Color get _buildingSel => isDark ? AppColors.blueMid : AppColors.blue;
-  Color get _explanada =>
-      isDark ? const Color(0xFF1C3530) : const Color(0xFFDDEDD0);
-  Color get _special =>
-      isDark ? const Color(0xFF2A2040) : const Color(0xFFE0DAEF);
-  Color get _coffee =>
-      isDark ? const Color(0xFF3A2A1A) : const Color(0xFFEDD9C0);
-  Color get _border => isDark ? AppColors.darkBorder : AppColors.border;
-  Color get _textSec =>
-      isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+  Color get _buildingBorder =>
+      isDark ? const Color(0xFF3A5A7A) : const Color(0xFF555555);
+  Color get _explanadaFill =>
+      isDark ? const Color(0xFF1A3020) : const Color(0xFFEEEEEE);
+  Color get _specialFill =>
+      isDark ? const Color(0xFF1C2A3A) : const Color(0xFFF0F0F0);
+  Color get _grassFill =>
+      isDark ? const Color(0xFF1A3020) : const Color(0xFFE8F5E9);
+  Color get _coffeeFill =>
+      isDark ? const Color(0xFF2A1A0A) : const Color(0xFFFFF8F0);
+  Color get _labelColor =>
+      isDark ? AppColors.darkTextSecondary : const Color(0xFF333333);
+  Color get _labelSel => Colors.white;
+  Color get _mutedLabel =>
+      isDark ? AppColors.darkTextMuted : const Color(0xFF777777);
+  Color get _salonTagBg =>
+      isDark ? const Color(0xFF0D47A1) : const Color(0xFF3A6B9E);
+  Color get _entranceBg =>
+      isDark ? const Color(0xFF1E3A5F) : const Color(0xFF2C4A6E);
 
-  // ── viewBox base 700 × 520 ──────────────────────────────────────
-  static const double _vW = 700;
-  static const double _vH = 520;
+  // ── viewBox 800 × 480 ──────────────────────────────────────────
+  static const double _vW = 800;
+  static const double _vH = 480;
+
+  // ── Márgenes y medidas base ─────────────────────────────────────
+  static const double _margin = 14.0;
+  static const double _rad = 6.0;
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / _vW, size.height / _vH);
-
     _drawBg(canvas);
-    _drawPaths(canvas);
     _drawZones(canvas);
     _drawBuildings(canvas);
+    _drawSalonTags(canvas);
     _drawEntrance(canvas);
-
     canvas.restore();
   }
 
-  // ── Fondo ────────────────────────────────────────────────────────
+  // ── Fondo y borde exterior ───────────────────────────────────────
   void _drawBg(Canvas canvas) {
-    canvas.drawRect(
-      const Rect.fromLTWH(0, 0, _vW, _vH),
-      Paint()..color = _bg,
+    final rr = RRect.fromRectAndRadius(
+      Rect.fromLTWH(_margin, _margin, _vW - _margin * 2, _vH - _margin * 2),
+      const Radius.circular(10),
     );
-    // Marco exterior del campus
+    canvas.drawRRect(rr, Paint()..color = _bg);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-          const Rect.fromLTWH(8, 8, 684, 504), const Radius.circular(14)),
+      rr,
       Paint()
-        ..color = _border
+        ..color = _borderOuter
         ..strokeWidth = 2
         ..style = PaintingStyle.stroke,
     );
   }
 
-  // ── Calles / caminos ─────────────────────────────────────────────
-  void _drawPaths(Canvas canvas) {
-    final p = Paint()..color = _path;
-
-    // Horizontal principal (divide fila superior e inferior)
-    canvas.drawRect(const Rect.fromLTWH(8, 218, 684, 24), p);
-
-    // Horizontal superior (separa edificios superiores del techo)
-    canvas.drawRect(const Rect.fromLTWH(8, 86, 684, 20), p);
-
-    // Horizontal inferior (separa fila inferior de zonas bajas)
-    canvas.drawRect(const Rect.fromLTWH(8, 368, 684, 20), p);
-
-    // Vertical izq (entre auditorio y ed.gobierno / ed.1)
-    canvas.drawRect(const Rect.fromLTWH(108, 8, 20, 504), p);
-
-    // Vertical centro (entre ed.2/1 y ed.lab/3)
-    canvas.drawRect(const Rect.fromLTWH(390, 8, 20, 504), p);
-
-    // Vertical der (entre ed.lab/3 y ed.5)
-    canvas.drawRect(const Rect.fromLTWH(560, 8, 20, 504), p);
-  }
-
   // ── Zonas especiales ─────────────────────────────────────────────
   void _drawZones(Canvas canvas) {
-    // Explanada
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(128, 106, 262, 112),
-      color: _explanada,
-      label: 'Explanada',
-      labelColor: isDark ? const Color(0xFF6DB88A) : const Color(0xFF3A7D44),
-      fontSize: 12,
-    );
+    // Explanada (centro-izquierda fila media)
+    _zone(canvas,
+        rect: const Rect.fromLTWH(222, 152, 188, 148),
+        fill: _explanadaFill,
+        label: 'Explanada',
+        labelColor: _mutedLabel,
+        fontSize: 13);
 
-    // Auditorio
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(18, 106, 90, 112),
-      color: _special,
-      label: 'Auditorio',
-      labelColor: isDark ? const Color(0xFFB39DDB) : const Color(0xFF5E35B1),
-      fontSize: 10,
-    );
+    // Auditorio (izquierda fila media)
+    _zone(canvas,
+        rect: const Rect.fromLTWH(28, 152, 90, 148),
+        fill: _specialFill,
+        label: 'Auditorio',
+        labelColor: _mutedLabel,
+        fontSize: 10);
 
-    // Área de estudio (izq, fila media-baja)
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(18, 242, 90, 80),
-      color: _grass,
-      label: 'Área\nEstudio',
-      labelColor: isDark ? const Color(0xFF66BB6A) : const Color(0xFF2E7D32),
-      fontSize: 9,
-    );
+    // Área de estudio (izquierda fila baja)
+    _zone(canvas,
+        rect: const Rect.fromLTWH(28, 318, 145, 105),
+        fill: _grassFill,
+        label: 'Área de\nestudio',
+        labelColor: _mutedLabel,
+        fontSize: 9);
 
-    // Área deportiva izquierda
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(18, 388, 110, 108),
-      color: _grass,
-      label: 'Área\nDeportiva',
-      labelColor: isDark ? const Color(0xFF66BB6A) : const Color(0xFF2E7D32),
-      fontSize: 9,
-    );
+    // Área deportiva izquierda (abajo izq)
+    _zone(canvas,
+        rect: const Rect.fromLTWH(28, 380, 100, 70), // comparte con estudio
+        fill: _grassFill,
+        label: '',
+        labelColor: _mutedLabel,
+        fontSize: 9);
 
     // Barra de café
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(138, 388, 80, 55),
-      color: _coffee,
-      label: 'Barra\nCafé',
-      labelColor: isDark ? const Color(0xFFFFB74D) : const Color(0xFF6D4C41),
-      fontSize: 8,
-    );
+    _zone(canvas,
+        rect: const Rect.fromLTWH(182, 398, 72, 52),
+        fill: _coffeeFill,
+        label: 'Barra\nde Café',
+        labelColor: _mutedLabel,
+        fontSize: 8);
 
-    // Área deportiva derecha
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(580, 242, 110, 126),
-      color: _grass,
-      label: 'Área\nDeportiva',
-      labelColor: isDark ? const Color(0xFF66BB6A) : const Color(0xFF2E7D32),
-      fontSize: 9,
-    );
+    // Área deportiva derecha (fila media-baja derecha)
+    _zone(canvas,
+        rect: const Rect.fromLTWH(648, 318, 122, 105),
+        fill: _grassFill,
+        label: 'Área\nDeportiva',
+        labelColor: _mutedLabel,
+        fontSize: 9);
 
-    // Cafetería
-    _zone(
-      canvas,
-      rect: const Rect.fromLTWH(580, 388, 110, 108),
-      color: _coffee,
-      label: 'Cafetería',
-      labelColor: isDark ? const Color(0xFFFFB74D) : const Color(0xFF6D4C41),
-      fontSize: 10,
-    );
+    // Cafetería (abajo derecha)
+    _zone(canvas,
+        rect: const Rect.fromLTWH(648, 398, 122, 52),
+        fill: _coffeeFill,
+        label: 'Cafetería',
+        labelColor: _mutedLabel,
+        fontSize: 9);
   }
 
   // ── Edificios ────────────────────────────────────────────────────
   void _drawBuildings(Canvas canvas) {
-    for (final e in _rects().entries) {
+    for (final e in _buildingRects().entries) {
       _building(canvas, e.key, e.value, _isSelected(e.key));
     }
   }
 
+  // Layout basado en el mapa oficial:
+  //
+  //  [  E/S  ]
+  //  [ Edif2 ][       ][ Edif4 ][       ]
+  //  [  Aud  ][ EdGob ][ Expl  ][ EdLab ][ Edif5 ]
+  //  [       ][       ][ Edif1 ][ Edif3 ][       ]
+  //
+  Map<String, Rect> _buildingRects() => {
+        // ── Fila superior ──────────────────────────────────────────
+        '2': const Rect.fromLTWH(222, 34, 168, 110),
+        '4': const Rect.fromLTWH(432, 34, 168, 110),
+
+        // ── Fila media ─────────────────────────────────────────────
+        'Gob': const Rect.fromLTWH(126, 152, 88, 148),
+        'Lab': const Rect.fromLTWH(418, 152, 188, 148),
+        '5': const Rect.fromLTWH(618, 34, 152, 266),
+
+        // ── Fila inferior ──────────────────────────────────────────
+        '1': const Rect.fromLTWH(222, 310, 168, 110),
+        '3': const Rect.fromLTWH(418, 310, 168, 110),
+      };
+
   bool _isSelected(String key) {
     if (selectedEdificio == key) return true;
     final lo = selectedEdificio.toLowerCase();
-    if (key == 'Lab' && (lo.contains('lab'))) return true;
-    // FIX 2: if sin llaves corregido con bloque {}
-    if (key == 'Gob' && (lo.contains('gob') || lo.contains('gobierno'))) {
+    if (key == 'Lab' && lo.contains('lab')) return true;
+    if (key == 'Gob' && (lo.contains('gob') || lo.contains('gobierno')))
       return true;
-    }
     final n = RegExp(r'\d+').firstMatch(selectedEdificio)?.group(0);
     return n != null && key == n;
   }
@@ -182,144 +174,171 @@ class CampusMapPainter extends CustomPainter {
   void _building(Canvas canvas, String key, Rect rect, bool selected) {
     // Sombra
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect.translate(3, 4), const Radius.circular(9)),
+      RRect.fromRectAndRadius(
+          rect.translate(2, 3), const Radius.circular(_rad)),
       Paint()
-        // FIX 3: withOpacity reemplazado por withValues
-        ..color = Colors.black.withValues(alpha: isDark ? 0.35 : 0.13)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        ..color = Colors.black.withValues(alpha: isDark ? 0.35 : 0.12)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
 
     // Cuerpo
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(9)),
-      // FIX 1: Usando _buildingColor en lugar de _building
-      Paint()..color = selected ? _buildingSel : _buildingColor,
+      RRect.fromRectAndRadius(rect, const Radius.circular(_rad)),
+      Paint()..color = selected ? _buildingSel : _buildingFill,
     );
 
     // Borde
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(9)),
+      RRect.fromRectAndRadius(rect, const Radius.circular(_rad)),
       Paint()
         ..color = selected
             ? (isDark ? AppColors.darkBlueMid : AppColors.blueLight)
-            : _border
-        ..strokeWidth = selected ? 2.5 : 1.5
+            : _buildingBorder
+        ..strokeWidth = selected ? 2.5 : 1.2
         ..style = PaintingStyle.stroke,
     );
 
-    // Ventanas (si no seleccionado)
+    // Ventanas cuando no está seleccionado
     if (!selected) _windows(canvas, rect);
 
     // Texto
     _text(
       canvas,
-      label: _label(key),
+      label: _buildingLabel(key),
       center: rect.center,
-      color: selected ? Colors.white : _textSec,
-      size: (key == 'Lab' || key == 'Gob') ? 9.0 : 11.0,
+      color: selected ? _labelSel : _labelColor,
+      size: (key == 'Lab' || key == 'Gob') ? 9.5 : 11.0,
       bold: selected,
-      maxW: rect.width - 8,
+      maxW: rect.width - 10,
     );
   }
 
-  String _label(String k) {
+  String _buildingLabel(String k) {
     switch (k) {
       case 'Lab':
-        return 'Edif.\nLabs';
+        return 'Edificio de\nLaboratorios';
       case 'Gob':
-        return 'Edif.\nGobierno';
+        return 'Edificio de\nGobierno';
       default:
-        return 'Edif. $k';
+        return 'Edificio $k';
     }
   }
 
   void _windows(Canvas canvas, Rect rect) {
     final p = Paint()
       ..color = isDark
-          // FIX 3: withOpacity reemplazado por withValues
           ? const Color(0xFF2A4A6A)
-          : const Color(0xFF90CAF9).withValues(alpha: 0.5);
-    const wW = 7.0, wH = 5.0, pad = 10.0, gap = 5.0;
-    double x = rect.left + pad;
-    while (x + wW < rect.right - pad / 2) {
-      double y = rect.top + pad;
-      while (y + wH < rect.bottom - pad / 2) {
+          : const Color(0xFFDDEEFF).withValues(alpha: 0.8);
+    const wW = 6.0, wH = 4.5, padX = 10.0, padY = 12.0, gap = 5.0;
+    double x = rect.left + padX;
+    while (x + wW < rect.right - padX / 2) {
+      double y = rect.top + padY;
+      while (y + wH < rect.bottom - padY / 2) {
         canvas.drawRRect(
-            RRect.fromRectAndRadius(
-                Rect.fromLTWH(x, y, wW, wH), const Radius.circular(1)),
-            p);
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(x, y, wW, wH), const Radius.circular(1)),
+          p,
+        );
         y += wH + gap;
       }
       x += wW + gap;
     }
   }
 
+  // ── Tags "Salones XYZ" ───────────────────────────────────────────
+  void _drawSalonTags(Canvas canvas) {
+    // Edificio 2 → Salones 2XYZ (debajo)
+    _salonTag(canvas, label: 'Salones 2XYZ', cx: 306, cy: 150);
+    // Edificio 4 → Salones 2XYZ (debajo)
+    _salonTag(canvas, label: 'Salones 2XYZ', cx: 516, cy: 150);
+    // Edificio 5 → Salones 4XYZ (derecha, arriba)
+    _salonTag(canvas, label: 'Salones 4XYZ', cx: 694, cy: 148);
+    // Edificio 5 → Salones 3XYZ (derecha, abajo)
+    _salonTag(canvas, label: 'Salones 3XYZ', cx: 694, cy: 306);
+    // Edificio 1 → Salones 1XYZ (debajo)
+    _salonTag(canvas, label: 'Salones 1XYZ', cx: 306, cy: 426);
+    // Edificio 3 → Salones 1XYZ (debajo)
+    _salonTag(canvas, label: 'Salones 1XYZ', cx: 502, cy: 426);
+  }
+
+  void _salonTag(Canvas canvas,
+      {required String label, required double cx, required double cy}) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 7.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    )..layout();
+
+    const padH = 6.0, padV = 3.0;
+    final w = tp.width + padH * 2;
+    final h = tp.height + padV * 2;
+    final rect = Rect.fromCenter(center: Offset(cx, cy), width: w, height: h);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(3)),
+      Paint()..color = _salonTagBg,
+    );
+    tp.paint(canvas, Offset(rect.left + padH, rect.top + padV));
+  }
+
   // ── Entrada / salida ─────────────────────────────────────────────
   void _drawEntrance(Canvas canvas) {
-    const cx = 290.0, cy = 72.0;
+    const cx = 345.0, cy = 28.0;
     final rr = RRect.fromRectAndRadius(
-      const Rect.fromLTWH(cx - 22, cy - 13, 44, 24),
-      const Radius.circular(7),
+      Rect.fromCenter(center: const Offset(cx, cy), width: 46, height: 22),
+      const Radius.circular(5),
     );
-    canvas.drawRRect(
-        rr,
-        Paint()
-          ..color = isDark ? AppColors.darkBlueLight : AppColors.blueSurface);
-    canvas.drawRRect(
-        rr,
-        Paint()
-          ..color = isDark ? AppColors.darkBlueMid : AppColors.blueMid
-          ..strokeWidth = 1.5
-          ..style = PaintingStyle.stroke);
+    canvas.drawRRect(rr, Paint()..color = _entranceBg);
 
     _text(
       canvas,
       label: 'E/S',
       center: const Offset(cx, cy),
-      color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-      size: 9,
+      color: Colors.white,
+      size: 9.5,
       bold: true,
-      maxW: 44,
+      maxW: 46,
     );
-
-    // Flecha abajo
-    final ap = Paint()
-      ..color = isDark ? AppColors.darkBlueMid : AppColors.blueMid;
-    final arrow = Path()
-      ..moveTo(cx - 7, cy + 11)
-      ..lineTo(cx + 7, cy + 11)
-      ..lineTo(cx, cy + 20)
-      ..close();
-    canvas.drawPath(arrow, ap);
   }
 
   // ── Helpers ──────────────────────────────────────────────────────
   void _zone(
     Canvas canvas, {
     required Rect rect,
-    required Color color,
+    required Color fill,
     required String label,
     required Color labelColor,
     double fontSize = 10,
   }) {
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)),
-        Paint()..color = color);
     canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(8)),
-        Paint()
-          // FIX 3: withOpacity reemplazado por withValues
-          ..color = labelColor.withValues(alpha: 0.25)
-          ..strokeWidth = 1
-          ..style = PaintingStyle.stroke);
-    _text(
-      canvas,
-      label: label,
-      center: rect.center,
-      color: labelColor,
-      size: fontSize,
-      bold: false,
-      maxW: rect.width - 8,
+      RRect.fromRectAndRadius(rect, const Radius.circular(5)),
+      Paint()..color = fill,
     );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(5)),
+      Paint()
+        ..color = _buildingBorder.withValues(alpha: 0.4)
+        ..strokeWidth = 1
+        ..style = PaintingStyle.stroke,
+    );
+    if (label.isNotEmpty) {
+      _text(
+        canvas,
+        label: label,
+        center: rect.center,
+        color: labelColor,
+        size: fontSize,
+        bold: false,
+        maxW: rect.width - 8,
+      );
+    }
   }
 
   void _text(
@@ -329,7 +348,7 @@ class CampusMapPainter extends CustomPainter {
     required Color color,
     required double size,
     required bool bold,
-    double maxW = 90,
+    double maxW = 100,
   }) {
     final tp = TextPainter(
       text: TextSpan(
@@ -347,30 +366,6 @@ class CampusMapPainter extends CustomPainter {
     tp.paint(
         canvas, Offset(center.dx - tp.width / 2, center.dy - tp.height / 2));
   }
-
-  // ── Rectángulos de edificios (coordenadas en viewBox 700×520) ────
-  Map<String, Rect> _rects() => {
-        // Fila superior
-        '2': const Rect.fromLTWH(128, 106, 262, 112),
-
-        // Edificio 4 (arriba derecha, entre calle centro y calle der)
-        '4': const Rect.fromLTWH(410, 106, 150, 112),
-
-        // Edificio de Gobierno (izq, fila media)
-        'Gob': const Rect.fromLTWH(18, 106, 90, 112),
-
-        // Edificio de Laboratorios (centro-der, fila media)
-        'Lab': const Rect.fromLTWH(410, 106, 150, 112),
-
-        // Edificio 5 (columna derecha, ocupa fila media completa)
-        '5': const Rect.fromLTWH(580, 106, 110, 248),
-
-        // Fila inferior centro-izq
-        '1': const Rect.fromLTWH(128, 242, 262, 112),
-
-        // Fila inferior centro-der
-        '3': const Rect.fromLTWH(410, 242, 150, 112),
-      };
 
   @override
   bool shouldRepaint(CampusMapPainter old) =>

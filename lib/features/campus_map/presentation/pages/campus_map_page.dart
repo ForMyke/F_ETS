@@ -7,6 +7,10 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/campus_map_painter.dart';
 import '../widgets/pulsing_pin.dart';
 
+// Tamaño fijo del canvas del mapa — coincide con el viewBox del painter
+const double _mapW = 800;
+const double _mapH = 480;
+
 class CampusMapPage extends StatefulWidget {
   final String edificioResaltado;
 
@@ -25,6 +29,9 @@ class _CampusMapPageState extends State<CampusMapPage>
   late AnimationController _fadeController;
   late String _selected;
 
+  final TransformationController _transformController =
+      TransformationController();
+
   @override
   void initState() {
     super.initState();
@@ -39,12 +46,24 @@ class _CampusMapPageState extends State<CampusMapPage>
       vsync: this,
       duration: const Duration(milliseconds: 350),
     )..forward();
+
+    // Centrar el mapa al abrir: calcular offset inicial tras el primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _centerMap());
+  }
+
+  void _centerMap() {
+    // Escala inicial para que el mapa ocupe ~90% del ancho disponible
+    final screenW = MediaQuery.of(context).size.width - 28; // padding 14*2
+    final scale = (screenW / _mapW).clamp(0.5, 1.5);
+    final matrix = Matrix4.identity()..scale(scale);
+    _transformController.value = matrix;
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
     _fadeController.dispose();
+    _transformController.dispose();
     super.dispose();
   }
 
@@ -138,13 +157,40 @@ class _CampusMapPageState extends State<CampusMapPage>
                       ],
                     ),
                   ),
+                  // Botón reset zoom
+                  GestureDetector(
+                    onTap: _centerMap,
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBgSurface
+                            : AppColors.bgSurface,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.borderLight,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.center_focus_strong_outlined,
+                        size: 18,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1),
 
             const SizedBox(height: 14),
 
-            // ── Mapa ─────────────────────────────────────────────────
+            // ── Mapa con pan/zoom ────────────────────────────────────
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -161,51 +207,48 @@ class _CampusMapPageState extends State<CampusMapPage>
                       ),
                     ),
                     child: InteractiveViewer(
-                      minScale: 0.7,
-                      maxScale: 5.0,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          return Stack(
-                            children: [
-                              // Painter
-                              SizedBox(
-                                width: constraints.maxWidth,
-                                height: constraints.maxHeight,
-                                child: GestureDetector(
-                                  onTapUp: (d) => _handleTap(
-                                      d.localPosition, constraints.biggest),
-                                  child: CustomPaint(
-                                    painter: CampusMapPainter(
-                                      isDark: isDark,
-                                      selectedEdificio: _selected,
-                                    ),
+                      transformationController: _transformController,
+                      minScale: 0.4,
+                      maxScale: 4.0,
+                      constrained:
+                          false, // ← clave: el hijo define su propio tamaño
+                      child: SizedBox(
+                        width: _mapW,
+                        height: _mapH,
+                        child: Stack(
+                          children: [
+                            // Painter
+                            Positioned.fill(
+                              child: GestureDetector(
+                                onTapUp: (d) => _handleTap(d.localPosition),
+                                child: CustomPaint(
+                                  painter: CampusMapPainter(
+                                    isDark: isDark,
+                                    selectedEdificio: _selected,
                                   ),
                                 ),
                               ),
+                            ),
 
-                              // Pines animados
-                              ...campusLocations.entries.map((e) {
-                                final isActive = _isMatch(e.key);
-                                // Escalar svgOffset al tamaño real
-                                final scaleX = constraints.maxWidth / 700;
-                                final scaleY = constraints.maxHeight / 520;
-                                final dx = e.value.svgOffset.dx * scaleX;
-                                final dy = e.value.svgOffset.dy * scaleY;
-                                return Positioned(
-                                  left: dx - 25,
-                                  top: dy - 30,
-                                  child: PulsingPin(
-                                    controller: _pulseController,
-                                    isActive: isActive,
-                                    isDark: isDark,
-                                    label: e.key,
-                                    onTap: () => _selectEdificio(e.key),
-                                  ),
-                                );
-                              }),
-                            ],
-                          );
-                        },
+                            // Pines — usan coordenadas del viewBox directamente
+                            ...campusLocations.entries.map((e) {
+                              final isActive = _isMatch(e.key);
+                              final dx = e.value.svgOffset.dx;
+                              final dy = e.value.svgOffset.dy;
+                              return Positioned(
+                                left: dx - 25,
+                                top: dy - 30,
+                                child: PulsingPin(
+                                  controller: _pulseController,
+                                  isActive: isActive,
+                                  isDark: isDark,
+                                  label: e.key,
+                                  onTap: () => _selectEdificio(e.key),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -347,21 +390,17 @@ class _CampusMapPageState extends State<CampusMapPage>
     return n != null && key == n;
   }
 
-  void _handleTap(Offset pos, Size canvasSize) {
-    final scaleX = 700 / canvasSize.width;
-    final scaleY = 520 / canvasSize.height;
-    // Convertir tap a coordenadas viewBox
-    final vx = pos.dx * scaleX;
-    final vy = pos.dy * scaleY;
-
+  void _handleTap(Offset localPos) {
+    // localPos ya está en coordenadas del SizedBox (800×480), sin escalar
     String? closest;
-    double minDist = 60.0;
+    double minDist = 60.0 * 60.0;
 
     for (final e in campusLocations.entries) {
       final ox = e.value.svgOffset.dx;
       final oy = e.value.svgOffset.dy;
-      final dist = ((vx - ox) * (vx - ox) + (vy - oy) * (vy - oy));
-      if (dist < minDist * minDist) {
+      final dist = (localPos.dx - ox) * (localPos.dx - ox) +
+          (localPos.dy - oy) * (localPos.dy - oy);
+      if (dist < minDist) {
         minDist = dist;
         closest = e.key;
       }
