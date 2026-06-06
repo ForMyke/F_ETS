@@ -35,6 +35,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
         hora: exam.hora,
         salon: exam.salon,
         edificio: exam.edificio,
+        piso: exam.piso,
         profesor: exam.profesor,
         periodoETS: exam.periodoETS,
         estado: exam.estado,

@@ -38,6 +38,7 @@ class SearchLocalDataSourceImpl implements SearchLocalDataSource {
         hora: map['hora'] as String,
         salon: map['salon'] as String,
         edificio: map['edificio'] as String,
+        piso: map['piso'] as String? ?? '',
         profesor: map['profesor'] as String,
         periodoETS: map['id_periodoETS'] as String,
         estado: map['estado'] as String,

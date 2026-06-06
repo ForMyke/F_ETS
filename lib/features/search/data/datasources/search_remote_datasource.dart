@@ -25,6 +25,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
     salon (
       id_salon,
       codigo,
+      piso,
       edificio (
         numero
       )
@@ -60,10 +61,8 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
     String? materia,
   }) async {
     try {
-      final response = await client
-          .from('ets')
-          .select(_selectQuery)
-          .eq('estado', 'activo');
+      final response =
+          await client.from('ets').select(_selectQuery).eq('estado', 'activo');
 
       final exams = response.map((json) => ExamModel.fromJson(json)).toList();
 
@@ -84,10 +83,8 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
   @override
   Future<List<String>> getCarreras() async {
     try {
-      final response = await client
-          .from('carrera')
-          .select('acronimo')
-          .eq('activo', true);
+      final response =
+          await client.from('carrera').select('acronimo').eq('activo', true);
 
       return response.map((row) => row['acronimo'] as String).toList();
     } catch (e) {

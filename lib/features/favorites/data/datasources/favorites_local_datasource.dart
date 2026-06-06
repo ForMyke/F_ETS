@@ -71,6 +71,7 @@ class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
       hora: json['hora'] as String,
       salon: json['salon'] as String,
       edificio: json['edificio'] as String,
+      piso: json['piso'] as String? ?? '',
       profesor: json['profesor'] as String,
       periodoETS: json['id_periodoETS'] as String,
       estado: json['estado'] as String,

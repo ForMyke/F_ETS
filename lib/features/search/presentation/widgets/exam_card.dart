@@ -187,6 +187,7 @@ class ExamCard extends StatelessWidget {
                               pageBuilder: (_, __, ___) => CampusMapPage(
                                 edificioResaltado: exam.edificio,
                                 salonCodigo: exam.salon,
+                                salonPiso: exam.piso,
                                 horaExamen: exam.hora,
                               ),
                               transitionsBuilder: (_, animation, __, child) =>

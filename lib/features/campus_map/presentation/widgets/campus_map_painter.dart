@@ -32,9 +32,6 @@ class CampusMapPainter extends CustomPainter {
   Color get _labelSel => Colors.white;
   Color get _mutedLabel =>
       isDark ? AppColors.darkTextMuted : const Color(0xFF777777);
-  Color get _entranceBg =>
-      isDark ? const Color(0xFF1E3A5F) : const Color(0xFF2C4A6E);
-
   // ── viewBox 800 × 480 ──────────────────────────────────────────
   static const double _vW = 800;
   static const double _vH = 480;
@@ -50,7 +47,6 @@ class CampusMapPainter extends CustomPainter {
     _drawBg(canvas);
     _drawZones(canvas);
     _drawBuildings(canvas);
-    _drawEntrance(canvas);
     canvas.restore();
   }
 
@@ -87,46 +83,6 @@ class CampusMapPainter extends CustomPainter {
         label: 'Auditorio',
         labelColor: _mutedLabel,
         fontSize: 10);
-
-    // Área de estudio (izquierda fila baja)
-    _zone(canvas,
-        rect: const Rect.fromLTWH(28, 318, 145, 105),
-        fill: _grassFill,
-        label: 'Área de\nestudio',
-        labelColor: _mutedLabel,
-        fontSize: 9);
-
-    // Área deportiva izquierda (abajo izq)
-    _zone(canvas,
-        rect: const Rect.fromLTWH(28, 380, 100, 70),
-        fill: _grassFill,
-        label: '',
-        labelColor: _mutedLabel,
-        fontSize: 9);
-
-    // Barra de café
-    _zone(canvas,
-        rect: const Rect.fromLTWH(182, 398, 72, 52),
-        fill: _coffeeFill,
-        label: 'Barra\nde Café',
-        labelColor: _mutedLabel,
-        fontSize: 8);
-
-    // Área deportiva derecha (fila media-baja derecha)
-    _zone(canvas,
-        rect: const Rect.fromLTWH(648, 318, 122, 105),
-        fill: _grassFill,
-        label: 'Área\nDeportiva',
-        labelColor: _mutedLabel,
-        fontSize: 9);
-
-    // Cafetería (abajo derecha)
-    _zone(canvas,
-        rect: const Rect.fromLTWH(648, 398, 122, 52),
-        fill: _coffeeFill,
-        label: 'Cafetería',
-        labelColor: _mutedLabel,
-        fontSize: 9);
   }
 
   // ── Edificios ────────────────────────────────────────────────────
@@ -144,7 +100,7 @@ class CampusMapPainter extends CustomPainter {
         // ── Fila media ─────────────────────────────────────────────
         'Gob': const Rect.fromLTWH(126, 152, 88, 148),
         'Lab': const Rect.fromLTWH(418, 152, 188, 148),
-        '5': const Rect.fromLTWH(618, 34, 152, 266),
+        '5': const Rect.fromLTWH(618, 152, 152, 148),
 
         // ── Fila inferior ──────────────────────────────────────────
         '1': const Rect.fromLTWH(222, 310, 168, 110),
@@ -197,21 +153,21 @@ class CampusMapPainter extends CustomPainter {
       label: _buildingLabel(key),
       center: rect.center,
       color: selected ? _labelSel : _labelColor,
-      size: (key == 'Lab' || key == 'Gob') ? 9.5 : 18.0,
+      size: (key == 'Lab' || key == 'Gob') ? 9.5 : 10.5,
       bold: true,
       maxW: rect.width - 10,
     );
   }
 
-  /// Devuelve solo el número o clave corta del edificio
+  /// Devuelve el nombre completo del edificio para mostrar en el mapa
   String _buildingLabel(String k) {
     switch (k) {
       case 'Lab':
-        return 'Lab';
+        return 'Laboratorios';
       case 'Gob':
-        return 'Gob';
+        return 'Gobierno';
       default:
-        return k; // '1', '2', '3', '4', '5'
+        return 'Edificio $k'; // 'Edificio 1', 'Edificio 2', etc.
     }
   }
 
@@ -234,26 +190,6 @@ class CampusMapPainter extends CustomPainter {
       }
       x += wW + gap;
     }
-  }
-
-  // ── Entrada / salida ─────────────────────────────────────────────
-  void _drawEntrance(Canvas canvas) {
-    const cx = 345.0, cy = 28.0;
-    final rr = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: const Offset(cx, cy), width: 46, height: 22),
-      const Radius.circular(5),
-    );
-    canvas.drawRRect(rr, Paint()..color = _entranceBg);
-
-    _text(
-      canvas,
-      label: 'E/S',
-      center: const Offset(cx, cy),
-      color: Colors.white,
-      size: 9.5,
-      bold: true,
-      maxW: 46,
-    );
   }
 
   // ── Helpers ──────────────────────────────────────────────────────

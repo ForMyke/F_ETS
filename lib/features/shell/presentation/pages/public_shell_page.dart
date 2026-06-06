@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import '../../../search/presentation/pages/search_page.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
+import '../../../campus_map/presentation/pages/campus_map_page.dart';
 
 class PublicShellPage extends StatefulWidget {
   const PublicShellPage({super.key});
@@ -29,6 +30,11 @@ class _PublicShellPageState extends State<PublicShellPage> {
       activeIcon: Icons.bookmark_rounded,
       label: 'Guardados',
     ),
+    _NavItem(
+      icon: Icons.map_outlined,
+      activeIcon: Icons.map_rounded,
+      label: 'Mapa',
+    ),
   ];
 
   void _onTap(int index) {
@@ -49,6 +55,7 @@ class _PublicShellPageState extends State<PublicShellPage> {
           final pages = [
             const SearchPage(),
             const FavoritesPage(),
+            const CampusMapPage(edificioResaltado: '1', showBackButton: false),
           ];
 
           return Scaffold(

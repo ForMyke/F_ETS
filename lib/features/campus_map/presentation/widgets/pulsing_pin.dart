@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
 
 class PulsingPin extends StatelessWidget {
   final AnimationController controller;
@@ -17,6 +16,17 @@ class PulsingPin extends StatelessWidget {
     required this.label,
     required this.onTap,
   });
+
+  String _pinLabel(String key) {
+    switch (key) {
+      case 'Lab':
+        return 'Laboratorios';
+      case 'Gob':
+        return 'Gobierno';
+      default:
+        return 'Edificio $key';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,37 +100,6 @@ class PulsingPin extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Etiqueta del número (solo inactivos para no saturar)
-                if (!isActive)
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkBgSurface
-                            : AppColors.bgPrimary,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.borderLight,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        label,
-                        style: AppTextStyles.caption.copyWith(
-                          fontSize: 7,
-                          color: isDark
-                              ? AppColors.darkTextMuted
-                              : AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             );
           },

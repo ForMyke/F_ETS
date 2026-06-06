@@ -17,14 +17,22 @@ class CampusMapPage extends StatefulWidget {
   /// Código del salón donde se aplica el examen (ej: "3CB1")
   final String? salonCodigo;
 
+  /// Planta/piso del salón (ej: "1", "2", "PB")
+  final String? salonPiso;
+
   /// Hora del examen (ej: "09:00")
   final String? horaExamen;
+
+  /// Si false, oculta el botón de volver (útil cuando se muestra en la nav shell)
+  final bool showBackButton;
 
   const CampusMapPage({
     super.key,
     required this.edificioResaltado,
     this.salonCodigo,
+    this.salonPiso,
     this.horaExamen,
+    this.showBackButton = true,
   });
 
   @override
@@ -177,33 +185,35 @@ class _CampusMapPageState extends State<CampusMapPage>
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
                   child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkBgSurface
-                                : AppColors.bgSurface,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
+                      if (widget.showBackButton) ...[
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
                               color: isDark
-                                  ? AppColors.darkBorder
-                                  : AppColors.borderLight,
-                              width: 1.5,
+                                  ? AppColors.darkBgSurface
+                                  : AppColors.bgSurface,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderLight,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
                             ),
                           ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 16,
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary,
-                          ),
                         ),
-                      ),
-                      const SizedBox(width: 14),
+                        const SizedBox(width: 14),
+                      ],
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,33 +241,6 @@ class _CampusMapPageState extends State<CampusMapPage>
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      // Botón reset zoom
-                      GestureDetector(
-                        onTap: _centerMap,
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkBgSurface
-                                : AppColors.bgSurface,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isDark
-                                  ? AppColors.darkBorder
-                                  : AppColors.borderLight,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.center_focus_strong_outlined,
-                            size: 18,
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary,
-                          ),
                         ),
                       ),
                     ],
@@ -310,7 +293,8 @@ class _CampusMapPageState extends State<CampusMapPage>
 
                                 // Pines
                                 ...campusLocations.entries.map((e) {
-                                  final isActive = _isMatch(e.key);
+                                  final isGob = e.key == 'Gob';
+                                  final isActive = !isGob && _isMatch(e.key);
                                   final dx = e.value.svgOffset.dx;
                                   final dy = e.value.svgOffset.dy;
                                   return Positioned(
@@ -321,7 +305,9 @@ class _CampusMapPageState extends State<CampusMapPage>
                                       isActive: isActive,
                                       isDark: isDark,
                                       label: e.key,
-                                      onTap: () => _selectEdificio(e.key),
+                                      onTap: isGob
+                                          ? () {}
+                                          : () => _selectEdificio(e.key),
                                     ),
                                   );
                                 }),
@@ -388,7 +374,11 @@ class _CampusMapPageState extends State<CampusMapPage>
                                 children: [
                                   // Nombre del edificio
                                   Text(
-                                    loc.nombre,
+                                    isOriginalBuilding &&
+                                            widget.salonPiso != null &&
+                                            widget.salonPiso!.isNotEmpty
+                                        ? '${loc.nombre} - Planta ${widget.salonPiso}'
+                                        : loc.nombre,
                                     style: AppTextStyles.body.copyWith(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 15,
@@ -398,11 +388,12 @@ class _CampusMapPageState extends State<CampusMapPage>
                                     ),
                                   ),
                                   const SizedBox(height: 6),
-                                  // Fila de datos: salón y hora
+                                  // Fila de datos: salón y hora (solo edificio original)
                                   Row(
                                     children: [
                                       // Salón
-                                      if (widget.salonCodigo != null) ...[
+                                      if (isOriginalBuilding &&
+                                          widget.salonCodigo != null) ...[
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 8, vertical: 3),
@@ -441,7 +432,8 @@ class _CampusMapPageState extends State<CampusMapPage>
                                         const SizedBox(width: 8),
                                       ],
                                       // Hora
-                                      if (widget.horaExamen != null)
+                                      if (isOriginalBuilding &&
+                                          widget.horaExamen != null)
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 8, vertical: 3),
@@ -487,9 +479,40 @@ class _CampusMapPageState extends State<CampusMapPage>
                                         ),
                                     ],
                                   ),
-                                  // Si no hay salón ni hora, mostrar texto de apoyo
+                                  // Rango de salones (modo exploración libre)
                                   if (widget.salonCodigo == null &&
-                                      widget.horaExamen == null)
+                                      _salonRange(_selected) != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.meeting_room_outlined,
+                                            size: 12,
+                                            color: isDark
+                                                ? AppColors.darkBlueMid
+                                                : AppColors.blueMid,
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Flexible(
+                                            child: Text(
+                                              _salonRange(_selected)!,
+                                              style: AppTextStyles.caption
+                                                  .copyWith(
+                                                fontSize: 11,
+                                                color: isDark
+                                                    ? AppColors.darkBlueMid
+                                                    : AppColors.blueMid,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  // Texto de apoyo cuando no hay info
+                                  if (!isOriginalBuilding &&
+                                      widget.salonCodigo == null &&
+                                      _salonRange(_selected) == null)
                                     Text(
                                       'Toca los pines para explorar',
                                       style: AppTextStyles.caption.copyWith(
@@ -569,6 +592,7 @@ class _CampusMapPageState extends State<CampusMapPage>
     double minDist = 60.0 * 60.0;
 
     for (final e in campusLocations.entries) {
+      if (e.key == 'Gob') continue; // Gobierno: solo representativo
       final ox = e.value.svgOffset.dx;
       final oy = e.value.svgOffset.dy;
       final dist = (localPos.dx - ox) * (localPos.dx - ox) +
@@ -580,5 +604,20 @@ class _CampusMapPageState extends State<CampusMapPage>
     }
 
     if (closest != null) _selectEdificio(closest);
+  }
+
+  String? _salonRange(String key) {
+    switch (key) {
+      case '1':
+      case '3':
+        return 'Salones 1001 – 1214';
+      case '2':
+      case '4':
+        return 'Salones 2001 – 2214';
+      case '5':
+        return 'Salones 3008 – 3214  ·  4008 – 4214';
+      default:
+        return null;
+    }
   }
 }

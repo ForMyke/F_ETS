@@ -13,6 +13,7 @@ class ExamModel extends Exam {
     required super.hora,
     required super.salon,
     required super.edificio,
+    required super.piso,
     required super.profesor,
     required super.periodoETS,
     required super.estado,
@@ -40,30 +41,32 @@ class ExamModel extends Exam {
       fechaFin: DateTime.parse(json['fechahorafin'] as String),
       turno: json['turno'] as String? ?? '',
       hora:
-      '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}',
+          '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}',
       salon: salonData['codigo'] as String? ?? salonData['id_salon'] as String,
       edificio: edificioData['numero'] as String,
+      piso: salonData['piso'] as String? ?? '',
       profesor:
-      '${usuarioData['nombre']} ${usuarioData['apellidopaterno']} ${usuarioData['apellidomaterno']}',
+          '${usuarioData['nombre']} ${usuarioData['apellidopaterno']} ${usuarioData['apellidomaterno']}',
       periodoETS: json['id_periodoets'] as String,
       estado: json['estado'] as String,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id_ets': id,
-    'materia': materia,
-    'carrera': carrera,
-    'semestre': semestre,
-    'plan': plan,
-    'fechaHoraInicio': fechaInicio.toIso8601String(),
-    'fechaHoraFin': fechaFin.toIso8601String(),
-    'turno': turno,
-    'hora': hora,
-    'salon': salon,
-    'edificio': edificio,
-    'profesor': profesor,
-    'id_periodoETS': periodoETS,
-    'estado': estado,
-  };
+        'id_ets': id,
+        'materia': materia,
+        'carrera': carrera,
+        'semestre': semestre,
+        'plan': plan,
+        'fechaHoraInicio': fechaInicio.toIso8601String(),
+        'fechaHoraFin': fechaFin.toIso8601String(),
+        'turno': turno,
+        'hora': hora,
+        'salon': salon,
+        'edificio': edificio,
+        'piso': piso,
+        'profesor': profesor,
+        'id_periodoETS': periodoETS,
+        'estado': estado,
+      };
 }
