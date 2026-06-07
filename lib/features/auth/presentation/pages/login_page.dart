@@ -13,6 +13,7 @@ import '../widgets/login_background.dart';
 import '../widgets/login_header.dart';
 import '../widgets/or_divider.dart';
 import '../widgets/social_login_button.dart';
+import 'privacy_policy_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -232,11 +233,27 @@ class _LoginPageState extends State<LoginPage> {
                             .fadeIn(delay: 260.ms, duration: 500.ms)
                             .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                         const SizedBox(height: 24),
+                        const SizedBox(height: 24),
                         Column(
                           children: [
                             const OrDivider(),
                             const SizedBox(height: 16),
                             SocialLoginButton(onTap: () {}),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Política de privacidad',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         )
                             .animate()
