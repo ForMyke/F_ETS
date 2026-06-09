@@ -35,7 +35,7 @@ dev-build: ## Construye la imagen de desarrollo
 	$(COMPOSE) --profile dev build flutter-dev
 
 dev: ## Levanta desarrollo con hot-reload
-	$(COMPOSE) --profile dev up flutter-dev
+	$(COMPOSE) --profile dev up flutter-dev -d
 
 dev-down: ## Detiene desarrollo
 	$(COMPOSE) --profile dev down

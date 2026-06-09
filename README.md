@@ -21,7 +21,7 @@ Ejecuta `make help` para ver todos los comandos disponibles:
 make help
 ```
 
-### Producción — http://localhost:8080
+### Producción — http://localhost:8081
 
 | Comando        | Descripción                                 |
 |----------------|---------------------------------------------|
@@ -40,7 +40,7 @@ make up           # Levanta en segundo plano
 make logs         # Verifica que arrancó bien
 ```
 
-### Desarrollo (hot-reload) — http://localhost:5000
+### Desarrollo (hot-reload) — http://localhost:5001
 
 | Comando         | Descripción                                        |
 |-----------------|----------------------------------------------------|

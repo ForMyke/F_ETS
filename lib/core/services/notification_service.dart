@@ -13,7 +13,7 @@ class NotificationService {
   bool _initialized = false;
 
   Future<void> init() async {
-    if (_initialized) return;
+    if (kIsWeb || _initialized) return;
 
     tz_data.initializeTimeZones();
 
@@ -32,6 +32,7 @@ class NotificationService {
   }
 
   Future<bool> requestPermission() async {
+    if (kIsWeb) return false;
     if (defaultTargetPlatform == TargetPlatform.android) {
       final android = _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
@@ -49,6 +50,7 @@ class NotificationService {
     required DateTime examDate,
     int daysBefore = 1,
   }) async {
+    if (kIsWeb) return;
     await init();
 
     final notifyDate = examDate.subtract(Duration(days: daysBefore));
@@ -91,10 +93,12 @@ class NotificationService {
   }
 
   Future<void> cancelNotification(int id) async {
+    if (kIsWeb) return;
     await _plugin.cancel(id);
   }
 
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    if (kIsWeb) return [];
     return await _plugin.pendingNotificationRequests();
   }
 
