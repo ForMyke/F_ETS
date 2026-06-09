@@ -26,3 +26,5 @@ Pods/
 run.sh
 /.metadata
 google-chrome-stable_current_amd64.deb
+#extra
+.claude/
