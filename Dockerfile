@@ -27,25 +27,15 @@ COPY . .
 RUN flutter build web --release
 
 
-FROM debian:12-slim AS prod
+FROM dart:stable-slim AS prod
 
-RUN apt-get update -q && \
-    apt-get install -y -q --no-install-recommends \
-        curl ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN curl -fsSL https://storage.googleapis.com/dart-archive/channels/stable/release/latest/linux_x64/dart-sdk.tar.gz \
-    | tar xz -C /usr/local && \
-    /usr/local/dart-sdk/bin/dart pub global activate dhttpd
-
-ENV PATH="/usr/local/dart-sdk/bin:/root/.pub-cache/bin:${PATH}"
+RUN dart pub global activate dhttpd
 
 WORKDIR /app
 COPY --from=builder /app/build/web ./build/web
 
 EXPOSE 8080
 CMD ["dhttpd", "--path", "build/web", "--host", "0.0.0.0", "--port", "8080"]
-
 
 FROM base AS dev
 
