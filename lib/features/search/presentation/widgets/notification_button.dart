@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/services/notification_service.dart';
-import '../../domain/entities/exam.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/core/services/notification_service.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 
 class NotificationButton extends StatefulWidget {
   final Exam exam;

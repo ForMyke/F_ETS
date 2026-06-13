@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../dashboard/presentation/pages/dashboard_page.dart';
-import '../../../exams/presentation/pages/exams_page.dart';
-import '../../../catalogs/presentation/pages/catalogs_page.dart';
-import '../../../jefes/presentation/pages/jefes_admin_page.dart';
+import 'package:etsAndroid/core/routes/app_routes.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:etsAndroid/features/exams/presentation/pages/exams_page.dart';
+import 'package:etsAndroid/features/catalogs/presentation/pages/catalogs_page.dart';
+import 'package:etsAndroid/features/jefes/presentation/pages/jefes_admin_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShellPage extends StatefulWidget {
@@ -64,7 +65,8 @@ class _AdminShellPageState extends State<AdminShellPage> {
           Navigator.of(ctx).pop();
           await Supabase.instance.client.auth.signOut();
           if (mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil(AppRoutes.home, (_) => false);
           }
         },
       ),

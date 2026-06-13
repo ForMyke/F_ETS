@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../search/data/models/exam_model.dart';
-import '../../data/datasources/alumno_remote_datasource.dart';
+import 'package:etsAndroid/features/search/data/models/exam_model.dart';
+import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
 
 part 'alumno_event.dart';
 part 'alumno_state.dart';

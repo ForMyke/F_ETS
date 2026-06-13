@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/datasources/exams_remote_datasource.dart';
+import 'package:etsAndroid/features/exams/data/datasources/exams_remote_datasource.dart';
 
 part 'exams_event.dart';
 part 'exams_state.dart';

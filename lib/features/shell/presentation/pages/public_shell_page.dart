@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/routes/app_routes.dart';
-import '../../../favorites/presentation/bloc/favorites_bloc.dart';
-import '../../../search/presentation/pages/search_page.dart';
-import '../../../favorites/presentation/pages/favorites_page.dart';
-import '../../../campus_map/presentation/pages/campus_map_page.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/core/routes/app_routes.dart';
+import 'package:etsAndroid/features/favorites/presentation/bloc/favorites_bloc.dart';
+import 'package:etsAndroid/features/search/presentation/pages/search_page.dart';
+import 'package:etsAndroid/features/favorites/presentation/pages/favorites_page.dart';
+import 'package:etsAndroid/features/campus_map/presentation/pages/campus_map_page.dart';
 
 class PublicShellPage extends StatefulWidget {
   const PublicShellPage({super.key});

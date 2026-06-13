@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/exam_model.dart';
+import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 abstract class SearchLocalDataSource {
   Future<void> cacheExams(List<ExamModel> exams);

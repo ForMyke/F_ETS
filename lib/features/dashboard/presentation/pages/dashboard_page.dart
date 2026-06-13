@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../data/datasources/dashboard_remote_datasource.dart';
-import '../bloc/dashboard_bloc.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
+import 'package:etsAndroid/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});

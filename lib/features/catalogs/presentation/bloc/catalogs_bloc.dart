@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/datasources/catalogs_remote_datasource.dart';
+import 'package:etsAndroid/features/catalogs/data/datasources/catalogs_remote_datasource.dart';
 
 part 'catalogs_event.dart';
 part 'catalogs_state.dart';

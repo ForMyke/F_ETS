@@ -7,10 +7,10 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/error_snackbar.dart';
 import '../../../../../core/error/failures.dart';
-import '../../../auth/presentation/widgets/labeled_text_field.dart';
-import '../../../auth/presentation/widgets/login_background.dart';
-import '../../data/datasources/jefe_remote_datasource.dart';
-import '../bloc/jefe_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
+import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource.dart';
+import 'package:etsAndroid/features/jefe/presentation/bloc/jefe_bloc.dart';
 import 'jefe_shell_page.dart';
 
 class JefeLoginPage extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/datasources/jefes_admin_datasource.dart';
+import 'package:etsAndroid/features/jefes/data/datasources/jefes_admin_datasource.dart';
 
 part 'jefes_admin_event.dart';
 part 'jefes_admin_state.dart';

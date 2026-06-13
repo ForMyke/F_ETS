@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_datasource.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/auth/domain/entities/user.dart';
+import 'package:etsAndroid/features/auth/domain/repositories/auth_repository.dart';
+import 'package:etsAndroid/features/auth/data/datasources/auth_remote_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;

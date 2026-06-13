@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/usecases/register_usecase.dart';
+import 'package:etsAndroid/features/auth/domain/entities/user.dart';
+import 'package:etsAndroid/features/auth/domain/usecases/register_usecase.dart';
 
 part 'register_event.dart';
 part 'register_state.dart';

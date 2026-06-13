@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../../data/datasources/alumno_remote_datasource.dart';
-import '../bloc/alumno_bloc.dart';
+import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
+import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 import 'alumno_exams_page.dart';
 import 'alumno_inscripciones_page.dart';
 
@@ -67,7 +68,8 @@ class _AlumnoShellPageState extends State<AlumnoShellPage> {
           Navigator.of(ctx).pop();
           await Supabase.instance.client.auth.signOut();
           if (mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil(AppRoutes.home, (_) => false);
           }
         },
       ),

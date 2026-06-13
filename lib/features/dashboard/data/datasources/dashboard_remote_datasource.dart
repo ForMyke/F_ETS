@@ -1,20 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
+import 'package:etsAndroid/features/dashboard/domain/entities/dashboard_stats.dart';
+import 'package:etsAndroid/features/dashboard/data/models/dashboard_stats_model.dart';
 
-class DashboardStats {
-  final int totalExams;
-  final String periodoNombre;
-  final Map<String, int> examsByCarrera;
-  final DateTime? proximoExamen;
-  final int salonesEnUso;
-
-  const DashboardStats({
-    required this.totalExams,
-    required this.periodoNombre,
-    required this.examsByCarrera,
-    required this.proximoExamen,
-    required this.salonesEnUso,
-  });
-}
+export 'package:etsAndroid/features/dashboard/domain/entities/dashboard_stats.dart' show DashboardStats;
 
 abstract class DashboardRemoteDataSource {
   Future<DashboardStats> getStats();
@@ -68,7 +57,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
       }
     }
 
-    return DashboardStats(
+    return DashboardStatsModel(
       totalExams: examsResponse.length,
       periodoNombre: periodoResponse['nombre'] as String,
       examsByCarrera: byCarrera,

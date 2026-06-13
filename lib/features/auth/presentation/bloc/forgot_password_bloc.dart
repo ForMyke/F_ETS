@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/forgot_password_usecase.dart';
+import 'package:etsAndroid/features/auth/domain/usecases/forgot_password_usecase.dart';
 
 part 'forgot_password_event.dart';
 part 'forgot_password_state.dart';

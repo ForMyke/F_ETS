@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/exam.dart';
-import '../../domain/usecases/export_ics_usecase.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/search/domain/usecases/export_ics_usecase.dart';
 
 class IcsExportButton extends StatefulWidget {
   final List<Exam> exams;

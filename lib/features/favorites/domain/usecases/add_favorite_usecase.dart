@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../../../search/domain/entities/exam.dart';
-import '../repositories/favorites_repository.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/usecases/usecase.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/favorites/domain/repositories/favorites_repository.dart';
 
 class AddFavoriteUseCase implements UseCase<void, AddFavoriteParams> {
   final FavoritesRepository repository;

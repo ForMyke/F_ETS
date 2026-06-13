@@ -1,63 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
+import 'package:etsAndroid/features/exams/domain/entities/exam_admin.dart';
+import 'package:etsAndroid/features/exams/data/models/exam_admin_model.dart';
 
-class ExamFormData {
-  final List<Map<String, dynamic>> carreras;
-  final List<Map<String, dynamic>> planes;
-  final List<Map<String, dynamic>> materias;
-  final List<Map<String, dynamic>> salones;
-  final List<Map<String, dynamic>> periodos;
-  final List<Map<String, dynamic>> jefes;
-
-  const ExamFormData({
-    required this.carreras,
-    required this.planes,
-    required this.materias,
-    required this.salones,
-    required this.periodos,
-    required this.jefes,
-  });
-}
-
-class ExamListItem {
-  final String id;
-  final String materia;
-  final String carrera;
-  final String salon;
-  final String salonId;
-  final String edificio;
-  final String turno;
-  final DateTime fechaInicio;
-  final DateTime fechaFin;
-  final String estado;
-  final String periodo;
-  final String profesor;
-  final String jefeId;
-  final String carreraMateriaId;
-  final String carreraId;
-  final String planId;
-  final int semestre;
-
-  const ExamListItem({
-    required this.id,
-    required this.materia,
-    required this.carrera,
-    required this.salon,
-    required this.salonId,
-    required this.edificio,
-    required this.turno,
-    required this.fechaInicio,
-    required this.fechaFin,
-    required this.estado,
-    required this.periodo,
-    required this.profesor,
-    required this.jefeId,
-    required this.carreraMateriaId,
-    required this.carreraId,
-    required this.planId,
-    required this.semestre,
-  });
-}
+export 'package:etsAndroid/features/exams/domain/entities/exam_admin.dart' show ExamListItem, ExamFormData;
 
 abstract class ExamsRemoteDataSource {
   Future<List<ExamListItem>> getExams();
@@ -89,7 +36,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
   @override
   Future<List<ExamListItem>> getExams() async {
-    final response = await client.from('ets').select('''
+    final response = await client.from(Tables.ets).select('''
       id_ets,
       fechahorainicio,
       fechahorafin,
@@ -113,33 +60,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       jefeacademia (
         usuario ( nombre, apellidopaterno, apellidomaterno )
       )
-    ''').order('fechahorainicio', ascending: true);
+    ''').order(Cols.fechaHoraInicio, ascending: true);
 
-    return response.map((e) {
-      final salon = e['salon'] as Map<String, dynamic>;
-      final cm = e['carrera_materia'] as Map<String, dynamic>;
-      final jefe = e['jefeacademia'] as Map<String, dynamic>;
-      final usuario = jefe['usuario'] as Map<String, dynamic>;
-      return ExamListItem(
-        id: e['id_ets'] as String,
-        materia: cm['materia']['nombre'] as String,
-        carrera: cm['carrera']['acronimo'] as String,
-        salon: salon['codigo'] as String,
-        salonId: e['id_salon'] as String,
-        edificio: salon['edificio']['numero'] as String,
-        turno: e['turno'] as String? ?? '',
-        fechaInicio: DateTime.parse(e['fechahorainicio'] as String),
-        fechaFin: DateTime.parse(e['fechahorafin'] as String),
-        estado: e['estado'] as String,
-        periodo: e['id_periodoets'] as String,
-        profesor: '${usuario['nombre']} ${usuario['apellidopaterno']} ${usuario['apellidomaterno']}',
-        jefeId: e['id_jefeacademia'] as String,
-        carreraMateriaId: e['id_carrera_materia'] as String,
-        carreraId: cm['id_carrera'] as String,
-        planId: cm['id_plan'] as String,
-        semestre: cm['semestre'] as int,
-      );
-    }).toList();
+    return response
+        .map((e) => ExamListItemModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -149,42 +74,42 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       String? semestre,
       ) async {
     final carrerasRes = await client
-        .from('carrera')
+        .from(Tables.carrera)
         .select('id_carrera, nombre, acronimo')
-        .eq('activo', true);
+        .eq(Cols.activo, true);
 
     List<Map<String, dynamic>> planesRes = [];
     if (carreraId != null) {
       final raw = await client
-          .from('carrera_materia')
+          .from(Tables.carreraMateria)
           .select('planestudios ( id_plan, nombre )')
-          .eq('id_carrera', carreraId);
+          .eq(Cols.idCarrera, carreraId);
       final seen = <String>{};
       for (final r in raw) {
         final p = r['planestudios'] as Map<String, dynamic>;
-        if (seen.add(p['id_plan'] as String)) planesRes.add(p);
+        if (seen.add(p[Cols.idPlan] as String)) planesRes.add(p);
       }
     }
 
     List<Map<String, dynamic>> materiasRes = [];
     if (carreraId != null && planId != null && semestre != null) {
       materiasRes = await client
-          .from('carrera_materia')
+          .from(Tables.carreraMateria)
           .select('id_carrera_materia, materia ( nombre )')
-          .eq('id_carrera', carreraId)
-          .eq('id_plan', planId)
-          .eq('semestre', int.parse(semestre));
+          .eq(Cols.idCarrera, carreraId)
+          .eq(Cols.idPlan, planId)
+          .eq(Cols.semestre, int.parse(semestre));
     }
 
     final salonesRes = await client
-        .from('salon')
+        .from(Tables.salon)
         .select('id_salon, codigo, edificio ( numero )');
 
     final periodosRes = await client
-        .from('periodoets')
+        .from(Tables.periodoEts)
         .select('id_periodoets, nombre');
 
-    final jefesRes = await client.from('jefeacademia').select('''
+    final jefesRes = await client.from(Tables.jefeAcademia).select('''
       id_jefeacademia,
       usuario ( nombre, apellidopaterno, apellidomaterno )
     ''');
@@ -208,17 +133,18 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     required DateTime fechaInicio,
     required DateTime fechaFin,
   }) async {
-    final turno = fechaInicio.hour < 14 ? 'Matutino' : 'Vespertino';
-    await client.from('ets').insert({
-      'id_ets': const Uuid().v4(),
-      'fechahorainicio': fechaInicio.toIso8601String(),
-      'fechahorafin': fechaFin.toIso8601String(),
-      'estado': 'activo',
-      'turno': turno,
-      'id_periodoets': periodoId,
-      'id_salon': salonId,
-      'id_carrera_materia': carreraeMateriaId,
-      'id_jefeacademia': jefeId,
+    final turno =
+        fechaInicio.hour < 14 ? ColValues.turnoMatutino : ColValues.turnoVespertino;
+    await client.from(Tables.ets).insert({
+      Cols.idEts: const Uuid().v4(),
+      Cols.fechaHoraInicio: fechaInicio.toIso8601String(),
+      Cols.fechaHoraFin: fechaFin.toIso8601String(),
+      Cols.estado: ColValues.estadoActivo,
+      Cols.turno: turno,
+      Cols.idPeriodoEts: periodoId,
+      Cols.idSalon: salonId,
+      Cols.idCarreraMateria: carreraeMateriaId,
+      Cols.idJefeAcademia: jefeId,
     });
   }
 
@@ -232,20 +158,21 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     required DateTime fechaInicio,
     required DateTime fechaFin,
   }) async {
-    final turno = fechaInicio.hour < 14 ? 'Matutino' : 'Vespertino';
-    await client.from('ets').update({
-      'fechahorainicio': fechaInicio.toIso8601String(),
-      'fechahorafin': fechaFin.toIso8601String(),
-      'turno': turno,
-      'id_periodoets': periodoId,
-      'id_salon': salonId,
-      'id_carrera_materia': carreraMateriaId,
-      'id_jefeacademia': jefeId,
-    }).eq('id_ets', id);
+    final turno =
+        fechaInicio.hour < 14 ? ColValues.turnoMatutino : ColValues.turnoVespertino;
+    await client.from(Tables.ets).update({
+      Cols.fechaHoraInicio: fechaInicio.toIso8601String(),
+      Cols.fechaHoraFin: fechaFin.toIso8601String(),
+      Cols.turno: turno,
+      Cols.idPeriodoEts: periodoId,
+      Cols.idSalon: salonId,
+      Cols.idCarreraMateria: carreraMateriaId,
+      Cols.idJefeAcademia: jefeId,
+    }).eq(Cols.idEts, id);
   }
 
   @override
   Future<void> deleteExam(String id) async {
-    await client.from('ets').delete().eq('id_ets', id);
+    await client.from(Tables.ets).delete().eq(Cols.idEts, id);
   }
 }

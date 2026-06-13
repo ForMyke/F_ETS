@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../data/datasources/exams_remote_datasource.dart';
-import '../bloc/exams_bloc.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/features/exams/data/datasources/exams_remote_datasource.dart';
+import 'package:etsAndroid/features/exams/presentation/bloc/exams_bloc.dart';
 import 'exam_form_page.dart';
 
 class ExamsPage extends StatelessWidget {

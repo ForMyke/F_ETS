@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/exam.dart';
-import '../../domain/usecases/get_exams_usecase.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/search/domain/usecases/get_exams_usecase.dart';
 
 part 'search_event.dart';
 part 'search_state.dart';

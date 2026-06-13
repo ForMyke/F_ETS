@@ -7,12 +7,12 @@ import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/error_snackbar.dart';
-import '../bloc/login_bloc.dart';
-import '../widgets/labeled_text_field.dart';
-import '../widgets/login_background.dart';
-import '../widgets/login_header.dart';
-import '../widgets/or_divider.dart';
-import '../widgets/social_login_button.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/login_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/login_header.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/or_divider.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/social_login_button.dart';
 import 'privacy_policy_page.dart';
 
 class LoginPage extends StatefulWidget {

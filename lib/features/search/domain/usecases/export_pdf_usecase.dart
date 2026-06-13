@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../entities/exam.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/usecases/usecase.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';

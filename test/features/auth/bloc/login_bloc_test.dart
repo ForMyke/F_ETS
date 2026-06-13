@@ -29,7 +29,7 @@ void main() {
 
     test('emits [LoginLoading, LoginSuccess] when usecase returns Right(user)',
         () async {
-      when(useCase.call(any))
+      when(useCase.call(tParams))
           .thenAnswer((_) async => const Right(tUser));
 
       final bloc = buildBloc();
@@ -50,7 +50,8 @@ void main() {
 
     test('emits [LoginLoading, LoginFailure] when usecase returns Left(failure)',
         () async {
-      when(useCase.call(any)).thenAnswer(
+      const badParams = LoginParams(email: 'a@b.com', password: 'bad');
+      when(useCase.call(badParams)).thenAnswer(
           (_) async => const Left(InvalidCredentialsFailure()));
 
       final bloc = buildBloc();
@@ -70,7 +71,7 @@ void main() {
     });
 
     test('passes provided credentials to the usecase', () async {
-      when(useCase.call(any))
+      when(useCase.call(tParams))
           .thenAnswer((_) async => const Right(tUser));
 
       final bloc = buildBloc();

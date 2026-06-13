@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../search/data/models/exam_model.dart';
+import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 // ── Modelos ──────────────────────────────────────────────────────────────────
 

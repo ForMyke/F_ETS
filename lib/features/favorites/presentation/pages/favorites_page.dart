@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/error_snackbar.dart';
-import '../../../search/presentation/widgets/exam_card.dart';
-import '../../../search/presentation/widgets/pdf_export_button.dart';
-import '../../../search/presentation/widgets/ics_export_button.dart';
-import '../bloc/favorites_bloc.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/core/widgets/error_snackbar.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/exam_card.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/pdf_export_button.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/ics_export_button.dart';
+import 'package:etsAndroid/features/favorites/presentation/bloc/favorites_bloc.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});

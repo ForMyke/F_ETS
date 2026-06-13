@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../search/data/models/exam_model.dart';
-import '../../../search/domain/entities/exam.dart';
-import '../../domain/repositories/favorites_repository.dart';
-import '../datasources/favorites_local_datasource.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/search/data/models/exam_model.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/favorites/domain/repositories/favorites_repository.dart';
+import 'package:etsAndroid/features/favorites/data/datasources/favorites_local_datasource.dart';
 
 class FavoritesRepositoryImpl implements FavoritesRepository {
   final FavoritesLocalDataSource localDataSource;

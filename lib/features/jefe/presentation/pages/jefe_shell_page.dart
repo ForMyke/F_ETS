@@ -6,8 +6,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../../data/datasources/jefe_remote_datasource.dart';
-import '../bloc/jefe_bloc.dart';
+import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource.dart';
+import 'package:etsAndroid/features/jefe/presentation/bloc/jefe_bloc.dart';
+
+// Estado / resultado string constants (match DB values)
+const String _kEstadoAprobado = 'aprobado';
+const String _kEstadoReprobado = 'reprobado';
+
+// Snackbar message constants
+const String _kMsgCalificacionGuardada = 'Calificación guardada correctamente.';
+const String _kMsgCalificacionInvalida = 'Ingresa un valor entre 0 y 10.';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHELL
@@ -550,7 +558,7 @@ class _JefeAlumnosPageState extends State<JefeAlumnosPage> {
                   if (val == null || val < 0 || val > 10) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('Ingresa un valor entre 0 y 10.'),
+                        content: const Text(_kMsgCalificacionInvalida),
                         backgroundColor: AppColors.error,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -683,7 +691,7 @@ class _JefeAlumnosPageState extends State<JefeAlumnosPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content:
-                            const Text('Calificación guardada correctamente.'),
+                            const Text(_kMsgCalificacionGuardada),
                         backgroundColor: AppColors.success,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -756,7 +764,7 @@ class _JefeAlumnosPageState extends State<JefeAlumnosPage> {
                       ),
                       if (loading)
                         Container(
-                          color: Colors.black.withOpacity(0.15),
+                          color: AppColors.loadingOverlay,
                           child: Center(
                             child: CircularProgressIndicator(
                               color: isDark
@@ -797,12 +805,12 @@ class _AlumnoCalificacionCard extends StatelessWidget {
 
   Color _resultadoColor(String? resultado) {
     switch (resultado) {
-      case 'aprobado':
+      case _kEstadoAprobado:
         return AppColors.success;
-      case 'reprobado':
+      case _kEstadoReprobado:
         return AppColors.error;
       default:
-        return const Color(0xFFF59E0B);
+        return AppColors.warning;
     }
   }
 

@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../entities/exam.dart';
-import '../repositories/search_repository.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/usecases/usecase.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/search/domain/repositories/search_repository.dart';
 
 class GetExamsUseCase implements UseCase<List<Exam>, GetExamsParams> {
   final SearchRepository repository;

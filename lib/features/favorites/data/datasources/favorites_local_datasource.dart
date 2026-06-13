@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../search/data/models/exam_model.dart';
+import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 abstract class FavoritesLocalDataSource {
   Future<List<ExamModel>> getFavorites();

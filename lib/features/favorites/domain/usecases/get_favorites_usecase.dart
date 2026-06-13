@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../../../search/domain/entities/exam.dart';
-import '../repositories/favorites_repository.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/usecases/usecase.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/favorites/domain/repositories/favorites_repository.dart';
 
 class GetFavoritesUseCase implements UseCase<List<Exam>, NoParams> {
   final FavoritesRepository repository;

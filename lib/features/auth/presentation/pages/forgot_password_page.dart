@@ -4,9 +4,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../bloc/forgot_password_bloc.dart';
-import '../widgets/labeled_text_field.dart';
-import '../widgets/login_background.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});

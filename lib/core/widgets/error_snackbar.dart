@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import '../error/failures.dart';
-import '../error/network_error_handler.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/error/network_error_handler.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
 
 class ErrorSnackbar {
   ErrorSnackbar._();
+
+  static const Duration _durationWithRetry = Duration(seconds: 5);
+  static const Duration _durationDefault = Duration(seconds: 3);
+  static const Duration _durationSuccess = Duration(seconds: 2);
+  static const String _labelRetry = 'Reintentar';
 
   static void show(
     BuildContext context, {
@@ -18,11 +23,11 @@ class ErrorSnackbar {
     final (icon, color) = switch (type) {
       NetworkErrorType.noConnection => (
           Icons.wifi_off_rounded,
-          const Color(0xFFF59E0B),
+          AppColors.warning,
         ),
       NetworkErrorType.timeout => (
           Icons.timer_off_outlined,
-          const Color(0xFFF59E0B),
+          AppColors.warning,
         ),
       NetworkErrorType.auth => (
           Icons.lock_outline_rounded,
@@ -50,13 +55,13 @@ class ErrorSnackbar {
         elevation: 0,
         margin: EdgeInsets.zero,
         padding: EdgeInsets.zero,
-        duration: Duration(seconds: onRetry != null ? 5 : 3),
+        duration: onRetry != null ? _durationWithRetry : _durationDefault,
         content: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A2433),
+              color: AppColors.darkSnackbarBg,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: color.withOpacity(0.3),
@@ -80,7 +85,7 @@ class ErrorSnackbar {
                   child: Text(
                     message,
                     style: AppTextStyles.caption.copyWith(
-                      color: const Color(0xFFE8F0FE),
+                      color: AppColors.darkTextPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                     ),
@@ -107,7 +112,7 @@ class ErrorSnackbar {
                         ),
                       ),
                       child: Text(
-                        'Reintentar',
+                        _labelRetry,
                         style: AppTextStyles.caption.copyWith(
                           color: color,
                           fontWeight: FontWeight.w500,
@@ -134,13 +139,13 @@ class ErrorSnackbar {
         elevation: 0,
         margin: EdgeInsets.zero,
         padding: EdgeInsets.zero,
-        duration: const Duration(seconds: 2),
+        duration: _durationSuccess,
         content: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A2433),
+              color: AppColors.darkSnackbarBg,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: AppColors.success.withOpacity(0.3),
@@ -167,7 +172,7 @@ class ErrorSnackbar {
                   child: Text(
                     message,
                     style: AppTextStyles.caption.copyWith(
-                      color: const Color(0xFFE8F0FE),
+                      color: AppColors.darkTextPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                     ),

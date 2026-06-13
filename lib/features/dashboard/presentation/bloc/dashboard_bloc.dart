@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/datasources/dashboard_remote_datasource.dart';
+import 'package:etsAndroid/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
 part 'dashboard_event.dart';
 part 'dashboard_state.dart';
 

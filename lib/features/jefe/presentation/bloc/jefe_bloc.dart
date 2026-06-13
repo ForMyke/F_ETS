@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/datasources/jefe_remote_datasource.dart';
+import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource.dart';
 
 part 'jefe_event.dart';
 part 'jefe_state.dart';

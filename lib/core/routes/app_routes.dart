@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../features/auth/data/datasources/auth_remote_datasource.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
-import '../../features/auth/domain/usecases/login_usecase.dart';
-import '../../features/auth/domain/usecases/reset_password_usecase.dart';
-import '../../features/auth/presentation/bloc/forgot_password_bloc.dart';
-import '../../features/auth/presentation/bloc/login_bloc.dart';
-import '../../features/auth/presentation/bloc/reset_password_bloc.dart';
-import '../../features/auth/presentation/pages/forgot_password_page.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/reset_password_page.dart';
-import '../../features/shell/presentation/pages/public_shell_page.dart';
-import '../../features/shell/presentation/pages/admin_shell_page.dart';
-import '../../features/alumno/presentation/pages/alumno_login_page.dart';
-import '../../features/jefe/presentation/pages/jefe_login_page.dart';
+import 'package:etsAndroid/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:etsAndroid/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:etsAndroid/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:etsAndroid/features/auth/domain/usecases/login_usecase.dart';
+import 'package:etsAndroid/features/auth/domain/usecases/reset_password_usecase.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/login_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/reset_password_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:etsAndroid/features/auth/presentation/pages/login_page.dart';
+import 'package:etsAndroid/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:etsAndroid/features/shell/presentation/pages/public_shell_page.dart';
+import 'package:etsAndroid/features/shell/presentation/pages/admin_shell_page.dart';
+import 'package:etsAndroid/features/alumno/presentation/pages/alumno_login_page.dart';
+import 'package:etsAndroid/features/jefe/presentation/pages/jefe_login_page.dart';
 
 class AppRoutes {
   AppRoutes._();

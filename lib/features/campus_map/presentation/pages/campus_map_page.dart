@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/data/campus_locations.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../widgets/campus_map_painter.dart';
-import '../widgets/pulsing_pin.dart';
+import 'package:etsAndroid/core/data/campus_locations.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/features/campus_map/presentation/widgets/campus_map_painter.dart';
+import 'package:etsAndroid/features/campus_map/presentation/widgets/pulsing_pin.dart';
 
 // Tamaño fijo del canvas del mapa — coincide con el viewBox del painter
 const double _mapW = 800;

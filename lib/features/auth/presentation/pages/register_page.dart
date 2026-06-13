@@ -4,13 +4,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../bloc/register_bloc.dart';
-import '../widgets/labeled_text_field.dart';
-import '../widgets/login_background.dart';
-import '../widgets/or_divider.dart';
-import '../widgets/password_strength_bar.dart';
-import '../widgets/register_header.dart';
-import '../widgets/social_login_button.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/register_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/or_divider.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/password_strength_bar.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/register_header.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/social_login_button.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

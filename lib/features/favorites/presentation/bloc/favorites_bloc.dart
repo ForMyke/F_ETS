@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../../../search/domain/entities/exam.dart';
-import '../../data/datasources/favorites_local_datasource.dart';
-import '../../data/repositories/favorites_repository_impl.dart';
-import '../../domain/usecases/add_favorite_usecase.dart';
-import '../../domain/usecases/get_favorites_usecase.dart';
-import '../../domain/usecases/remove_favorite_usecase.dart';
+import 'package:etsAndroid/core/usecases/usecase.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/favorites/data/datasources/favorites_local_datasource.dart';
+import 'package:etsAndroid/features/favorites/data/repositories/favorites_repository_impl.dart';
+import 'package:etsAndroid/features/favorites/domain/usecases/add_favorite_usecase.dart';
+import 'package:etsAndroid/features/favorites/domain/usecases/get_favorites_usecase.dart';
+import 'package:etsAndroid/features/favorites/domain/usecases/remove_favorite_usecase.dart';
 
 part 'favorites_event.dart';
 part 'favorites_state.dart';

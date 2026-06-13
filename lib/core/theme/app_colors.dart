@@ -41,4 +41,9 @@ class AppColors {
   // Semantic
   static const Color error = Color(0xFFE24B4A);
   static const Color success = Color(0xFF1D9E75);
+  static const Color warning = Color(0xFFF59E0B);
+
+  // Overlays
+  static const Color darkSnackbarBg = Color(0xFF1A2433);
+  static const Color loadingOverlay = Color(0x26000000);
 }

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/exam.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 
 abstract class SearchRepository {
   Future<Either<Failure, List<Exam>>> getExams({

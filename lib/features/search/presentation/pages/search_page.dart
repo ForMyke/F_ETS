@@ -4,20 +4,20 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/error_snackbar.dart';
-import '../../data/datasources/search_local_datasource.dart';
-import '../../data/datasources/search_remote_datasource.dart';
-import '../../data/repositories/search_repository_impl.dart';
-import '../../domain/usecases/get_exams_usecase.dart';
-import '../bloc/search_bloc.dart';
-import '../widgets/exam_card.dart';
-import '../widgets/filter_sheet.dart';
-import '../widgets/ics_export_button.dart';
-import '../widgets/pdf_export_button.dart';
-import '../../../favorites/presentation/bloc/favorites_bloc.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/theme/app_colors.dart';
+import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/core/widgets/error_snackbar.dart';
+import 'package:etsAndroid/features/search/data/datasources/search_local_datasource.dart';
+import 'package:etsAndroid/features/search/data/datasources/search_remote_datasource.dart';
+import 'package:etsAndroid/features/search/data/repositories/search_repository_impl.dart';
+import 'package:etsAndroid/features/search/domain/usecases/get_exams_usecase.dart';
+import 'package:etsAndroid/features/search/presentation/bloc/search_bloc.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/exam_card.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/filter_sheet.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/ics_export_button.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/pdf_export_button.dart';
+import 'package:etsAndroid/features/favorites/presentation/bloc/favorites_bloc.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -195,22 +195,22 @@ class _SearchViewState extends State<_SearchView> {
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF59E0B).withOpacity(0.1),
+                            color: AppColors.warning.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFF59E0B).withOpacity(0.3),
+                              color: AppColors.warning.withOpacity(0.3),
                               width: 1.5,
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.wifi_off_rounded, size: 16, color: Color(0xFFF59E0B)),
+                              const Icon(Icons.wifi_off_rounded, size: 16, color: AppColors.warning),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   'Sin conexión. Mostrando datos guardados.',
                                   style: AppTextStyles.caption.copyWith(
-                                    color: const Color(0xFFF59E0B),
+                                    color: AppColors.warning,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

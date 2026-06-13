@@ -30,7 +30,7 @@ class PasswordStrengthBar extends StatelessWidget {
 
     final (color, label, segments) = switch (strength) {
       PasswordStrength.weak => (AppColors.error, 'Débil', 1),
-      PasswordStrength.fair => (const Color(0xFFF59E0B), 'Regular', 2),
+      PasswordStrength.fair => (AppColors.warning, 'Regular', 2),
       PasswordStrength.strong => (AppColors.success, 'Fuerte', 3),
       _ => (AppColors.error, '', 0),
     };

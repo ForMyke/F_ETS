@@ -1,4 +1,4 @@
-import '../../domain/entities/exam.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 
 class ExamModel extends Exam {
   const ExamModel({

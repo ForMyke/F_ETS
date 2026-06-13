@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/error/network_error_handler.dart';
-import '../../domain/entities/exam.dart';
-import '../../domain/repositories/search_repository.dart';
-import '../datasources/search_local_datasource.dart';
-import '../datasources/search_remote_datasource.dart';
-import '../models/exam_model.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/error/network_error_handler.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
+import 'package:etsAndroid/features/search/domain/repositories/search_repository.dart';
+import 'package:etsAndroid/features/search/data/datasources/search_local_datasource.dart';
+import 'package:etsAndroid/features/search/data/datasources/search_remote_datasource.dart';
+import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 class SearchRepositoryImpl implements SearchRepository {
   final SearchRemoteDataSource remoteDataSource;

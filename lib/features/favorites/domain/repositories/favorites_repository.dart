@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../search/domain/entities/exam.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 
 abstract class FavoritesRepository {
   Future<Either<Failure, List<Exam>>> getFavorites();

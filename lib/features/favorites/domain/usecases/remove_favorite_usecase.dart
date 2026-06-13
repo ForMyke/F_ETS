@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../repositories/favorites_repository.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/core/usecases/usecase.dart';
+import 'package:etsAndroid/features/favorites/domain/repositories/favorites_repository.dart';
 
 class RemoveFavoriteUseCase implements UseCase<void, RemoveFavoriteParams> {
   final FavoritesRepository repository;

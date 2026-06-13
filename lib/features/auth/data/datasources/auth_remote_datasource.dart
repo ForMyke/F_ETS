@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/error/failures.dart';
-import '../models/user_model.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/auth/data/models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login({required String email, required String password});

@@ -3,8 +3,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../../data/datasources/alumno_remote_datasource.dart';
-import '../bloc/alumno_bloc.dart';
+import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
+import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
+
+// Estado string constants (match DB values)
+const String _kEstadoAprobado = 'aprobado';
+const String _kEstadoReprobado = 'reprobado';
+const String _kEstadoCalificado = 'calificado';
 
 class AlumnoInscripcionesPage extends StatefulWidget {
   final AlumnoProfile perfil;
@@ -182,7 +187,7 @@ class _InscripcionCard extends StatelessWidget {
       case 'reprobado':
         return AppColors.error;
       default:
-        return const Color(0xFFF59E0B);
+        return AppColors.warning;
     }
   }
 

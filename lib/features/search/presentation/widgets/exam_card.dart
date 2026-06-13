@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/theme/app_text_styles.dart';
-import '../../domain/entities/exam.dart';
+import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 import 'notification_button.dart';
 import '../../../../../features/campus_map/presentation/pages/campus_map_page.dart';
 

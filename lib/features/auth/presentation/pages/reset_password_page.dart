@@ -5,10 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../bloc/reset_password_bloc.dart';
-import '../widgets/labeled_text_field.dart';
-import '../widgets/login_background.dart';
-import '../widgets/password_strength_bar.dart';
+import 'package:etsAndroid/features/auth/presentation/bloc/reset_password_bloc.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
+import 'package:etsAndroid/features/auth/presentation/widgets/password_strength_bar.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
