@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
 import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 // ── Modelos ──────────────────────────────────────────────────────────────────

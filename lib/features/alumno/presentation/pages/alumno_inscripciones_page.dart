@@ -182,9 +182,9 @@ class _InscripcionCard extends StatelessWidget {
 
   Color _estadoColor(String estado) {
     switch (estado) {
-      case 'aprobado':
+      case _kEstadoAprobado:
         return AppColors.success;
-      case 'reprobado':
+      case _kEstadoReprobado:
         return AppColors.error;
       default:
         return AppColors.warning;
@@ -193,11 +193,11 @@ class _InscripcionCard extends StatelessWidget {
 
   String _estadoLabel(String estado) {
     switch (estado) {
-      case 'aprobado':
+      case _kEstadoAprobado:
         return 'Aprobado';
-      case 'reprobado':
+      case _kEstadoReprobado:
         return 'Reprobado';
-      case 'calificado':
+      case _kEstadoCalificado:
         return 'Calificado';
       default:
         return 'Pendiente';

@@ -17,7 +17,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   @override
   Future<DashboardStats> getStats() async {
     final examsResponse = await client
-        .from('ets')
+        .from(Tables.ets)
         .select('''
           id_ets,
           fechahorainicio,
@@ -29,12 +29,12 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
             )
           )
         ''')
-        .eq('estado', 'activo');
+        .eq(Cols.estado, ColValues.estadoActivo);
 
     final periodoResponse = await client
-        .from('periodoets')
-        .select('nombre')
-        .eq('estado', 'activo')
+        .from(Tables.periodoEts)
+        .select(Cols.nombre)
+        .eq(Cols.estado, ColValues.estadoActivo)
         .limit(1)
         .single();
 
