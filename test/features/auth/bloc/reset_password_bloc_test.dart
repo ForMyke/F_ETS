@@ -5,7 +5,18 @@ import 'package:etsAndroid/features/auth/presentation/bloc/reset_password_bloc.d
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockResetPasswordUseCase extends Mock implements ResetPasswordUseCase {}
+// ResetPasswordUseCase.call() returns Future<Either<Failure, void>>.
+// Provide an explicit noSuchMethod override so Mockito has a valid default.
+class MockResetPasswordUseCase extends Mock implements ResetPasswordUseCase {
+  @override
+  Future<Either<Failure, void>> call(ResetPasswordParams params) =>
+      super.noSuchMethod(
+        Invocation.method(#call, [params]),
+        returnValue: Future<Either<Failure, void>>.value(
+          Left<Failure, void>(const ServerFailure()),
+        ),
+      ) as Future<Either<Failure, void>>;
+}
 
 void main() {
   late MockResetPasswordUseCase useCase;
@@ -29,8 +40,9 @@ void main() {
     test(
         'emits [ResetPasswordLoading, ResetPasswordSuccess] when use case succeeds',
         () async {
-      when(useCase.call(tParams))
-          .thenAnswer((_) async => const Right(null));
+      when(useCase.call(tParams)).thenAnswer(
+        (_) async => Right<Failure, void>(null),
+      );
 
       final bloc = buildBloc();
 
@@ -50,8 +62,9 @@ void main() {
     test(
         'emits [ResetPasswordLoading, ResetPasswordFailure] when use case fails',
         () async {
-      when(useCase.call(tParams))
-          .thenAnswer((_) async => const Left(ServerFailure()));
+      when(useCase.call(tParams)).thenAnswer(
+        (_) async => Left<Failure, void>(const ServerFailure()),
+      );
 
       final bloc = buildBloc();
 
@@ -107,11 +120,12 @@ void main() {
     });
 
     test('preserves visibility flags in loading state', () async {
-      when(useCase.call(tParams))
-          .thenAnswer((_) async => const Right(null));
+      when(useCase.call(tParams)).thenAnswer(
+        (_) async => Right<Failure, void>(null),
+      );
 
       final bloc = buildBloc();
-      // First toggle password visible
+      // Toggle password visible first
       bloc.add(const ResetPasswordVisibilityToggled());
       await bloc.stream.firstWhere((s) => s is ResetPasswordInitial);
 

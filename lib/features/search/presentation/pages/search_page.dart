@@ -47,9 +47,12 @@ class _SearchView extends StatefulWidget {
   State<_SearchView> createState() => _SearchViewState();
 }
 
+const List<String> _kCarreras = ['ISC', 'LCD', 'IIA'];
+const String _kSupportMailto =
+    'mailto:soporte@escom.ipn.mx?subject=Ayuda%20con%20mi%20ETS';
+
 class _SearchViewState extends State<_SearchView> {
   final _searchController = TextEditingController();
-  final List<String> _carreras = ['ISC', 'LCD', 'IIA'];
 
   @override
   void dispose() {
