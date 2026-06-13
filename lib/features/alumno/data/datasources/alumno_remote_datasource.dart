@@ -1,60 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:etsAndroid/core/constants/api_endpoints.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
+import 'package:etsAndroid/features/alumno/data/models/alumno_profile_model.dart';
+import 'package:etsAndroid/features/alumno/data/models/inscripcion_model.dart';
 import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
-// ── Modelos ──────────────────────────────────────────────────────────────────
-
-class AlumnoProfile {
-  final String idAlumno;
-  final String boleta;
-  final String idCarrera;
-  final String idPlan;
-  final String nombre;
-  final String apellidoPaterno;
-  final String apellidoMaterno;
-  final String correo;
-
-  const AlumnoProfile({
-    required this.idAlumno,
-    required this.boleta,
-    required this.idCarrera,
-    required this.idPlan,
-    required this.nombre,
-    required this.apellidoPaterno,
-    required this.apellidoMaterno,
-    required this.correo,
-  });
-}
-
-class InscripcionItem {
-  final String idInscripcion;
-  final String idEts;
-  final String materia;
-  final String carrera;
-  final String salon;
-  final String edificio;
-  final DateTime fechaInicio;
-  final String hora;
-  final String turno;
-  final String estado;
-  final double? calificacion;
-  final String? resultado;
-
-  const InscripcionItem({
-    required this.idInscripcion,
-    required this.idEts,
-    required this.materia,
-    required this.carrera,
-    required this.salon,
-    required this.edificio,
-    required this.fechaInicio,
-    required this.hora,
-    required this.turno,
-    required this.estado,
-    this.calificacion,
-    this.resultado,
-  });
-}
+export 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
+export 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
 
 // ── Contrato ─────────────────────────────────────────────────────────────────
 
@@ -152,7 +105,6 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
     required String idCarrera,
     required String idPlan,
   }) async {
-    // 1. Crear cuenta en Supabase Auth
     final authRes = await client.auth.signUp(
       email: correo,
       password: password,
@@ -165,7 +117,6 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
     final uid = user.id;
 
-    // 2. Insertar en tabla usuario
     await client.from(Tables.usuario).insert({
       Cols.idUsuario: uid,
       Cols.correo: correo,
@@ -176,7 +127,6 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
       Cols.apellidoMaterno: apellidoMaterno,
     });
 
-    // 3. Insertar en tabla alumno
     await client.from(Tables.alumno).insert({
       Cols.idAlumnoCol: uid,
       Cols.boleta: boleta,
@@ -201,7 +151,6 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
     final uid = user.id;
 
-    // Verificar que sea alumno
     final alumnoRes = await client
         .from(Tables.alumno)
         .select(
@@ -214,18 +163,7 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
       throw Exception('Esta cuenta no corresponde a un alumno registrado.');
     }
 
-    final u = alumnoRes['usuario'] as Map<String, dynamic>;
-
-    return AlumnoProfile(
-      idAlumno: alumnoRes['id_alumno'] as String,
-      boleta: alumnoRes['boleta'] as String,
-      idCarrera: alumnoRes['id_carrera'] as String,
-      idPlan: alumnoRes['id_plan'] as String,
-      nombre: u['nombre'] as String,
-      apellidoPaterno: u['apellidopaterno'] as String,
-      apellidoMaterno: u['apellidomaterno'] as String,
-      correo: u['correo'] as String,
-    );
+    return AlumnoProfileModel.fromJson(alumnoRes as Map<String, dynamic>);
   }
 
   @override
@@ -247,33 +185,25 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
     if (alumnoRes == null) return null;
 
-    final u = alumnoRes['usuario'] as Map<String, dynamic>;
-
-    return AlumnoProfile(
-      idAlumno: alumnoRes['id_alumno'] as String,
-      boleta: alumnoRes['boleta'] as String,
-      idCarrera: alumnoRes['id_carrera'] as String,
-      idPlan: alumnoRes['id_plan'] as String,
-      nombre: u['nombre'] as String,
-      apellidoPaterno: u['apellidopaterno'] as String,
-      apellidoMaterno: u['apellidomaterno'] as String,
-      correo: u['correo'] as String,
-    );
+    return AlumnoProfileModel.fromJson(alumnoRes as Map<String, dynamic>);
   }
 
   @override
   Future<List<ExamModel>> getExamsDisponibles(
       {required String idCarrera}) async {
-    final res =
-        await client.from(Tables.ets).select(_selectExams).eq(Cols.estado, ColValues.estadoActivo);
+    final res = await client
+        .from(Tables.ets)
+        .select(_selectExams)
+        .eq(Cols.estado, ColValues.estadoActivo);
 
-    // Filtrar en memoria: solo ETS donde id_carrera coincide con la del alumno
     final filtrados = (res as List).where((json) {
       final cm = json['carrera_materia'] as Map<String, dynamic>;
       return cm['id_carrera'] == idCarrera;
     }).toList();
 
-    return filtrados.map((json) => ExamModel.fromJson(json)).toList();
+    return filtrados
+        .map((json) => ExamModel.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -295,14 +225,14 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
     required String idAlumno,
     required String idEts,
   }) async {
-    // Generar ID simple con timestamp
     final id = 'INS${DateTime.now().millisecondsSinceEpoch}';
     await client.from(Tables.inscripcionEts).insert({
       Cols.idInscripcionEts: id,
       Cols.idEts: idEts,
       Cols.idAlumno: idAlumno,
       Cols.estado: ColValues.estadoPendiente,
-      Cols.fechaInscripcion: DateTime.now().toIso8601String().substring(0, 10),
+      Cols.fechaInscripcion:
+          DateTime.now().toIso8601String().substring(0, 10),
       Cols.calificacion: null,
       Cols.resultado: null,
     });
@@ -331,28 +261,9 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
         .eq(Cols.idAlumno, idAlumno)
         .order(Cols.idInscripcionEts, ascending: false);
 
-    return res.map((e) {
-      final ets = e['ets'] as Map<String, dynamic>;
-      final salon = ets['salon'] as Map<String, dynamic>;
-      final cm = ets['carrera_materia'] as Map<String, dynamic>;
-      final fechaInicio = DateTime.parse(ets['fechahorainicio'] as String);
-
-      return InscripcionItem(
-        idInscripcion: e['id_inscripcionets'] as String,
-        idEts: e['id_ets'] as String,
-        materia: cm['materia']['nombre'] as String,
-        carrera: cm['carrera']['acronimo'] as String,
-        salon: salon['codigo'] as String,
-        edificio: salon['edificio']['numero'] as String,
-        fechaInicio: fechaInicio,
-        hora:
-            '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}',
-        turno: ets['turno'] as String? ?? '',
-        estado: e['estado'] as String,
-        calificacion: (e['calificacion'] as num?)?.toDouble(),
-        resultado: e['resultado'] as String?,
-      );
-    }).toList();
+    return res
+        .map((e) => InscripcionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -366,7 +277,8 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
   @override
   Future<List<Map<String, dynamic>>> getPlanes() async {
-    final res = await client.from(Tables.planEstudios).select('id_plan, nombre');
+    final res =
+        await client.from(Tables.planEstudios).select('id_plan, nombre');
     return List<Map<String, dynamic>>.from(res);
   }
 }

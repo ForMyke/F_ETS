@@ -1,39 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:etsAndroid/core/constants/api_endpoints.dart';
+import 'package:etsAndroid/features/jefes/domain/entities/jefe_admin_item.dart';
+import 'package:etsAndroid/features/jefes/domain/entities/academia_item.dart';
+import 'package:etsAndroid/features/jefes/data/models/jefe_admin_model.dart';
+import 'package:etsAndroid/features/jefes/data/models/academia_model.dart';
 
-class JefeAdminItem {
-  final String idJefe;
-  final String nombre;
-  final String apellidoPaterno;
-  final String apellidoMaterno;
-  final String correo;
-  final String? idAcademia;
-  final String? nombreAcademia;
-
-  const JefeAdminItem({
-    required this.idJefe,
-    required this.nombre,
-    required this.apellidoPaterno,
-    required this.apellidoMaterno,
-    required this.correo,
-    this.idAcademia,
-    this.nombreAcademia,
-  });
-
-  String get nombreCompleto => '$nombre $apellidoPaterno $apellidoMaterno';
-}
-
-class AcademiaItem {
-  final String idAcademia;
-  final String nombre;
-  final String acronimo;
-
-  const AcademiaItem({
-    required this.idAcademia,
-    required this.nombre,
-    required this.acronimo,
-  });
-}
+export 'package:etsAndroid/features/jefes/domain/entities/jefe_admin_item.dart';
+export 'package:etsAndroid/features/jefes/domain/entities/academia_item.dart';
 
 abstract class JefesAdminDataSource {
   Future<List<JefeAdminItem>> getJefes();
@@ -61,27 +34,20 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
       usuario ( nombre, apellidopaterno, apellidomaterno, correo )
     ''');
 
-    // También obtenemos las academias para saber a cuál pertenece cada jefe
     final academias = await client
         .from(Tables.academia)
         .select('id_academia, nombre, id_jefeacademia');
 
     return (res as List).map((e) {
-      final u = e['usuario'] as Map<String, dynamic>;
       final idJefe = e['id_jefeacademia'] as String;
 
-      // Buscar academia del jefe
       final academiaList = (academias as List)
           .where((a) => a['id_jefeacademia'] == idJefe)
           .toList();
       final academia = academiaList.isNotEmpty ? academiaList.first : null;
 
-      return JefeAdminItem(
-        idJefe: idJefe,
-        nombre: u['nombre'] as String,
-        apellidoPaterno: u['apellidopaterno'] as String,
-        apellidoMaterno: u['apellidomaterno'] as String,
-        correo: u['correo'] as String,
+      return JefeAdminModel.fromJson(
+        e as Map<String, dynamic>,
         idAcademia: academia?['id_academia'] as String?,
         nombreAcademia: academia?['nombre'] as String?,
       );
@@ -90,14 +56,11 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
 
   @override
   Future<List<AcademiaItem>> getAcademias() async {
-    final res =
-        await client.from(Tables.academia).select('id_academia, nombre, acronimo');
+    final res = await client
+        .from(Tables.academia)
+        .select('id_academia, nombre, acronimo');
     return (res as List)
-        .map((e) => AcademiaItem(
-              idAcademia: e['id_academia'] as String,
-              nombre: e['nombre'] as String,
-              acronimo: e['acronimo'] as String,
-            ))
+        .map((e) => AcademiaModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
@@ -110,14 +73,12 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
     required String password,
     required String idAcademia,
   }) async {
-    // Guardar credenciales del admin actual antes de crear el nuevo usuario
     final adminSession = client.auth.currentSession;
     final adminEmail = client.auth.currentUser?.email;
     if (adminSession == null || adminEmail == null) {
       throw Exception('No hay sesión de admin activa.');
     }
 
-    // 1. Crear cuenta del jefe con signUp (cierra sesión del admin temporalmente)
     final authRes = await client.auth.signUp(
       email: correo,
       password: password,
@@ -126,7 +87,6 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
     final uid = authRes.user?.id;
     if (uid == null) throw Exception('No se pudo crear la cuenta.');
 
-    // 2. Insertar datos del jefe con el token del nuevo usuario (aún activo)
     await client.from(Tables.usuario).insert({
       Cols.idUsuario: uid,
       Cols.correo: correo,
@@ -146,23 +106,17 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
         .from(Tables.academia)
         .update({Cols.idJefeAcademiaCol: uid}).eq(Cols.idAcademiaCol, idAcademia);
 
-    // 3. Restaurar sesión del admin con su token de refresco
     await client.auth.setSession(adminSession.refreshToken!);
   }
 
   @override
   Future<void> deleteJefe(String idJefe) async {
-    // Desasignar de academia
     await client
         .from(Tables.academia)
         .update({Cols.idJefeAcademiaCol: null}).eq(Cols.idJefeAcademiaCol, idJefe);
 
-    // Borrar de jefeacademia y usuario
     await client.from(Tables.jefeAcademia).delete().eq(Cols.idJefeAcademiaCol, idJefe);
 
     await client.from(Tables.usuario).delete().eq(Cols.idUsuario, idJefe);
-
-    // Nota: la cuenta de Auth queda huérfana pero sin acceso
-    // ya que no hay registro en jefeacademia ni usuario.
   }
 }
