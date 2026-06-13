@@ -1,67 +1,15 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:etsAndroid/core/constants/api_endpoints.dart';
+import 'package:etsAndroid/features/jefe/domain/entities/jefe_profile.dart';
+import 'package:etsAndroid/features/jefe/domain/entities/ets_de_jefe_item.dart';
+import 'package:etsAndroid/features/jefe/domain/entities/alumno_inscrito_item.dart';
+import 'package:etsAndroid/features/jefe/data/models/jefe_profile_model.dart';
+import 'package:etsAndroid/features/jefe/data/models/ets_de_jefe_model.dart';
+import 'package:etsAndroid/features/jefe/data/models/alumno_inscrito_model.dart';
 
-// ── Modelos ───────────────────────────────────────────────────────────────────
-
-class JefeProfile {
-  final String idJefe;
-  final String nombre;
-  final String apellidoPaterno;
-  final String apellidoMaterno;
-  final String correo;
-
-  const JefeProfile({
-    required this.idJefe,
-    required this.nombre,
-    required this.apellidoPaterno,
-    required this.apellidoMaterno,
-    required this.correo,
-  });
-
-  String get nombreCompleto => '$nombre $apellidoPaterno $apellidoMaterno';
-}
-
-class EtsDeJefeItem {
-  final String idEts;
-  final String materia;
-  final String carrera;
-  final String salon;
-  final String edificio;
-  final DateTime fechaInicio;
-  final String hora;
-  final String turno;
-  final String estado;
-
-  const EtsDeJefeItem({
-    required this.idEts,
-    required this.materia,
-    required this.carrera,
-    required this.salon,
-    required this.edificio,
-    required this.fechaInicio,
-    required this.hora,
-    required this.turno,
-    required this.estado,
-  });
-}
-
-class AlumnoInscritoItem {
-  final String idInscripcion;
-  final String boleta;
-  final String nombreAlumno;
-  final double? calificacion;
-  final String? resultado;
-  final String estado;
-
-  const AlumnoInscritoItem({
-    required this.idInscripcion,
-    required this.boleta,
-    required this.nombreAlumno,
-    this.calificacion,
-    this.resultado,
-    required this.estado,
-  });
-}
+export 'package:etsAndroid/features/jefe/domain/entities/jefe_profile.dart';
+export 'package:etsAndroid/features/jefe/domain/entities/ets_de_jefe_item.dart';
+export 'package:etsAndroid/features/jefe/domain/entities/alumno_inscrito_item.dart';
 
 // ── Contrato ──────────────────────────────────────────────────────────────────
 
@@ -105,7 +53,6 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
 
     final uid = user.id;
 
-    // Verificar que sea jefe de academia
     final jefeRes = await client
         .from(Tables.jefeAcademia)
         .select(
@@ -119,15 +66,7 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
           'Esta cuenta no corresponde a un jefe de academia registrado.');
     }
 
-    final u = jefeRes['usuario'] as Map<String, dynamic>;
-
-    return JefeProfile(
-      idJefe: jefeRes['id_jefeacademia'] as String,
-      nombre: u['nombre'] as String,
-      apellidoPaterno: u['apellidopaterno'] as String,
-      apellidoMaterno: u['apellidomaterno'] as String,
-      correo: u['correo'] as String,
-    );
+    return JefeProfileModel.fromJson(jefeRes as Map<String, dynamic>);
   }
 
   @override
@@ -137,7 +76,6 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
 
   @override
   Future<List<EtsDeJefeItem>> getEtsDeJefe(String idJefe) async {
-    // Obtenemos la academia del jefe
     final academiaRes = await client
         .from(Tables.academia)
         .select('id_academia')
@@ -148,7 +86,6 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
 
     final idAcademia = academiaRes['id_academia'] as String;
 
-    // Obtenemos los ETS donde la carrera_materia pertenece a esa academia
     final res = await client.from(Tables.ets).select('''
       id_ets,
       fechahorainicio,
@@ -162,30 +99,14 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
       )
     ''').eq(Cols.estado, ColValues.estadoActivo);
 
-    // Filtrar en memoria por academia
     final filtrados = (res as List).where((e) {
       final cm = e['carrera_materia'] as Map<String, dynamic>;
       return cm['id_academia'] == idAcademia;
     }).toList();
 
-    return filtrados.map((e) {
-      final salon = e['salon'] as Map<String, dynamic>;
-      final cm = e['carrera_materia'] as Map<String, dynamic>;
-      final fechaInicio = DateTime.parse(e['fechahorainicio'] as String);
-
-      return EtsDeJefeItem(
-        idEts: e['id_ets'] as String,
-        materia: cm['materia']['nombre'] as String,
-        carrera: cm['carrera']['acronimo'] as String,
-        salon: salon['codigo'] as String,
-        edificio: salon['edificio']['numero'] as String,
-        fechaInicio: fechaInicio,
-        hora:
-            '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}',
-        turno: e['turno'] as String? ?? '',
-        estado: e['estado'] as String,
-      );
-    }).toList();
+    return filtrados
+        .map((e) => EtsDeJefeModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -201,21 +122,9 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
       )
     ''').eq(Cols.idEts, idEts);
 
-    return (res as List).map((e) {
-      final alumno = e['alumno'] as Map<String, dynamic>;
-      final usuario = alumno['usuario'] as Map<String, dynamic>;
-      final nombre =
-          '${usuario['nombre']} ${usuario['apellidopaterno']} ${usuario['apellidomaterno']}';
-
-      return AlumnoInscritoItem(
-        idInscripcion: e['id_inscripcionets'] as String,
-        boleta: alumno['boleta'] as String,
-        nombreAlumno: nombre,
-        calificacion: (e['calificacion'] as num?)?.toDouble(),
-        resultado: e['resultado'] as String?,
-        estado: e['estado'] as String,
-      );
-    }).toList();
+    return (res as List)
+        .map((e) => AlumnoInscritoModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -223,7 +132,9 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
     required String idInscripcion,
     required double calificacion,
   }) async {
-    final resultado = calificacion >= 6.0 ? ColValues.resultadoAprobado : ColValues.resultadoReprobado;
+    final resultado = calificacion >= 6.0
+        ? ColValues.resultadoAprobado
+        : ColValues.resultadoReprobado;
     await client.from(Tables.inscripcionEts).update({
       Cols.calificacion: calificacion,
       Cols.resultado: resultado,
