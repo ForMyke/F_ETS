@@ -66,7 +66,7 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
           'Esta cuenta no corresponde a un jefe de academia registrado.');
     }
 
-    return JefeProfileModel.fromJson(jefeRes as Map<String, dynamic>);
+    return JefeProfileModel.fromJson(jefeRes);
   }
 
   @override
@@ -99,13 +99,13 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
       )
     ''').eq(Cols.estado, ColValues.estadoActivo);
 
-    final filtrados = (res as List).where((e) {
+    final filtrados = res.where((e) {
       final cm = e['carrera_materia'] as Map<String, dynamic>;
       return cm['id_academia'] == idAcademia;
     }).toList();
 
     return filtrados
-        .map((e) => EtsDeJefeModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => EtsDeJefeModel.fromJson(e))
         .toList();
   }
 
@@ -122,8 +122,8 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
       )
     ''').eq(Cols.idEts, idEts);
 
-    return (res as List)
-        .map((e) => AlumnoInscritoModel.fromJson(e as Map<String, dynamic>))
+    return res
+        .map((e) => AlumnoInscritoModel.fromJson(e))
         .toList();
   }
 

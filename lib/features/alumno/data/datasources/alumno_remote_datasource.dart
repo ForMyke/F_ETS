@@ -163,7 +163,7 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
       throw Exception('Esta cuenta no corresponde a un alumno registrado.');
     }
 
-    return AlumnoProfileModel.fromJson(alumnoRes as Map<String, dynamic>);
+    return AlumnoProfileModel.fromJson(alumnoRes);
   }
 
   @override
@@ -185,7 +185,7 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
     if (alumnoRes == null) return null;
 
-    return AlumnoProfileModel.fromJson(alumnoRes as Map<String, dynamic>);
+    return AlumnoProfileModel.fromJson(alumnoRes);
   }
 
   @override
@@ -196,13 +196,13 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
         .select(_selectExams)
         .eq(Cols.estado, ColValues.estadoActivo);
 
-    final filtrados = (res as List).where((json) {
+    final filtrados = res.where((json) {
       final cm = json['carrera_materia'] as Map<String, dynamic>;
       return cm['id_carrera'] == idCarrera;
     }).toList();
 
     return filtrados
-        .map((json) => ExamModel.fromJson(json as Map<String, dynamic>))
+        .map((json) => ExamModel.fromJson(json))
         .toList();
   }
 
@@ -262,7 +262,7 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
         .order(Cols.idInscripcionEts, ascending: false);
 
     return res
-        .map((e) => InscripcionModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => InscripcionModel.fromJson(e))
         .toList();
   }
 

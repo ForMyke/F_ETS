@@ -5,7 +5,6 @@ import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart
 import 'package:etsAndroid/features/alumno/domain/repositories/alumno_repository.dart';
 import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
 import 'package:etsAndroid/features/search/domain/entities/exam.dart';
-import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 class AlumnoRepositoryImpl implements AlumnoRepository {
   final AlumnoRemoteDataSource remoteDataSource;
@@ -81,7 +80,7 @@ class AlumnoRepositoryImpl implements AlumnoRepository {
     try {
       final models =
           await remoteDataSource.getExamsDisponibles(idCarrera: idCarrera);
-      final exams = models.map((m) => m as Exam).toList();
+      final List<Exam> exams = models;
       return Right(exams);
     } catch (_) {
       return const Left(ServerFailure('Error al cargar exámenes.'));

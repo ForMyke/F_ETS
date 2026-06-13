@@ -63,7 +63,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     ''').order(Cols.fechaHoraInicio, ascending: true);
 
     return response
-        .map((e) => ExamListItemModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => ExamListItemModel.fromJson(e))
         .toList();
   }
 

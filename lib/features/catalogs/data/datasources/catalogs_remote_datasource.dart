@@ -53,7 +53,7 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
         .from(Tables.carrera)
         .select('id_carrera, nombre, acronimo, activo');
     return res
-        .map((e) => CarreraModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => CarreraModel.fromJson(e))
         .toList();
   }
 
@@ -92,7 +92,7 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
     final res =
         await client.from(Tables.edificio).select('id_edificio, numero');
     return res
-        .map((e) => EdificioModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => EdificioModel.fromJson(e))
         .toList();
   }
 
@@ -125,7 +125,7 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
       edificio ( numero )
     ''');
     return res
-        .map((e) => SalonModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => SalonModel.fromJson(e))
         .toList();
   }
 
