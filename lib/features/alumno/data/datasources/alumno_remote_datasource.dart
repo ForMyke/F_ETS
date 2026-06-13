@@ -166,23 +166,23 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
     final uid = user.id;
 
     // 2. Insertar en tabla usuario
-    await client.from('usuario').insert({
-      'id_usuario': uid,
-      'correo': correo,
-      'activo': true,
-      'passwordhash': '',
-      'nombre': nombre,
-      'apellidopaterno': apellidoPaterno,
-      'apellidomaterno': apellidoMaterno,
+    await client.from(Tables.usuario).insert({
+      Cols.idUsuario: uid,
+      Cols.correo: correo,
+      Cols.activo: true,
+      Cols.passwordHash: '',
+      Cols.nombre: nombre,
+      Cols.apellidoPaterno: apellidoPaterno,
+      Cols.apellidoMaterno: apellidoMaterno,
     });
 
     // 3. Insertar en tabla alumno
-    await client.from('alumno').insert({
-      'id_alumno': uid,
-      'boleta': boleta,
-      'id_carrera': idCarrera,
-      'id_plan': idPlan,
-      'id_usuario': uid,
+    await client.from(Tables.alumno).insert({
+      Cols.idAlumnoCol: uid,
+      Cols.boleta: boleta,
+      Cols.idCarrera: idCarrera,
+      Cols.idPlan: idPlan,
+      Cols.idUsuario: uid,
     });
   }
 
@@ -203,10 +203,10 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
     // Verificar que sea alumno
     final alumnoRes = await client
-        .from('alumno')
+        .from(Tables.alumno)
         .select(
             'id_alumno, boleta, id_carrera, id_plan, usuario(nombre, apellidopaterno, apellidomaterno, correo)')
-        .eq('id_alumno', uid)
+        .eq(Cols.idAlumno, uid)
         .maybeSingle();
 
     if (alumnoRes == null) {
@@ -239,10 +239,10 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
     if (user == null) return null;
 
     final alumnoRes = await client
-        .from('alumno')
+        .from(Tables.alumno)
         .select(
             'id_alumno, boleta, id_carrera, id_plan, usuario(nombre, apellidopaterno, apellidomaterno, correo)')
-        .eq('id_alumno', user.id)
+        .eq(Cols.idAlumno, user.id)
         .maybeSingle();
 
     if (alumnoRes == null) return null;
@@ -265,7 +265,7 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
   Future<List<ExamModel>> getExamsDisponibles(
       {required String idCarrera}) async {
     final res =
-        await client.from('ets').select(_selectExams).eq('estado', 'activo');
+        await client.from(Tables.ets).select(_selectExams).eq(Cols.estado, ColValues.estadoActivo);
 
     // Filtrar en memoria: solo ETS donde id_carrera coincide con la del alumno
     final filtrados = (res as List).where((json) {
@@ -282,10 +282,10 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
     required String idEts,
   }) async {
     final res = await client
-        .from('inscripcionets')
+        .from(Tables.inscripcionEts)
         .select('id_inscripcionets')
-        .eq('id_alumno', idAlumno)
-        .eq('id_ets', idEts)
+        .eq(Cols.idAlumno, idAlumno)
+        .eq(Cols.idEts, idEts)
         .maybeSingle();
     return res != null;
   }
@@ -297,21 +297,21 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
   }) async {
     // Generar ID simple con timestamp
     final id = 'INS${DateTime.now().millisecondsSinceEpoch}';
-    await client.from('inscripcionets').insert({
-      'id_inscripcionets': id,
-      'id_ets': idEts,
-      'id_alumno': idAlumno,
-      'estado': 'pendiente',
-      'fechainscripcion': DateTime.now().toIso8601String().substring(0, 10),
-      'calificacion': null,
-      'resultado': null,
+    await client.from(Tables.inscripcionEts).insert({
+      Cols.idInscripcionEts: id,
+      Cols.idEts: idEts,
+      Cols.idAlumno: idAlumno,
+      Cols.estado: ColValues.estadoPendiente,
+      Cols.fechaInscripcion: DateTime.now().toIso8601String().substring(0, 10),
+      Cols.calificacion: null,
+      Cols.resultado: null,
     });
   }
 
   @override
   Future<List<InscripcionItem>> getMisInscripciones(String idAlumno) async {
     final res = await client
-        .from('inscripcionets')
+        .from(Tables.inscripcionEts)
         .select('''
           id_inscripcionets,
           id_ets,
@@ -328,8 +328,8 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
             )
           )
         ''')
-        .eq('id_alumno', idAlumno)
-        .order('id_inscripcionets', ascending: false);
+        .eq(Cols.idAlumno, idAlumno)
+        .order(Cols.idInscripcionEts, ascending: false);
 
     return res.map((e) {
       final ets = e['ets'] as Map<String, dynamic>;
@@ -358,15 +358,15 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
   @override
   Future<List<Map<String, dynamic>>> getCarreras() async {
     final res = await client
-        .from('carrera')
+        .from(Tables.carrera)
         .select('id_carrera, nombre, acronimo')
-        .eq('activo', true);
+        .eq(Cols.activo, true);
     return List<Map<String, dynamic>>.from(res);
   }
 
   @override
   Future<List<Map<String, dynamic>>> getPlanes() async {
-    final res = await client.from('planestudios').select('id_plan, nombre');
+    final res = await client.from(Tables.planEstudios).select('id_plan, nombre');
     return List<Map<String, dynamic>>.from(res);
   }
 }

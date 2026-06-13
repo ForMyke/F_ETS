@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
 
 class JefeAdminItem {
   final String idJefe;
@@ -55,14 +56,14 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
 
   @override
   Future<List<JefeAdminItem>> getJefes() async {
-    final res = await client.from('jefeacademia').select('''
+    final res = await client.from(Tables.jefeAcademia).select('''
       id_jefeacademia,
       usuario ( nombre, apellidopaterno, apellidomaterno, correo )
     ''');
 
     // También obtenemos las academias para saber a cuál pertenece cada jefe
     final academias = await client
-        .from('academia')
+        .from(Tables.academia)
         .select('id_academia, nombre, id_jefeacademia');
 
     return (res as List).map((e) {
@@ -90,7 +91,7 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
   @override
   Future<List<AcademiaItem>> getAcademias() async {
     final res =
-        await client.from('academia').select('id_academia, nombre, acronimo');
+        await client.from(Tables.academia).select('id_academia, nombre, acronimo');
     return (res as List)
         .map((e) => AcademiaItem(
               idAcademia: e['id_academia'] as String,
@@ -126,24 +127,24 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
     if (uid == null) throw Exception('No se pudo crear la cuenta.');
 
     // 2. Insertar datos del jefe con el token del nuevo usuario (aún activo)
-    await client.from('usuario').insert({
-      'id_usuario': uid,
-      'correo': correo,
-      'activo': true,
-      'passwordhash': '',
-      'nombre': nombre,
-      'apellidopaterno': apellidoPaterno,
-      'apellidomaterno': apellidoMaterno,
+    await client.from(Tables.usuario).insert({
+      Cols.idUsuario: uid,
+      Cols.correo: correo,
+      Cols.activo: true,
+      Cols.passwordHash: '',
+      Cols.nombre: nombre,
+      Cols.apellidoPaterno: apellidoPaterno,
+      Cols.apellidoMaterno: apellidoMaterno,
     });
 
-    await client.from('jefeacademia').insert({
-      'id_jefeacademia': uid,
-      'id_usuario': uid,
+    await client.from(Tables.jefeAcademia).insert({
+      Cols.idJefeAcademiaCol: uid,
+      Cols.idUsuario: uid,
     });
 
     await client
-        .from('academia')
-        .update({'id_jefeacademia': uid}).eq('id_academia', idAcademia);
+        .from(Tables.academia)
+        .update({Cols.idJefeAcademiaCol: uid}).eq(Cols.idAcademiaCol, idAcademia);
 
     // 3. Restaurar sesión del admin con su token de refresco
     await client.auth.setSession(adminSession.refreshToken!);
@@ -153,13 +154,13 @@ class JefesAdminDataSourceImpl implements JefesAdminDataSource {
   Future<void> deleteJefe(String idJefe) async {
     // Desasignar de academia
     await client
-        .from('academia')
-        .update({'id_jefeacademia': null}).eq('id_jefeacademia', idJefe);
+        .from(Tables.academia)
+        .update({Cols.idJefeAcademiaCol: null}).eq(Cols.idJefeAcademiaCol, idJefe);
 
     // Borrar de jefeacademia y usuario
-    await client.from('jefeacademia').delete().eq('id_jefeacademia', idJefe);
+    await client.from(Tables.jefeAcademia).delete().eq(Cols.idJefeAcademiaCol, idJefe);
 
-    await client.from('usuario').delete().eq('id_usuario', idJefe);
+    await client.from(Tables.usuario).delete().eq(Cols.idUsuario, idJefe);
 
     // Nota: la cuenta de Auth queda huérfana pero sin acceso
     // ya que no hay registro en jefeacademia ni usuario.

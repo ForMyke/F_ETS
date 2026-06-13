@@ -3,7 +3,62 @@ import 'package:etsAndroid/features/jefe/presentation/bloc/jefe_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockJefeRemoteDataSource extends Mock implements JefeRemoteDataSource {}
+// Null-safe mock: provide noSuchMethod overrides for every return type so
+// Mockito can return a valid default instead of `null` for non-nullable types.
+class MockJefeRemoteDataSource extends Mock implements JefeRemoteDataSource {
+  static const _defaultPerfil = JefeProfile(
+    idJefe: '',
+    nombre: '',
+    apellidoPaterno: '',
+    apellidoMaterno: '',
+    correo: '',
+  );
+
+  @override
+  Future<JefeProfile> login({
+    required String correo,
+    required String password,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(#login, [], {#correo: correo, #password: password}),
+        returnValue: Future.value(_defaultPerfil),
+      ) as Future<JefeProfile>;
+
+  @override
+  Future<void> logout() => super.noSuchMethod(
+        Invocation.method(#logout, []),
+        returnValue: Future<void>.value(),
+      ) as Future<void>;
+
+  @override
+  Future<List<EtsDeJefeItem>> getEtsDeJefe(String idJefe) =>
+      super.noSuchMethod(
+        Invocation.method(#getEtsDeJefe, [idJefe]),
+        returnValue: Future.value(<EtsDeJefeItem>[]),
+      ) as Future<List<EtsDeJefeItem>>;
+
+  @override
+  Future<List<AlumnoInscritoItem>> getAlumnosInscritos(String idEts) =>
+      super.noSuchMethod(
+        Invocation.method(#getAlumnosInscritos, [idEts]),
+        returnValue: Future.value(<AlumnoInscritoItem>[]),
+      ) as Future<List<AlumnoInscritoItem>>;
+
+  @override
+  Future<void> guardarCalificacion({
+    required String idInscripcion,
+    required double calificacion,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(#guardarCalificacion, [], {
+          #idInscripcion: idInscripcion,
+          #calificacion: calificacion,
+        }),
+        returnValue: Future<void>.value(),
+      ) as Future<void>;
+}
+
+// ── Test fixtures ─────────────────────────────────────────────────────────────
 
 const tPerfil = JefeProfile(
   idJefe: 'j-1',
@@ -54,10 +109,8 @@ void main() {
 
     test('emits [JefeLoading, JefeAuthenticated] on successful login',
         () async {
-      when(dataSource.login(
-        correo: anyNamed('correo'),
-        password: anyNamed('password'),
-      )).thenAnswer((_) async => tPerfil);
+      when(dataSource.login(correo: 'laura@ipn.mx', password: '123456'))
+          .thenAnswer((_) async => tPerfil);
 
       final bloc = buildBloc();
 
@@ -77,10 +130,8 @@ void main() {
     });
 
     test('emits [JefeLoading, JefeAuthFailure] when login throws', () async {
-      when(dataSource.login(
-        correo: anyNamed('correo'),
-        password: anyNamed('password'),
-      )).thenThrow(Exception('Credenciales incorrectas.'));
+      when(dataSource.login(correo: 'x@x.com', password: 'bad'))
+          .thenThrow(Exception('Credenciales incorrectas.'));
 
       final bloc = buildBloc();
 
@@ -229,8 +280,8 @@ void main() {
         'emits [JefeGuardandoCalificacion, JefeAlumnosSuccess] after saving grade',
         () async {
       when(dataSource.guardarCalificacion(
-        idInscripcion: anyNamed('idInscripcion'),
-        calificacion: anyNamed('calificacion'),
+        idInscripcion: 'ins-1',
+        calificacion: 8.5,
       )).thenAnswer((_) async {});
       when(dataSource.getAlumnosInscritos('ets-1'))
           .thenAnswer((_) async => [tAlumno]);
@@ -261,8 +312,8 @@ void main() {
         'emits [JefeGuardandoCalificacion, JefeCalificacionFailure] when guardarCalificacion throws',
         () async {
       when(dataSource.guardarCalificacion(
-        idInscripcion: anyNamed('idInscripcion'),
-        calificacion: anyNamed('calificacion'),
+        idInscripcion: 'ins-1',
+        calificacion: 5.0,
       )).thenThrow(Exception('db error'));
 
       final bloc = buildBloc();

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
 import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
 abstract class SearchRemoteDataSource {
@@ -62,7 +63,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
   }) async {
     try {
       final response =
-          await client.from('ets').select(_selectQuery).eq('estado', 'activo');
+          await client.from(Tables.ets).select(_selectQuery).eq(Cols.estado, ColValues.estadoActivo);
 
       final exams = response.map((json) => ExamModel.fromJson(json)).toList();
 
@@ -84,7 +85,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
   Future<List<String>> getCarreras() async {
     try {
       final response =
-          await client.from('carrera').select('acronimo').eq('activo', true);
+          await client.from(Tables.carrera).select(Cols.acronimo).eq(Cols.activo, true);
 
       return response.map((row) => row['acronimo'] as String).toList();
     } catch (e) {

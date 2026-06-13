@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
 import 'package:uuid/uuid.dart';
 
 class CarreraItem {
@@ -63,7 +64,7 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
   // Carreras
   @override
   Future<List<CarreraItem>> getCarreras() async {
-    final res = await client.from('carrera').select('id_carrera, nombre, acronimo, activo');
+    final res = await client.from(Tables.carrera).select('id_carrera, nombre, acronimo, activo');
     return res.map((e) => CarreraItem(
       id: e['id_carrera'] as String,
       nombre: e['nombre'] as String,
@@ -74,32 +75,32 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
 
   @override
   Future<void> createCarrera({required String nombre, required String acronimo}) async {
-    await client.from('carrera').insert({
-      'id_carrera': const Uuid().v4(),
-      'nombre': nombre,
-      'acronimo': acronimo,
-      'activo': true,
+    await client.from(Tables.carrera).insert({
+      Cols.idCarreraCol: const Uuid().v4(),
+      Cols.nombre: nombre,
+      Cols.acronimo: acronimo,
+      Cols.activo: true,
     });
   }
 
   @override
   Future<void> updateCarrera({required String id, required String nombre, required String acronimo, required bool activo}) async {
-    await client.from('carrera').update({
-      'nombre': nombre,
-      'acronimo': acronimo,
-      'activo': activo,
-    }).eq('id_carrera', id);
+    await client.from(Tables.carrera).update({
+      Cols.nombre: nombre,
+      Cols.acronimo: acronimo,
+      Cols.activo: activo,
+    }).eq(Cols.idCarreraCol, id);
   }
 
   @override
   Future<void> deleteCarrera(String id) async {
-    await client.from('carrera').delete().eq('id_carrera', id);
+    await client.from(Tables.carrera).delete().eq(Cols.idCarreraCol, id);
   }
 
   // Edificios
   @override
   Future<List<EdificioItem>> getEdificios() async {
-    final res = await client.from('edificio').select('id_edificio, numero');
+    final res = await client.from(Tables.edificio).select('id_edificio, numero');
     return res.map((e) => EdificioItem(
       id: e['id_edificio'] as String,
       numero: e['numero'] as String,
@@ -108,26 +109,26 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
 
   @override
   Future<void> createEdificio({required String numero}) async {
-    await client.from('edificio').insert({
-      'id_edificio': const Uuid().v4(),
-      'numero': numero,
+    await client.from(Tables.edificio).insert({
+      Cols.idEdificio: const Uuid().v4(),
+      Cols.numero: numero,
     });
   }
 
   @override
   Future<void> updateEdificio({required String id, required String numero}) async {
-    await client.from('edificio').update({'numero': numero}).eq('id_edificio', id);
+    await client.from(Tables.edificio).update({Cols.numero: numero}).eq(Cols.idEdificio, id);
   }
 
   @override
   Future<void> deleteEdificio(String id) async {
-    await client.from('edificio').delete().eq('id_edificio', id);
+    await client.from(Tables.edificio).delete().eq(Cols.idEdificio, id);
   }
 
   // Salones
   @override
   Future<List<SalonItem>> getSalones() async {
-    final res = await client.from('salon').select('''
+    final res = await client.from(Tables.salon).select('''
       id_salon, codigo, piso, id_edificio,
       edificio ( numero )
     ''');
@@ -142,25 +143,25 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
 
   @override
   Future<void> createSalon({required String codigo, required String piso, required String edificioId}) async {
-    await client.from('salon').insert({
-      'id_salon': const Uuid().v4(),
-      'codigo': codigo,
-      'piso': piso,
-      'id_edificio': edificioId,
+    await client.from(Tables.salon).insert({
+      Cols.idSalonCol: const Uuid().v4(),
+      Cols.codigo: codigo,
+      Cols.piso: piso,
+      Cols.idEdificio: edificioId,
     });
   }
 
   @override
   Future<void> updateSalon({required String id, required String codigo, required String piso, required String edificioId}) async {
-    await client.from('salon').update({
-      'codigo': codigo,
-      'piso': piso,
-      'id_edificio': edificioId,
-    }).eq('id_salon', id);
+    await client.from(Tables.salon).update({
+      Cols.codigo: codigo,
+      Cols.piso: piso,
+      Cols.idEdificio: edificioId,
+    }).eq(Cols.idSalonCol, id);
   }
 
   @override
   Future<void> deleteSalon(String id) async {
-    await client.from('salon').delete().eq('id_salon', id);
+    await client.from(Tables.salon).delete().eq(Cols.idSalonCol, id);
   }
 }

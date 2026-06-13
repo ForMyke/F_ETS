@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
 
 // ── Modelos ───────────────────────────────────────────────────────────────────
 
@@ -106,10 +107,10 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
 
     // Verificar que sea jefe de academia
     final jefeRes = await client
-        .from('jefeacademia')
+        .from(Tables.jefeAcademia)
         .select(
             'id_jefeacademia, usuario(nombre, apellidopaterno, apellidomaterno, correo)')
-        .eq('id_jefeacademia', uid)
+        .eq(Cols.idJefeAcademiaCol, uid)
         .maybeSingle();
 
     if (jefeRes == null) {
@@ -138,9 +139,9 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
   Future<List<EtsDeJefeItem>> getEtsDeJefe(String idJefe) async {
     // Obtenemos la academia del jefe
     final academiaRes = await client
-        .from('academia')
+        .from(Tables.academia)
         .select('id_academia')
-        .eq('id_jefeacademia', idJefe)
+        .eq(Cols.idJefeAcademiaCol, idJefe)
         .maybeSingle();
 
     if (academiaRes == null) return [];
@@ -148,7 +149,7 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
     final idAcademia = academiaRes['id_academia'] as String;
 
     // Obtenemos los ETS donde la carrera_materia pertenece a esa academia
-    final res = await client.from('ets').select('''
+    final res = await client.from(Tables.ets).select('''
       id_ets,
       fechahorainicio,
       turno,
@@ -159,7 +160,7 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
         materia ( nombre ),
         carrera ( acronimo )
       )
-    ''').eq('estado', 'activo');
+    ''').eq(Cols.estado, ColValues.estadoActivo);
 
     // Filtrar en memoria por academia
     final filtrados = (res as List).where((e) {
@@ -189,7 +190,7 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
 
   @override
   Future<List<AlumnoInscritoItem>> getAlumnosInscritos(String idEts) async {
-    final res = await client.from('inscripcionets').select('''
+    final res = await client.from(Tables.inscripcionEts).select('''
       id_inscripcionets,
       estado,
       calificacion,
@@ -198,7 +199,7 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
         boleta,
         usuario ( nombre, apellidopaterno, apellidomaterno )
       )
-    ''').eq('id_ets', idEts);
+    ''').eq(Cols.idEts, idEts);
 
     return (res as List).map((e) {
       final alumno = e['alumno'] as Map<String, dynamic>;
@@ -222,11 +223,11 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
     required String idInscripcion,
     required double calificacion,
   }) async {
-    final resultado = calificacion >= 6.0 ? 'aprobado' : 'reprobado';
-    await client.from('inscripcionets').update({
-      'calificacion': calificacion,
-      'resultado': resultado,
-      'estado': 'calificado',
-    }).eq('id_inscripcionets', idInscripcion);
+    final resultado = calificacion >= 6.0 ? ColValues.resultadoAprobado : ColValues.resultadoReprobado;
+    await client.from(Tables.inscripcionEts).update({
+      Cols.calificacion: calificacion,
+      Cols.resultado: resultado,
+      Cols.estado: ColValues.estadoCalificado,
+    }).eq(Cols.idInscripcionEts, idInscripcion);
   }
 }
