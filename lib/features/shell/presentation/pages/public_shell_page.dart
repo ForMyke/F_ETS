@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import '../../../search/presentation/pages/search_page.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
@@ -47,7 +48,6 @@ class _PublicShellPageState extends State<PublicShellPage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // FavoritesBloc compartido entre SearchPage y FavoritesPage
     return BlocProvider(
       create: (_) => FavoritesBloc.create()..add(const FavoritesStarted()),
       child: Builder(
@@ -121,6 +121,7 @@ class _AnimatedBottomNav extends StatelessWidget {
           height: 64,
           child: Row(
             children: [
+              // Tabs principales
               ...List.generate(items.length, (i) {
                 final isActive = i == currentIndex;
                 return Expanded(
@@ -135,7 +136,9 @@ class _AnimatedBottomNav extends StatelessWidget {
                   ),
                 );
               }),
-              _AdminButton(isDark: isDark),
+
+              // Menú de acceso: alumno, jefe, admin
+              _AccessMenu(isDark: isDark),
             ],
           ),
         ),
@@ -144,6 +147,104 @@ class _AnimatedBottomNav extends StatelessWidget {
         .animate()
         .fadeIn(duration: 600.ms, delay: 200.ms)
         .slideY(begin: 0.3, curve: Curves.easeOutCubic);
+  }
+}
+
+/// Botón con menú desplegable para elegir tipo de acceso.
+class _AccessMenu extends StatelessWidget {
+  final bool isDark;
+  const _AccessMenu({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      offset: const Offset(0, -160),
+      color: isDark ? AppColors.darkBgSurface : AppColors.bgPrimary,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      itemBuilder: (_) => [
+        _menuItem(
+          value: 'alumno',
+          icon: Icons.person_outline_rounded,
+          label: 'Soy alumno',
+          isDark: isDark,
+        ),
+        _menuItem(
+          value: 'jefe',
+          icon: Icons.supervisor_account_outlined,
+          label: 'Soy jefe de academia',
+          isDark: isDark,
+        ),
+        _menuItem(
+          value: 'admin',
+          icon: Icons.admin_panel_settings_outlined,
+          label: 'Administrador',
+          isDark: isDark,
+        ),
+      ],
+      onSelected: (value) {
+        switch (value) {
+          case 'alumno':
+            Navigator.of(context).pushNamed(AppRoutes.alumnoLogin);
+            break;
+          case 'jefe':
+            Navigator.of(context).pushNamed(AppRoutes.jefeLogin);
+            break;
+          case 'admin':
+            Navigator.of(context).pushNamed(AppRoutes.adminLogin);
+            break;
+        }
+      },
+      child: SizedBox(
+        width: 56,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkBgOverlay : AppColors.bgOverlay,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.borderLight,
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.login_rounded,
+                size: 16,
+                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _menuItem({
+    required String value,
+    required IconData icon,
+    required String label,
+    required bool isDark,
+  }) {
+    return PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon,
+              size: 18,
+              color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
+          const SizedBox(width: 12),
+          Text(label,
+              style: AppTextStyles.body.copyWith(
+                color:
+                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                fontSize: 14,
+              )),
+        ],
+      ),
+    );
   }
 }
 
@@ -196,44 +297,6 @@ class _NavTile extends StatelessWidget {
           child: Text(item.label),
         ),
       ],
-    );
-  }
-}
-
-class _AdminButton extends StatelessWidget {
-  final bool isDark;
-  const _AdminButton({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pushNamed('/admin-login'),
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 56,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkBgOverlay : AppColors.bgOverlay,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isDark ? AppColors.darkBorder : AppColors.borderLight,
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                Icons.admin_panel_settings_outlined,
-                size: 16,
-                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

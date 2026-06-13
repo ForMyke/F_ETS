@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
@@ -13,7 +14,8 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/shell/presentation/pages/public_shell_page.dart';
 import '../../features/shell/presentation/pages/admin_shell_page.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../features/alumno/presentation/pages/alumno_login_page.dart';
+import '../../features/jefe/presentation/pages/jefe_login_page.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -23,12 +25,14 @@ class AppRoutes {
   static const String adminHome = '/admin';
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
+  static const String alumnoLogin = '/alumno-login';
+  static const String jefeLogin = '/jefe-login';
 
   static AuthRepositoryImpl _buildRepo() => AuthRepositoryImpl(
-    remoteDataSource: AuthRemoteDataSourceImpl(
-      client: Supabase.instance.client,
-    ),
-  );
+        remoteDataSource: AuthRemoteDataSourceImpl(
+          client: Supabase.instance.client,
+        ),
+      );
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -67,6 +71,12 @@ class AppRoutes {
             child: const ResetPasswordPage(),
           ),
         );
+
+      case alumnoLogin:
+        return _fadeRoute(const AlumnoLoginPage());
+
+      case jefeLogin:
+        return _fadeRoute(const JefeLoginPage());
 
       default:
         return _fadeRoute(const PublicShellPage());

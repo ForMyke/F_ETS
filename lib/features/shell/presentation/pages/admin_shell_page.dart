@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../exams/presentation/pages/exams_page.dart';
 import '../../../catalogs/presentation/pages/catalogs_page.dart';
+import '../../../jefes/presentation/pages/jefes_admin_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShellPage extends StatefulWidget {
@@ -22,6 +23,7 @@ class _AdminShellPageState extends State<AdminShellPage> {
     DashboardPage(),
     ExamsPage(),
     CatalogsPage(),
+    JefesAdminPage(),
   ];
 
   final List<_NavItem> _navItems = const [
@@ -39,6 +41,11 @@ class _AdminShellPageState extends State<AdminShellPage> {
       icon: Icons.folder_outlined,
       activeIcon: Icons.folder_rounded,
       label: 'Catálogos',
+    ),
+    _NavItem(
+      icon: Icons.supervisor_account_outlined,
+      activeIcon: Icons.supervisor_account_rounded,
+      label: 'Jefes',
     ),
   ];
 
@@ -149,7 +156,7 @@ class _AdminBottomNav extends StatelessWidget {
                 onTap: onLogout,
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
-                  width: 56,
+                  width: 48,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -208,7 +215,7 @@ class _NavTile extends StatelessWidget {
         AnimatedContainer(
           duration: 250.ms,
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
             color: isActive
                 ? (isDark
@@ -228,7 +235,7 @@ class _NavTile extends StatelessWidget {
           duration: 200.ms,
           style: AppTextStyles.caption.copyWith(
             color: isActive ? activeColor : inactiveColor,
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
           ),
           child: Text(item.label),
