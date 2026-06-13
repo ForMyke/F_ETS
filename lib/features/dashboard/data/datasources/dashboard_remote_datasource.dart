@@ -44,12 +44,13 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     final now = DateTime.now();
 
     for (final exam in examsResponse) {
-      final acronimo = exam['carrera_materia']['carrera']['acronimo'] as String;
+      final acronimo = exam[Tables.carreraMateria][Tables.carrera]
+          [Cols.acronimo] as String;
       byCarrera[acronimo] = (byCarrera[acronimo] ?? 0) + 1;
 
-      salones.add(exam['id_salon'] as String);
+      salones.add(exam[Cols.idSalon] as String);
 
-      final fecha = DateTime.parse(exam['fechahorainicio'] as String);
+      final fecha = DateTime.parse(exam[Cols.fechaHoraInicio] as String);
       if (fecha.isAfter(now)) {
         if (proximo == null || fecha.isBefore(proximo)) {
           proximo = fecha;
@@ -59,7 +60,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
 
     return DashboardStatsModel(
       totalExams: examsResponse.length,
-      periodoNombre: periodoResponse['nombre'] as String,
+      periodoNombre: periodoResponse[Cols.nombre] as String,
       examsByCarrera: byCarrera,
       proximoExamen: proximo,
       salonesEnUso: salones.length,

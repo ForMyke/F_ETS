@@ -86,7 +86,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .eq(Cols.idCarrera, carreraId);
       final seen = <String>{};
       for (final r in raw) {
-        final p = r['planestudios'] as Map<String, dynamic>;
+        final p = r[Tables.planEstudios] as Map<String, dynamic>;
         if (seen.add(p[Cols.idPlan] as String)) planesRes.add(p);
       }
     }

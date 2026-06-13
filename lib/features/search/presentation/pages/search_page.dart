@@ -76,7 +76,7 @@ class _SearchViewState extends State<_SearchView> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => FilterSheet(
-        carreras: _carreras,
+        carreras: _kCarreras,
         selectedCarrera: state.carrera,
         selectedSemestre: state.semestre,
         selectedPlan: state.plan,
@@ -433,7 +433,7 @@ class _SearchViewState extends State<_SearchView> {
                             padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                             child: GestureDetector(
                               onTap: () => launchUrl(
-                                Uri.parse('mailto:soporte@escom.ipn.mx?subject=Ayuda%20con%20mi%20ETS'),
+                                Uri.parse(_kSupportMailto),
                                 mode: LaunchMode.externalApplication,
                               ),
                               child: Container(
