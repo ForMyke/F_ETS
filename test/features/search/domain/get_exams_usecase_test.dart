@@ -6,7 +6,36 @@ import 'package:etsAndroid/features/search/domain/usecases/get_exams_usecase.dar
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockSearchRepository extends Mock implements SearchRepository {}
+// Null-safe mock: override getExams() with a valid non-null default.
+class MockSearchRepository extends Mock implements SearchRepository {
+  @override
+  Future<Either<Failure, List<Exam>>> getExams({
+    String? carrera,
+    int? semestre,
+    String? plan,
+    String? materia,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(#getExams, [], {
+          #carrera: carrera,
+          #semestre: semestre,
+          #plan: plan,
+          #materia: materia,
+        }),
+        returnValue: Future.value(
+          const Left<Failure, List<Exam>>(ServerFailure()),
+        ),
+      ) as Future<Either<Failure, List<Exam>>>;
+
+  @override
+  Future<Either<Failure, List<String>>> getCarreras() =>
+      super.noSuchMethod(
+        Invocation.method(#getCarreras, []),
+        returnValue: Future.value(
+          const Left<Failure, List<String>>(ServerFailure()),
+        ),
+      ) as Future<Either<Failure, List<String>>>;
+}
 
 void main() {
   late MockSearchRepository repository;
@@ -40,15 +69,23 @@ void main() {
   group('GetExamsUseCase', () {
     test('returns Right(list) when repository succeeds', () async {
       when(repository.getExams(
-        carrera: anyNamed('carrera'),
-        semestre: anyNamed('semestre'),
-        plan: anyNamed('plan'),
-        materia: anyNamed('materia'),
+        carrera: 'ISC',
+        semestre: 1,
+        plan: null,
+        materia: null,
       )).thenAnswer((_) async => Right([tExam]));
 
       final result = await useCase(tParams);
 
-      expect(result, Right<Failure, List<Exam>>([tExam]));
+      // Use fold to avoid List identity inequality in dartz's Right.==
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (f) => fail('Expected Right but got Left: $f'),
+        (list) {
+          expect(list.length, 1);
+          expect(list.first, tExam);
+        },
+      );
       verify(repository.getExams(
         carrera: 'ISC',
         semestre: 1,
@@ -59,10 +96,10 @@ void main() {
 
     test('returns Left(failure) when repository fails', () async {
       when(repository.getExams(
-        carrera: anyNamed('carrera'),
-        semestre: anyNamed('semestre'),
-        plan: anyNamed('plan'),
-        materia: anyNamed('materia'),
+        carrera: 'ISC',
+        semestre: 1,
+        plan: null,
+        materia: null,
       )).thenAnswer((_) async => const Left(ServerFailure()));
 
       final result = await useCase(tParams);

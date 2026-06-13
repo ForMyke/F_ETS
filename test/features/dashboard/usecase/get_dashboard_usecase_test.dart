@@ -7,7 +7,17 @@ import 'package:etsAndroid/features/dashboard/domain/usecases/get_dashboard_usec
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockDashboardRepository extends Mock implements DashboardRepository {}
+// Null-safe mock: override getStats() so Mockito has a valid non-null default.
+class MockDashboardRepository extends Mock implements DashboardRepository {
+  @override
+  Future<Either<Failure, DashboardStats>> getStats() =>
+      super.noSuchMethod(
+        Invocation.method(#getStats, []),
+        returnValue: Future.value(
+          Left<Failure, DashboardStats>(const ServerFailure()),
+        ),
+      ) as Future<Either<Failure, DashboardStats>>;
+}
 
 void main() {
   late MockDashboardRepository repository;
@@ -16,7 +26,7 @@ void main() {
   final tStats = DashboardStats(
     totalExams: 10,
     periodoNombre: 'ETS Enero 2026',
-    examsByCarrera: {'ISC': 5, 'IIA': 3, 'LCD': 2},
+    examsByCarrera: const {'ISC': 5, 'IIA': 3, 'LCD': 2},
     proximoExamen: DateTime(2026, 6, 12, 9),
     salonesEnUso: 4,
   );
@@ -55,6 +65,8 @@ void main() {
 
       await useCase(NoParams());
 
+      // Verify the one expected call, then confirm no additional calls occurred.
+      verify(repository.getStats()).called(1);
       verifyNoMoreInteractions(repository);
     });
 

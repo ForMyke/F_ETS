@@ -6,7 +6,17 @@ import 'package:etsAndroid/features/auth/presentation/bloc/register_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockRegisterUseCase extends Mock implements RegisterUseCase {}
+// Null-safe mock: override call() so Mockito has a valid non-null default.
+class MockRegisterUseCase extends Mock implements RegisterUseCase {
+  @override
+  Future<Either<Failure, User>> call(RegisterParams params) =>
+      super.noSuchMethod(
+        Invocation.method(#call, [params]),
+        returnValue: Future.value(
+          const Left<Failure, User>(ServerFailure()),
+        ),
+      ) as Future<Either<Failure, User>>;
+}
 
 void main() {
   late MockRegisterUseCase useCase;

@@ -1,48 +1,26 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:etsAndroid/core/constants/api_endpoints.dart';
 import 'package:uuid/uuid.dart';
+import 'package:etsAndroid/core/constants/api_endpoints.dart';
+import 'package:etsAndroid/features/catalogs/domain/entities/carrera_item.dart';
+import 'package:etsAndroid/features/catalogs/domain/entities/edificio_item.dart';
+import 'package:etsAndroid/features/catalogs/domain/entities/salon_item.dart';
+import 'package:etsAndroid/features/catalogs/data/models/carrera_model.dart';
+import 'package:etsAndroid/features/catalogs/data/models/edificio_model.dart';
+import 'package:etsAndroid/features/catalogs/data/models/salon_model.dart';
 
-class CarreraItem {
-  final String id;
-  final String nombre;
-  final String acronimo;
-  final bool activo;
-
-  const CarreraItem({
-    required this.id,
-    required this.nombre,
-    required this.acronimo,
-    required this.activo,
-  });
-}
-
-class EdificioItem {
-  final String id;
-  final String numero;
-
-  const EdificioItem({required this.id, required this.numero});
-}
-
-class SalonItem {
-  final String id;
-  final String codigo;
-  final String piso;
-  final String edificioId;
-  final String edificioNumero;
-
-  const SalonItem({
-    required this.id,
-    required this.codigo,
-    required this.piso,
-    required this.edificioId,
-    required this.edificioNumero,
-  });
-}
+export 'package:etsAndroid/features/catalogs/domain/entities/carrera_item.dart';
+export 'package:etsAndroid/features/catalogs/domain/entities/edificio_item.dart';
+export 'package:etsAndroid/features/catalogs/domain/entities/salon_item.dart';
 
 abstract class CatalogsRemoteDataSource {
   Future<List<CarreraItem>> getCarreras();
-  Future<void> createCarrera({required String nombre, required String acronimo});
-  Future<void> updateCarrera({required String id, required String nombre, required String acronimo, required bool activo});
+  Future<void> createCarrera(
+      {required String nombre, required String acronimo});
+  Future<void> updateCarrera(
+      {required String id,
+      required String nombre,
+      required String acronimo,
+      required bool activo});
   Future<void> deleteCarrera(String id);
 
   Future<List<EdificioItem>> getEdificios();
@@ -51,8 +29,15 @@ abstract class CatalogsRemoteDataSource {
   Future<void> deleteEdificio(String id);
 
   Future<List<SalonItem>> getSalones();
-  Future<void> createSalon({required String codigo, required String piso, required String edificioId});
-  Future<void> updateSalon({required String id, required String codigo, required String piso, required String edificioId});
+  Future<void> createSalon(
+      {required String codigo,
+      required String piso,
+      required String edificioId});
+  Future<void> updateSalon(
+      {required String id,
+      required String codigo,
+      required String piso,
+      required String edificioId});
   Future<void> deleteSalon(String id);
 }
 
@@ -64,17 +49,17 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
   // Carreras
   @override
   Future<List<CarreraItem>> getCarreras() async {
-    final res = await client.from(Tables.carrera).select('id_carrera, nombre, acronimo, activo');
-    return res.map((e) => CarreraItem(
-      id: e['id_carrera'] as String,
-      nombre: e['nombre'] as String,
-      acronimo: e['acronimo'] as String,
-      activo: e['activo'] as bool,
-    )).toList();
+    final res = await client
+        .from(Tables.carrera)
+        .select('id_carrera, nombre, acronimo, activo');
+    return res
+        .map((e) => CarreraModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
-  Future<void> createCarrera({required String nombre, required String acronimo}) async {
+  Future<void> createCarrera(
+      {required String nombre, required String acronimo}) async {
     await client.from(Tables.carrera).insert({
       Cols.idCarreraCol: const Uuid().v4(),
       Cols.nombre: nombre,
@@ -84,7 +69,11 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
   }
 
   @override
-  Future<void> updateCarrera({required String id, required String nombre, required String acronimo, required bool activo}) async {
+  Future<void> updateCarrera(
+      {required String id,
+      required String nombre,
+      required String acronimo,
+      required bool activo}) async {
     await client.from(Tables.carrera).update({
       Cols.nombre: nombre,
       Cols.acronimo: acronimo,
@@ -100,11 +89,11 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
   // Edificios
   @override
   Future<List<EdificioItem>> getEdificios() async {
-    final res = await client.from(Tables.edificio).select('id_edificio, numero');
-    return res.map((e) => EdificioItem(
-      id: e['id_edificio'] as String,
-      numero: e['numero'] as String,
-    )).toList();
+    final res =
+        await client.from(Tables.edificio).select('id_edificio, numero');
+    return res
+        .map((e) => EdificioModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -116,8 +105,11 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
   }
 
   @override
-  Future<void> updateEdificio({required String id, required String numero}) async {
-    await client.from(Tables.edificio).update({Cols.numero: numero}).eq(Cols.idEdificio, id);
+  Future<void> updateEdificio(
+      {required String id, required String numero}) async {
+    await client
+        .from(Tables.edificio)
+        .update({Cols.numero: numero}).eq(Cols.idEdificio, id);
   }
 
   @override
@@ -132,17 +124,16 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
       id_salon, codigo, piso, id_edificio,
       edificio ( numero )
     ''');
-    return res.map((e) => SalonItem(
-      id: e['id_salon'] as String,
-      codigo: e['codigo'] as String,
-      piso: e['piso'] as String,
-      edificioId: e['id_edificio'] as String,
-      edificioNumero: e['edificio']['numero'] as String,
-    )).toList();
+    return res
+        .map((e) => SalonModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
-  Future<void> createSalon({required String codigo, required String piso, required String edificioId}) async {
+  Future<void> createSalon(
+      {required String codigo,
+      required String piso,
+      required String edificioId}) async {
     await client.from(Tables.salon).insert({
       Cols.idSalonCol: const Uuid().v4(),
       Cols.codigo: codigo,
@@ -152,7 +143,11 @@ class CatalogsRemoteDataSourceImpl implements CatalogsRemoteDataSource {
   }
 
   @override
-  Future<void> updateSalon({required String id, required String codigo, required String piso, required String edificioId}) async {
+  Future<void> updateSalon(
+      {required String id,
+      required String codigo,
+      required String piso,
+      required String edificioId}) async {
     await client.from(Tables.salon).update({
       Cols.codigo: codigo,
       Cols.piso: piso,

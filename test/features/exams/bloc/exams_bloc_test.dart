@@ -1,10 +1,87 @@
 import 'package:etsAndroid/features/exams/data/datasources/exams_remote_datasource.dart';
+import 'package:etsAndroid/features/exams/domain/entities/exam_admin.dart';
 import 'package:etsAndroid/features/exams/presentation/bloc/exams_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockExamsRemoteDataSource extends Mock
-    implements ExamsRemoteDataSource {}
+// Null-safe mock: override every method that returns a non-nullable Future.
+class MockExamsRemoteDataSource extends Mock implements ExamsRemoteDataSource {
+  @override
+  Future<List<ExamListItem>> getExams() =>
+      super.noSuchMethod(
+        Invocation.method(#getExams, []),
+        returnValue: Future.value(<ExamListItem>[]),
+      ) as Future<List<ExamListItem>>;
+
+  @override
+  Future<ExamFormData> getFormData(
+    String? carreraId,
+    String? planId,
+    String? semestre,
+  ) =>
+      super.noSuchMethod(
+        Invocation.method(#getFormData, [carreraId, planId, semestre]),
+        returnValue: Future.value(const ExamFormData(
+          carreras: [],
+          planes: [],
+          materias: [],
+          salones: [],
+          periodos: [],
+          jefes: [],
+        )),
+      ) as Future<ExamFormData>;
+
+  @override
+  Future<void> createExam({
+    required String carreraeMateriaId,
+    required String salonId,
+    required String periodoId,
+    required String jefeId,
+    required DateTime fechaInicio,
+    required DateTime fechaFin,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(#createExam, [], {
+          #carreraeMateriaId: carreraeMateriaId,
+          #salonId: salonId,
+          #periodoId: periodoId,
+          #jefeId: jefeId,
+          #fechaInicio: fechaInicio,
+          #fechaFin: fechaFin,
+        }),
+        returnValue: Future<void>.value(),
+      ) as Future<void>;
+
+  @override
+  Future<void> updateExam({
+    required String id,
+    required String carreraMateriaId,
+    required String salonId,
+    required String periodoId,
+    required String jefeId,
+    required DateTime fechaInicio,
+    required DateTime fechaFin,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(#updateExam, [], {
+          #id: id,
+          #carreraMateriaId: carreraMateriaId,
+          #salonId: salonId,
+          #periodoId: periodoId,
+          #jefeId: jefeId,
+          #fechaInicio: fechaInicio,
+          #fechaFin: fechaFin,
+        }),
+        returnValue: Future<void>.value(),
+      ) as Future<void>;
+
+  @override
+  Future<void> deleteExam(String id) =>
+      super.noSuchMethod(
+        Invocation.method(#deleteExam, [id]),
+        returnValue: Future<void>.value(),
+      ) as Future<void>;
+}
 
 ExamListItem _examItem(String id) => ExamListItem(
       id: id,
