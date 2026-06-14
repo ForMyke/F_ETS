@@ -114,6 +114,12 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
     final uid = user.id;
 
+    // Si signUp no devuelve sesión (confirmación pendiente a nivel config),
+    // hacemos signIn para obtenerla antes de insertar en tablas propias.
+    if (authRes.session == null) {
+      await client.auth.signInWithPassword(email: correo, password: password);
+    }
+
     await client.from(Tables.usuario).insert({
       Cols.idUsuario: uid,
       Cols.correo: correo,

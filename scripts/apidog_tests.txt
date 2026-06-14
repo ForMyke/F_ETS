@@ -1,0 +1,162 @@
+============================================================
+ESCOM ETS — Cadenas para Apidog
+============================================================
+
+BASE URL
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1
+
+------------------------------------------------------------
+HEADERS COMUNES (agregar en todas las requests)
+------------------------------------------------------------
+apikey:        sb_publishable_AN8bxmkNGmX63Gtmd09U4w_RTx4gj8M
+Authorization: Bearer sb_publishable_AN8bxmkNGmX63Gtmd09U4w_RTx4gj8M
+Content-Type:  application/json
+
+------------------------------------------------------------
+1. OBTENER CARRERAS
+------------------------------------------------------------
+Método: GET
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/carrera?select=id_carrera,nombre,acronimo&activo=eq.true
+
+------------------------------------------------------------
+2. OBTENER EXÁMENES ACTIVOS CON DETALLE
+------------------------------------------------------------
+Método: GET
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/ets?select=id_ets,fechahorainicio,fechahorafin,turno,estado,salon(codigo,edificio(numero)),carrera_materia(semestre,materia(nombre),carrera(acronimo)),jefeacademia(usuario(nombre,apellidopaterno,apellidomaterno))&estado=eq.activo
+
+------------------------------------------------------------
+3. OBTENER SALONES
+------------------------------------------------------------
+Método: GET
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/salon?select=id_salon,codigo,piso,edificio(numero)
+
+------------------------------------------------------------
+4. OBTENER MATERIAS
+------------------------------------------------------------
+Método: GET
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/materia?select=id_materia,nombre
+
+------------------------------------------------------------
+5. OBTENER PROFESORES (jefeacademia)
+------------------------------------------------------------
+Método: GET
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/jefeacademia?select=id_jefeacademia,usuario(nombre,apellidopaterno,apellidomaterno,correo)
+
+------------------------------------------------------------
+6. REGISTRO DE ALUMNO — Paso 1: Crear cuenta Auth
+------------------------------------------------------------
+Método: POST
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/auth/v1/signup
+
+Headers extra:
+  (solo los headers comunes)
+
+Body (JSON):
+{
+  "email": "alumno@prueba.com",
+  "password": "password123"
+}
+
+NOTA: Guarda el "id" del usuario que regresa — lo necesitas en el paso 2.
+
+------------------------------------------------------------
+7. REGISTRO DE ALUMNO — Paso 2: Insertar perfil en usuario
+------------------------------------------------------------
+Método: POST
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/usuario
+
+Headers extra:
+  Prefer: return=representation
+
+Body (JSON):
+{
+  "id_usuario": "UUID_DEL_PASO_1",
+  "correo": "alumno@prueba.com",
+  "nombre": "Juan",
+  "apellidopaterno": "Pérez",
+  "apellidomaterno": "López",
+  "activo": true
+}
+
+------------------------------------------------------------
+8. REGISTRO DE ALUMNO — Paso 3: Insertar alumno
+------------------------------------------------------------
+Método: POST
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/alumno
+
+Headers extra:
+  Prefer: return=representation
+
+Body (JSON):
+{
+  "id_alumno": "UUID_DEL_PASO_1",
+  "boleta": "2023630100",
+  "id_carrera": "UUID_DE_LA_CARRERA",
+  "id_plan": "UUID_DEL_PLAN",
+  "id_usuario": "UUID_DEL_PASO_1"
+}
+
+------------------------------------------------------------
+9. LOGIN DE ALUMNO
+------------------------------------------------------------
+Método: POST
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/auth/v1/token?grant_type=password
+
+Body (JSON):
+{
+  "email": "alumno@prueba.com",
+  "password": "password123"
+}
+
+NOTA: La respuesta incluye "access_token". Cópialo y úsalo
+      en el header Authorization de las requests siguientes:
+      Authorization: Bearer <access_token>
+
+------------------------------------------------------------
+10. VER MIS INSCRIPCIONES (requiere access_token del login)
+------------------------------------------------------------
+Método: GET
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/inscripcionets?select=id_inscripcionets,estado,calificacion,resultado,ets(fechahorainicio,turno,salon(codigo,edificio(numero)),carrera_materia(materia(nombre),carrera(acronimo)))&id_alumno=eq.UUID_DEL_ALUMNO
+
+Header Authorization: Bearer <access_token del login>
+
+------------------------------------------------------------
+11. INSCRIBIRSE A UN EXAMEN (requiere access_token del login)
+------------------------------------------------------------
+Método: POST
+URL:
+https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/inscripcionets
+
+Headers extra:
+  Prefer: return=representation
+  Authorization: Bearer <access_token del login>
+
+Body (JSON):
+{
+  "id_inscripcionets": "INS1749820000000",
+  "id_ets": "UUID_DEL_ETS",
+  "id_alumno": "UUID_DEL_ALUMNO",
+  "estado": "pendiente",
+  "fechainscripcion": "2026-06-13"
+}
+
+------------------------------------------------------------
+CÓMO OBTENER LOS UUIDs NECESARIOS
+------------------------------------------------------------
+- IDs de carrera: usar request #1
+- IDs de plan:
+  GET https://qztkhyttuumtfhywamdp.supabase.co/rest/v1/planestudios?select=id_plan,nombre
+- IDs de ets:
+  usar request #2 y copiar el campo "id_ets"
+
+============================================================

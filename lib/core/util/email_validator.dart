@@ -67,7 +67,8 @@ class IpnEmailValidator {
       return null; // No se puede validar sin datos completos.
     }
 
-    final alias = _normalizarTexto(email.split('@').first);
+    // El alias conserva dígitos; solo se normalizan letras (quitar acentos).
+    final alias = _normalizarAliasEmail(email.split('@').first);
     final inicialNombre = _inicialDe(nombre);
     final apPaterno = _normalizarTexto(apellidoPaterno);
     final inicialMaterno = _inicialDe(apellidoMaterno);
@@ -113,6 +114,7 @@ class IpnEmailValidator {
   // ── Helpers privados ─────────────────────────────────────────────────────
 
   /// Normaliza texto: minúsculas, sin acentos, solo letras a-z.
+  /// Usado para nombres y apellidos (sin dígitos).
   static String _normalizarTexto(String texto) {
     const acentos = 'áéíóúüàèìòùâêîôûäëïöüÿãõ';
     const sinAcento = 'aeiouuaeiouaeiouaeiouÿao';
@@ -120,8 +122,19 @@ class IpnEmailValidator {
     for (var i = 0; i < acentos.length; i++) {
       resultado = resultado.replaceAll(acentos[i], sinAcento[i]);
     }
-    // Quitar caracteres no alfabéticos (espacios, guiones, etc.)
     return resultado.replaceAll(RegExp(r'[^a-z]'), '');
+  }
+
+  /// Normaliza el alias del correo: minúsculas, sin acentos,
+  /// conservando letras Y dígitos (no elimina los 4 números finales).
+  static String _normalizarAliasEmail(String alias) {
+    const acentos = 'áéíóúüàèìòùâêîôûäëïöüÿãõ';
+    const sinAcento = 'aeiouuaeiouaeiouaeiouÿao';
+    var resultado = alias.trim().toLowerCase();
+    for (var i = 0; i < acentos.length; i++) {
+      resultado = resultado.replaceAll(acentos[i], sinAcento[i]);
+    }
+    return resultado.replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 
   static String _inicialDe(String texto) =>

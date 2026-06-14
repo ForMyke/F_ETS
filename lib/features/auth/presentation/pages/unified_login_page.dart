@@ -22,6 +22,7 @@ import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource
 import 'package:etsAndroid/features/jefe/presentation/bloc/jefe_bloc.dart';
 import 'package:etsAndroid/features/jefe/presentation/pages/jefe_shell_page.dart';
 import 'package:etsAndroid/features/shell/presentation/pages/admin_shell_page.dart';
+import 'package:etsAndroid/features/alumno/presentation/pages/alumno_register_page.dart';
 
 /// Detecta el rol del usuario por dominio de correo:
 ///   @alumno.ipn.mx  → alumno
@@ -353,6 +354,40 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage>
                         .slideY(begin: 0.2, curve: Curves.easeOutCubic),
 
                     const SizedBox(height: 24),
+
+                    // ── Link de registro (solo para alumnos) ──────────────
+                    if (_rolDetectado == _RolDetectado.alumno)
+                      Center(
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AlumnoRegisterPage(),
+                            ),
+                          ),
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '¿No tienes cuenta? ',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Regístrate',
+                                  style: AppTextStyles.link.copyWith(
+                                    color: isDark
+                                        ? AppColors.darkBlueMid
+                                        : AppColors.blueMid,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
                   ],
                 ),
               ),
