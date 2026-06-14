@@ -121,6 +121,7 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
           perfil: event.perfil,
           message: 'Ya estás inscrito a este examen.',
         ));
+        add(AlumnoExamsLoaded(perfil: event.perfil));
         return;
       }
       await dataSource.inscribirse(
@@ -134,6 +135,7 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
         perfil: event.perfil,
         message: 'Error al inscribirse. Intenta de nuevo.',
       ));
+      add(AlumnoExamsLoaded(perfil: event.perfil));
     }
   }
 }
