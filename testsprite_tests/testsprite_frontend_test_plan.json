@@ -1,0 +1,1383 @@
+[
+  {
+    "id": "TC001",
+    "title": "Public visitor searches ETS sessions and sees results",
+    "description": "This verifies that a public visitor can search ETS sessions from the home page and view matching results.",
+    "category": "ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a valid subject or career"
+      },
+      {
+        "type": "action",
+        "description": "Submit the search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify matching ETS sessions are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Student enrolls in an ETS exam",
+    "description": "A signed-in student can enroll in an ETS exam and see a successful enrollment confirmation.",
+    "category": "Alumno ETS Enrollment",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open an ETS exam from the available list"
+      },
+      {
+        "type": "action",
+        "description": "Enroll in the exam"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an enrollment confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Search and open ETS exam details",
+    "description": "A public visitor can search ETS sessions and open an exam to view its details.",
+    "category": "Public ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a subject or career name"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exam list is filtered"
+      },
+      {
+        "type": "action",
+        "description": "Open an exam from the results"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exam details are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Student logs in successfully",
+    "description": "A student can sign in and enter the student area with valid credentials.",
+    "category": "Alumno Login and Registration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the student area is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Administrator signs in and reaches the admin area",
+    "description": "This verifies that an administrator can log in with valid credentials and access the authenticated admin shell.",
+    "category": "Admin Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin area is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Filter ETS exams by career or turno",
+    "description": "A public visitor can narrow the ETS list using the available filters and see the results update.",
+    "category": "Public ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the filter panel"
+      },
+      {
+        "type": "action",
+        "description": "Select a career or turno filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exam list is narrowed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Student views available ETS exams after login",
+    "description": "A signed-in student can open the ETS list and see available exams for enrollment.",
+    "category": "Alumno ETS Enrollment",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open the available ETS exams view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify available ETS exams are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Sign in as jefe de academia",
+    "description": "A department head can log in with valid credentials and enter the jefe area.",
+    "category": "Jefe Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /jefe-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the jefe area is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the assigned ETS area is accessible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Public visitor opens an ETS exam detail from search results",
+    "description": "This verifies that a public visitor can open an exam from search results and view its detail information.",
+    "category": "ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a valid subject or career"
+      },
+      {
+        "type": "action",
+        "description": "Submit the search"
+      },
+      {
+        "type": "action",
+        "description": "Open one of the displayed ETS sessions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exam detail view is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Create a new exam",
+    "description": "An administrator can add a new ETS exam and see it appear in the exams list.",
+    "category": "Admin Exams Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the exams section"
+      },
+      {
+        "type": "action",
+        "description": "Open the exam creation form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the exam details with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new exam is displayed in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Student registers a new account",
+    "description": "A new student can complete registration with valid academic details and see a success confirmation.",
+    "category": "Alumno Login and Registration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Open the registration form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with Test Student"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student ID field with 2023123456"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with student.test@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the career field with a valid career"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with a valid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a registration success confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Public visitor filters ETS results and sees the list update",
+    "description": "This verifies that applying a filter on the public search page narrows the displayed ETS sessions.",
+    "category": "ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a valid subject or career"
+      },
+      {
+        "type": "action",
+        "description": "Select a filter option"
+      },
+      {
+        "type": "action",
+        "description": "Submit the search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the filtered ETS sessions are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Student opens an ETS exam details page",
+    "description": "A signed-in student can inspect the details of a selected ETS exam before enrolling.",
+    "category": "Alumno ETS Enrollment",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open an ETS exam from the available list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the ETS exam details are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "View the exam list",
+    "description": "An administrator can open the exams section and see the current ETS exam list.",
+    "category": "Admin Exams Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the exams section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exam list is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Save grades for enrolled students",
+    "description": "A signed-in department head can enter grades for enrolled students and save them successfully.",
+    "category": "Jefe ETS and Grade Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /jefe-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open an assigned ETS session"
+      },
+      {
+        "type": "action",
+        "description": "Enter grades for the enrolled students"
+      },
+      {
+        "type": "action",
+        "description": "Save the grades"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a save confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the submitted grades are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "Save an ETS exam to favorites",
+    "description": "A public visitor can bookmark an ETS exam from the search results and keep it saved locally.",
+    "category": "Public ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a subject or career name"
+      },
+      {
+        "type": "action",
+        "description": "Save an exam from the results to favorites"
+      },
+      {
+        "type": "action",
+        "description": "Open the saved items section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved exam is displayed in favorites"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Edit an existing exam",
+    "description": "An administrator can update an existing ETS exam and see the changes reflected in the exams list.",
+    "category": "Admin Exams Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the exams section"
+      },
+      {
+        "type": "action",
+        "description": "Select an existing exam"
+      },
+      {
+        "type": "action",
+        "description": "Edit the exam details with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated exam is displayed in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "Student reviews enrollment history and grades",
+    "description": "A signed-in student can open their enrollment history and see past ETS inscriptions with grades when available.",
+    "category": "Alumno Inscripciones",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open Mis inscripciones"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the enrollment history and grades are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC019",
+    "title": "View assigned ETS sessions",
+    "description": "A signed-in department head can see the list of ETS sessions assigned to their academia.",
+    "category": "Jefe ETS and Grade Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /jefe-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify assigned ETS sessions are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC020",
+    "title": "View saved ETS favorites list",
+    "description": "A public visitor can open Guardados and review the ETS exams that were saved locally.",
+    "category": "Favorites",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the saved items section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved exams list is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC021",
+    "title": "Administrator views dashboard statistics after signing in",
+    "description": "This verifies that an authenticated administrator can open the dashboard and see aggregate ETS statistics.",
+    "category": "Admin Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open the dashboard section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard statistics are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC022",
+    "title": "Delete an exam",
+    "description": "An administrator can delete an ETS exam and the list updates to remove it.",
+    "category": "Admin Exams Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the exams section"
+      },
+      {
+        "type": "action",
+        "description": "Select an existing exam"
+      },
+      {
+        "type": "action",
+        "description": "Delete the exam"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exam is no longer displayed in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC023",
+    "title": "Open an assigned ETS and review enrolled students",
+    "description": "A signed-in department head can open an assigned ETS session and see the enrolled students list.",
+    "category": "Jefe ETS and Grade Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /jefe-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open an assigned ETS session"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the enrolled students list is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC024",
+    "title": "Export ETS search results as PDF",
+    "description": "A public visitor can export the current ETS search results as a PDF file from the search page.",
+    "category": "Public ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Review the current exam list"
+      },
+      {
+        "type": "action",
+        "description": "Export the results as a PDF"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the PDF export action completes successfully"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC025",
+    "title": "Public visitor saves and removes an ETS favorite",
+    "description": "This verifies that a public visitor can add an ETS session to favorites and later remove it from the saved list.",
+    "category": "Guardados",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a valid subject or career"
+      },
+      {
+        "type": "action",
+        "description": "Submit the search"
+      },
+      {
+        "type": "action",
+        "description": "Save one of the displayed ETS sessions as a favorite"
+      },
+      {
+        "type": "action",
+        "description": "Open the saved items section"
+      },
+      {
+        "type": "action",
+        "description": "Remove the saved ETS session from favorites"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved list is updated"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC026",
+    "title": "Create a new jefe account",
+    "description": "An administrator can add a new jefe account and see it appear in the jefe list.",
+    "category": "Admin Jefes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the jefes section"
+      },
+      {
+        "type": "action",
+        "description": "Open the jefe creation form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name, email, password, and academia fields with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new jefe account is displayed in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC027",
+    "title": "Export ETS search results as calendar file",
+    "description": "A public visitor can export the current ETS search results as a calendar file from the search page.",
+    "category": "Public ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Review the current exam list"
+      },
+      {
+        "type": "action",
+        "description": "Export the results as a calendar file"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the calendar export action completes successfully"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC028",
+    "title": "Remove an exam from favorites",
+    "description": "A public visitor can remove a saved ETS exam and see it disappear from the favorites list.",
+    "category": "Favorites",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the saved items section"
+      },
+      {
+        "type": "action",
+        "description": "Remove a saved exam from favorites"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the removed exam no longer appears in favorites"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC029",
+    "title": "Public visitor exports filtered ETS results",
+    "description": "This verifies that a public visitor can export the current filtered search results from the public search page.",
+    "category": "ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a valid subject or career"
+      },
+      {
+        "type": "action",
+        "description": "Select a filter option"
+      },
+      {
+        "type": "action",
+        "description": "Submit the search"
+      },
+      {
+        "type": "action",
+        "description": "Export the current results"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an export confirmation is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC030",
+    "title": "View the jefe accounts list",
+    "description": "An administrator can open the jefes section and see the current jefe accounts list.",
+    "category": "Admin Jefes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the jefes section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the jefe accounts list is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC031",
+    "title": "Browse reference catalogs",
+    "description": "An administrator can open the catalogs section and browse the buildings, rooms, and careers lists.",
+    "category": "Admin Catalogs",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the catalogs section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the reference catalogs are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC032",
+    "title": "Open the campus map",
+    "description": "A public visitor can open the Mapa section and view the ESCOM campus map.",
+    "category": "Campus Map",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the campus map section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the campus map is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC033",
+    "title": "Student sees invalid login feedback",
+    "description": "A student entering invalid credentials receives an authentication error and stays on the login screen.",
+    "category": "Alumno Login and Registration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with wrong-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid-credentials message is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC034",
+    "title": "Administrator opens password recovery",
+    "description": "This verifies that the administrator can access the password recovery page from the login screen.",
+    "category": "Admin Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Open the password recovery link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the password recovery page is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC035",
+    "title": "Public visitor views the campus map and highlights a building",
+    "description": "This verifies that a public visitor can open the campus map and select a building to see it highlighted.",
+    "category": "Mapa",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the campus map section"
+      },
+      {
+        "type": "action",
+        "description": "Select a building on the map"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected building is highlighted"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC036",
+    "title": "Student sees registration validation feedback",
+    "description": "A student submitting incomplete or invalid registration data receives a validation or creation error and remains on the registration form.",
+    "category": "Alumno Login and Registration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Open the registration form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with Test Student"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a registration validation error is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC037",
+    "title": "Highlight a building on the campus map",
+    "description": "A public visitor can select a building on the campus map and see it highlighted.",
+    "category": "Campus Map",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the campus map section"
+      },
+      {
+        "type": "action",
+        "description": "Select a building on the map"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected building is highlighted"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC038",
+    "title": "Administrator requests a password reset email",
+    "description": "This verifies that an administrator can submit an email address on the password recovery page and see a success confirmation.",
+    "category": "Forgot Password",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /forgot-password"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC039",
+    "title": "Student cannot enroll twice in the same ETS exam",
+    "description": "A signed-in student attempting to enroll again in the same exam sees a message indicating the exam is already enrolled.",
+    "category": "Alumno ETS Enrollment",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /alumno-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open an ETS exam from the available list"
+      },
+      {
+        "type": "action",
+        "description": "Enroll in the exam"
+      },
+      {
+        "type": "action",
+        "description": "Enroll in the same exam again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an already-enrolled message is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC040",
+    "title": "Handle an empty ETS search result",
+    "description": "A public visitor sees an empty state when a search or filter combination returns no ETS sessions.",
+    "category": "Public ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a rare subject or career name"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty state message is displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC041",
+    "title": "Administrator sees an invalid login message",
+    "description": "This verifies that incorrect administrator credentials keep the user on the login page and show a validation error.",
+    "category": "Admin Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid credentials message is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC042",
+    "title": "Reject invalid jefe credentials",
+    "description": "A department head sees an invalid-credentials message when signing in with incorrect credentials.",
+    "category": "Jefe Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /jefe-login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid-credentials message is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC043",
+    "title": "Public visitor sees an empty state for no search matches",
+    "description": "This verifies that the public search page shows an empty state when no ETS sessions match the search criteria.",
+    "category": "ETS Search",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a value that produces no matches"
+      },
+      {
+        "type": "action",
+        "description": "Submit the search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty state message is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC044",
+    "title": "Administrator opens the privacy policy from login",
+    "description": "This verifies that the administrator can access the privacy policy from the login screen.",
+    "category": "Admin Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-login"
+      },
+      {
+        "type": "action",
+        "description": "Open the privacy policy link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the privacy policy page is displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC045",
+    "title": "Administrator sees validation when requesting a password reset with empty input",
+    "description": "This verifies that the password recovery form prevents submission without a valid email address and shows a validation message.",
+    "category": "Forgot Password",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /forgot-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an email validation message is visible"
+      }
+    ],
+    "priority": "Low"
+  }
+]

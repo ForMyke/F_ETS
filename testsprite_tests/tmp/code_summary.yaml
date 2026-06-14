@@ -1,0 +1,320 @@
+version: "2"
+type: frontend
+tech_stack:
+  - language: Dart
+  - framework: Flutter (web target)
+  - state_management: flutter_bloc / BLoC pattern
+  - backend: Supabase (auth + Postgres)
+  - architecture: Clean Architecture (data / domain / presentation)
+  - ui_library: Material Design 3, google_fonts, flutter_animate
+  - other: get_it (DI), dartz (Either), shared_preferences, http, url_launcher, uuid, share_plus, path_provider
+
+routes:
+  - path: /
+    file: lib/features/shell/presentation/pages/public_shell_page.dart
+    auth_required: false
+    description: Public home shell with bottom nav (Buscar, Guardados, Mapa) and role-access popup menu
+  - path: /admin-login
+    file: lib/features/auth/presentation/pages/login_page.dart
+    auth_required: false
+    description: Admin login with email and password via Supabase auth
+  - path: /admin
+    file: lib/features/shell/presentation/pages/admin_shell_page.dart
+    auth_required: true
+    description: Admin shell with bottom nav (Dashboard, Exámenes, Catálogos, Jefes) and logout
+  - path: /forgot-password
+    file: lib/features/auth/presentation/pages/forgot_password_page.dart
+    auth_required: false
+    description: Send password-reset email to admin account
+  - path: /reset-password
+    file: lib/features/auth/presentation/pages/reset_password_page.dart
+    auth_required: false
+    description: Confirm new password after clicking email reset link
+  - path: /alumno-login
+    file: lib/features/alumno/presentation/pages/alumno_login_page.dart
+    auth_required: false
+    description: Student (alumno) login with email and password
+  - path: /jefe-login
+    file: lib/features/jefe/presentation/pages/jefe_login_page.dart
+    auth_required: false
+    description: Department head (jefe de academia) login with email and password
+
+features:
+  - name: Public ETS Search
+    description: Search and filter available ETS (special exams) by career, subject or turn; export results as PDF or ICS calendar file
+    files:
+      - lib/features/search/presentation/pages/search_page.dart
+      - lib/features/search/presentation/widgets/exam_card.dart
+      - lib/features/search/presentation/widgets/filter_sheet.dart
+      - lib/features/search/presentation/widgets/pdf_export_button.dart
+      - lib/features/search/presentation/widgets/ics_export_button.dart
+      - lib/features/search/domain/usecases/get_exams_usecase.dart
+    entry_route: /
+    user_interactions:
+      - Type text in the search bar to filter exams by subject or career
+      - Open filter sheet to narrow results by career (ISC, LCD, IIA) or turno
+      - Tap an exam card to see details
+      - Tap the PDF export button to download the current list as PDF
+      - Tap the ICS export button to download calendar file
+      - Tap the bookmark icon on an exam card to save it to favorites
+    api_calls:
+      - method: GET
+        endpoint: Supabase query on 'ets' table joined with carrera_materia, salon, edificio, periodoets
+    auth_required: false
+
+  - name: Favorites
+    description: Locally save and manage favorite ETS exams using shared_preferences
+    files:
+      - lib/features/favorites/presentation/pages/favorites_page.dart
+      - lib/features/favorites/domain/usecases/get_favorites_usecase.dart
+      - lib/features/favorites/domain/usecases/add_favorite_usecase.dart
+      - lib/features/favorites/domain/usecases/remove_favorite_usecase.dart
+    entry_route: /
+    user_interactions:
+      - Tap the Guardados tab in the bottom nav to see saved exams
+      - Tap the bookmark icon to remove an exam from favorites
+    api_calls: []
+    auth_required: false
+
+  - name: Campus Map
+    description: Interactive painted map of ESCOM campus buildings with pulsing pin and building highlight
+    files:
+      - lib/features/campus_map/presentation/pages/campus_map_page.dart
+      - lib/features/campus_map/presentation/widgets/campus_map_painter.dart
+      - lib/features/campus_map/presentation/widgets/pulsing_pin.dart
+    entry_route: /
+    user_interactions:
+      - Tap the Mapa tab in the bottom nav to see the campus map
+      - Tap a building on the map to highlight it
+    api_calls: []
+    auth_required: false
+
+  - name: Admin Login
+    description: Administrators sign in with email and password via Supabase auth; on success, navigate to /admin
+    files:
+      - lib/features/auth/presentation/pages/login_page.dart
+      - lib/features/auth/presentation/bloc/login_bloc.dart
+      - lib/features/auth/domain/usecases/login_usecase.dart
+    entry_route: /admin-login
+    user_interactions:
+      - Tap the login icon in the bottom nav popup and select Administrador
+      - Fill the email field
+      - Fill the password field
+      - Tap the Entrar button to submit
+      - See shake animation and snackbar on invalid credentials
+      - Tap ¿Olvidaste tu contraseña? to go to forgot password
+      - Tap Política de privacidad to open the privacy policy page
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.signInWithPassword
+    auth_required: false
+
+  - name: Forgot Password
+    description: Send a password-reset link to the admin's email address
+    files:
+      - lib/features/auth/presentation/pages/forgot_password_page.dart
+      - lib/features/auth/presentation/bloc/forgot_password_bloc.dart
+      - lib/features/auth/domain/usecases/forgot_password_usecase.dart
+    entry_route: /forgot-password
+    user_interactions:
+      - Fill the email field
+      - Tap the send button
+      - See success or error message
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.resetPasswordForEmail
+    auth_required: false
+
+  - name: Admin Dashboard
+    description: View aggregate statistics (total exams, enrollments, active exams, etc.)
+    files:
+      - lib/features/dashboard/presentation/pages/dashboard_page.dart
+      - lib/features/dashboard/domain/usecases/get_dashboard_usecase.dart
+    entry_route: /admin
+    user_interactions:
+      - View stats cards with exam and enrollment counts
+    api_calls:
+      - method: GET
+        endpoint: Supabase queries on ets and inscripcionets tables
+    auth_required: true
+
+  - name: Admin Exams Management
+    description: Create, read, update, and delete ETS exam records including date, salon, career-subject, and jefe assignments
+    files:
+      - lib/features/exams/presentation/pages/exams_page.dart
+      - lib/features/exams/presentation/pages/exam_form_page.dart
+      - lib/features/exams/presentation/bloc/exams_bloc.dart
+      - lib/features/exams/domain/usecases/create_exam_usecase.dart
+      - lib/features/exams/domain/usecases/update_exam_usecase.dart
+      - lib/features/exams/domain/usecases/delete_exam_usecase.dart
+    entry_route: /admin
+    user_interactions:
+      - Tap the Exámenes tab in admin bottom nav
+      - Tap the add button to open the exam form
+      - Fill in exam details (date, turno, salon, career-subject, jefe)
+      - Submit to create a new exam
+      - Tap an exam to edit its details
+      - Tap delete to remove an exam
+    api_calls:
+      - method: GET
+        endpoint: Supabase query on ets table
+      - method: POST
+        endpoint: Supabase insert on ets table
+      - method: PUT
+        endpoint: Supabase update on ets table
+      - method: DELETE
+        endpoint: Supabase delete on ets table
+    auth_required: true
+
+  - name: Admin Catalogs
+    description: View reference data for buildings (edificios), rooms (salones), and careers (carreras)
+    files:
+      - lib/features/catalogs/presentation/pages/catalogs_page.dart
+      - lib/features/catalogs/presentation/bloc/catalogs_bloc.dart
+    entry_route: /admin
+    user_interactions:
+      - Tap the Catálogos tab in admin bottom nav
+      - Browse lists of buildings, rooms, and careers
+    api_calls:
+      - method: GET
+        endpoint: Supabase queries on edificio, salon, carrera tables
+    auth_required: true
+
+  - name: Admin Jefes Management
+    description: Create, read, and delete jefe de academia accounts linked to an academia
+    files:
+      - lib/features/jefes/presentation/pages/jefes_admin_page.dart
+      - lib/features/jefes/presentation/bloc/jefes_admin_bloc.dart
+      - lib/features/jefes/domain/usecases/get_jefes_usecase.dart
+      - lib/features/jefes/domain/usecases/create_jefe_usecase.dart
+      - lib/features/jefes/domain/usecases/delete_jefe_usecase.dart
+    entry_route: /admin
+    user_interactions:
+      - Tap the Jefes tab in admin bottom nav
+      - Tap the add button to create a new jefe
+      - Fill in name, email, password, and academia fields
+      - Tap delete to remove a jefe
+    api_calls:
+      - method: GET
+        endpoint: Supabase query on jefeacademia and usuario tables
+      - method: POST
+        endpoint: Supabase insert on jefeacademia and usuario tables
+      - method: DELETE
+        endpoint: Supabase delete on jefeacademia table
+    auth_required: true
+
+  - name: Alumno Login
+    description: Students sign in with their email and password to access their personal ETS panel
+    files:
+      - lib/features/alumno/presentation/pages/alumno_login_page.dart
+      - lib/features/alumno/presentation/bloc/alumno_bloc.dart
+      - lib/features/alumno/domain/usecases/login_alumno_usecase.dart
+    entry_route: /alumno-login
+    user_interactions:
+      - Tap the login icon in the bottom nav popup and select Soy alumno
+      - Fill the email field
+      - Fill the password field
+      - Tap the login button
+      - See error snackbar on invalid credentials
+      - Tap the register link to go to registration
+    api_calls:
+      - method: POST
+        endpoint: Supabase query on alumno and usuario tables
+    auth_required: false
+
+  - name: Alumno Registration
+    description: New students register an account with name, boleta, email, carrera, and password
+    files:
+      - lib/features/alumno/presentation/pages/alumno_register_page.dart
+      - lib/features/alumno/domain/usecases/register_alumno_usecase.dart
+    entry_route: /alumno-login
+    user_interactions:
+      - Tap register link on the alumno login page
+      - Fill in name, boleta, email, carrera, and password fields
+      - Tap the register button to submit
+      - See success or error message
+    api_calls:
+      - method: POST
+        endpoint: Supabase insert on alumno and usuario tables
+    auth_required: false
+
+  - name: Alumno ETS Enrollment
+    description: Students browse available ETS exams and enroll in them
+    files:
+      - lib/features/alumno/presentation/pages/alumno_exams_page.dart
+      - lib/features/alumno/presentation/pages/alumno_ets_detail_page.dart
+      - lib/features/alumno/domain/usecases/get_exams_disponibles_usecase.dart
+      - lib/features/alumno/domain/usecases/inscribirse_usecase.dart
+    entry_route: /alumno-login
+    user_interactions:
+      - View list of available ETS exams after login
+      - Tap an exam to view its details
+      - Tap enroll button to register for the exam
+      - See success or error confirmation
+    api_calls:
+      - method: GET
+        endpoint: Supabase query on ets table filtered by active period
+      - method: POST
+        endpoint: Supabase insert on inscripcionets table
+    auth_required: true
+
+  - name: Alumno Inscripciones
+    description: Students view their own ETS enrollment history and results
+    files:
+      - lib/features/alumno/presentation/pages/alumno_inscripciones_page.dart
+      - lib/features/alumno/domain/usecases/get_mis_inscripciones_usecase.dart
+    entry_route: /alumno-login
+    user_interactions:
+      - View list of enrolled ETS with status and grade if graded
+    api_calls:
+      - method: GET
+        endpoint: Supabase query on inscripcionets joined with ets table filtered by alumno id
+    auth_required: true
+
+  - name: Jefe Login
+    description: Department heads (jefes de academia) sign in to manage their assigned ETS exams and grade students
+    files:
+      - lib/features/jefe/presentation/pages/jefe_login_page.dart
+      - lib/features/jefe/presentation/bloc/jefe_bloc.dart
+      - lib/features/jefe/domain/usecases/login_jefe_usecase.dart
+    entry_route: /jefe-login
+    user_interactions:
+      - Tap the login icon in the bottom nav popup and select Soy jefe de academia
+      - Fill the email field
+      - Fill the password field
+      - Tap the login button
+      - See error snackbar on invalid credentials
+    api_calls:
+      - method: POST
+        endpoint: Supabase query on jefeacademia and usuario tables
+    auth_required: false
+
+  - name: Jefe ETS and Grade Management
+    description: Jefes view their assigned ETS exams, see enrolled students, and submit grades
+    files:
+      - lib/features/jefe/presentation/pages/jefe_shell_page.dart
+      - lib/features/jefe/domain/usecases/get_ets_de_jefe_usecase.dart
+      - lib/features/jefe/domain/usecases/get_alumnos_inscritos_usecase.dart
+      - lib/features/jefe/domain/usecases/guardar_calificacion_usecase.dart
+    entry_route: /jefe-login
+    user_interactions:
+      - View list of ETS exams assigned to their academia
+      - Tap an ETS to see enrolled students
+      - Enter a grade for each student
+      - Save grades
+    api_calls:
+      - method: GET
+        endpoint: Supabase query on ets filtered by jefe id
+      - method: GET
+        endpoint: Supabase query on inscripcionets joined with alumno table
+      - method: PUT
+        endpoint: Supabase update on inscripcionets table to set calificacion and resultado
+    auth_required: true
+
+known_limitations:
+  - issue: Social login button (Google) on the admin login page has an empty onTap handler — not implemented
+    location: lib/features/auth/presentation/pages/login_page.dart
+    impact: Clicking the Google login button does nothing
+  - issue: Favorites are stored locally (shared_preferences) and not synced to backend
+    location: lib/features/favorites/data/datasources/favorites_local_datasource.dart
+    impact: Favorites are lost when local storage is cleared and are not available on other devices

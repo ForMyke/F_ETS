@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/error/failures.dart';
 import '../../../../../core/routes/app_routes.dart';
@@ -23,25 +21,64 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   final _shakeKey = GlobalKey();
-  bool _hasError = false;
+
+  /// Entry fade-in (~400 ms). Native AnimationController so the Ticker is
+  /// properly cleaned up on dispose — no orphaned Timers in widget tests.
+  late final AnimationController _entryController;
+  late final Animation<double> _entryFade;
+
+  /// Horizontal-shake on validation error. Also native so it never leaves
+  /// pending Timers; mimics flutter_animate's shakeX(amount: 6, 400 ms).
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeOffset;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    )..forward();
+    _entryFade = CurvedAnimation(
+      parent: _entryController,
+      curve: Curves.easeOut,
+    );
+
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    // Oscillate ±6 px then settle back to 0, matching the old shakeX effect.
+    _shakeOffset = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 6.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 6.0, end: -6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -6.0, end: 6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 6.0, end: -6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -6.0, end: 6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 6.0, end: 0.0), weight: 1),
+    ]).animate(_shakeController);
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _entryController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
   void _onSubmit(BuildContext context) {
     if (!(_formKey.currentState?.validate() ?? false)) {
       HapticFeedback.mediumImpact();
-      setState(() => _hasError = !_hasError);
+      _shakeController.forward(from: 0);
       return;
     }
     context.read<LoginBloc>().add(LoginSubmitted(
@@ -68,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
           }
           if (state is LoginFailure) {
             HapticFeedback.mediumImpact();
-            setState(() => _hasError = !_hasError);
+            _shakeController.forward(from: 0);
             ErrorSnackbar.show(
               context,
               failure: InvalidCredentialsFailure(state.message),
@@ -78,228 +115,194 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context, state) {
           final isLoading = state is LoginLoading;
 
-          // Extract widgets into local variables so kIsTest guards are clean.
-
-          final backButton = GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.darkBgSurface
-                    : AppColors.bgSurface,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isDark
-                      ? AppColors.darkBorder
-                      : AppColors.borderLight,
-                  width: 1.5,
-                ),
-              ),
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 16,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-          );
-
-          final formFields = Column(
-            key: _shakeKey,
-            children: [
-              LabeledTextField(
-                label: 'Correo electrónico',
-                hint: 'usuario@email.com',
-                controller: _emailController,
-                prefixIcon: Icons.mail_outline_rounded,
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Campo requerido';
-                  if (!v.contains('@')) return 'Correo inválido';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              LabeledTextField(
-                label: 'Contraseña',
-                hint: '••••••••',
-                controller: _passwordController,
-                prefixIcon: Icons.lock_outline_rounded,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Campo requerido';
-                  if (v.length < 6) return 'Mínimo 6 caracteres';
-                  return null;
-                },
-              ),
-            ],
-          );
-
-          final forgotPassword = Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () =>
-                  Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '¿Olvidaste tu contraseña? ',
-                      style: AppTextStyles.caption
-                          .copyWith(color: captionColor),
-                    ),
-                    TextSpan(
-                      text: 'Recuperar',
-                      style: AppTextStyles.link.copyWith(color: linkColor),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-
-          final loginButton = AnimatedContainer(
-            duration: 250.ms,
-            curve: Curves.easeInOut,
-            width: isLoading
-                ? 52
-                : MediaQuery.of(context).size.width - 56,
-            height: 52,
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.blueMid : AppColors.blue,
-              borderRadius: BorderRadius.circular(isLoading ? 26 : 12),
-            ),
-            child: GestureDetector(
-              onTap: isLoading ? null : () => _onSubmit(context),
-              child: Center(
-                child: isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Entrar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-              ),
-            ),
-          );
-
-          final socialSection = Column(
-            children: [
-              const OrDivider(),
-              const SizedBox(height: 16),
-              SocialLoginButton(onTap: () {}),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const PrivacyPolicyPage()),
-                ),
-                child: Center(
-                  child: Text(
-                    'Política de privacidad',
-                    style: AppTextStyles.caption.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextMuted
-                          : AppColors.textMuted,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-
           return LoginBackground(
             child: SafeArea(
               child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 32,
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Back button
-                        kIsTest
-                            ? backButton
-                            : backButton
-                                .animate()
-                                .fadeIn(duration: 400.ms)
-                                .slideX(
-                                    begin: -0.1,
-                                    curve: Curves.easeOutCubic),
-                        const SizedBox(height: 20),
-                        // Login header
-                        kIsTest
-                            ? const LoginHeader()
-                            : const LoginHeader()
-                                .animate()
-                                .fadeIn(duration: 500.ms)
-                                .slideY(
-                                    begin: 0.2,
-                                    curve: Curves.easeOutCubic),
-                        const SizedBox(height: 32),
-                        // Form fields — shake on error + entry animation
-                        kIsTest
-                            ? formFields
-                            : formFields
-                                .animate(target: _hasError ? 1 : 0)
-                                .shakeX(amount: 6, duration: 400.ms)
-                                .animate()
-                                .fadeIn(delay: 100.ms, duration: 500.ms)
-                                .slideY(
-                                    begin: 0.2,
-                                    curve: Curves.easeOutCubic),
-                        const SizedBox(height: 12),
-                        // Forgot password link
-                        kIsTest
-                            ? forgotPassword
-                            : forgotPassword
-                                .animate()
-                                .fadeIn(delay: 180.ms, duration: 500.ms)
-                                .slideY(
-                                    begin: 0.2,
-                                    curve: Curves.easeOutCubic),
-                        const SizedBox(height: 28),
-                        // Login button
-                        kIsTest
-                            ? loginButton
-                            : loginButton
-                                .animate()
-                                .fadeIn(delay: 260.ms, duration: 500.ms)
-                                .slideY(
-                                    begin: 0.2,
-                                    curve: Curves.easeOutCubic),
-                        const SizedBox(height: 24),
-                        const SizedBox(height: 24),
-                        // Social login + privacy policy
-                        kIsTest
-                            ? socialSection
-                            : socialSection
-                                .animate()
-                                .fadeIn(delay: 340.ms, duration: 500.ms)
-                                .slideY(
-                                    begin: 0.2,
-                                    curve: Curves.easeOutCubic),
-                      ],
+                // FadeTransition driven by a native AnimationController gives
+                // the same fade-in effect as the old flutter_animate chains
+                // without scheduling any Future.delayed Timers.
+                child: FadeTransition(
+                  opacity: _entryFade,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 32,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Back button
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkBgSurface
+                                    : AppColors.bgSurface,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderLight,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 16,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const LoginHeader(),
+                          const SizedBox(height: 32),
+                          // Form fields with native shake on validation error
+                          AnimatedBuilder(
+                            animation: _shakeOffset,
+                            builder: (context, child) => Transform.translate(
+                              offset: Offset(_shakeOffset.value, 0),
+                              child: child,
+                            ),
+                            child: Column(
+                              key: _shakeKey,
+                              children: [
+                                LabeledTextField(
+                                  label: 'Correo electrónico',
+                                  hint: 'usuario@email.com',
+                                  controller: _emailController,
+                                  prefixIcon: Icons.mail_outline_rounded,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty)
+                                      return 'Campo requerido';
+                                    if (!v.contains('@'))
+                                      return 'Correo inválido';
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                LabeledTextField(
+                                  label: 'Contraseña',
+                                  hint: '••••••••',
+                                  controller: _passwordController,
+                                  prefixIcon: Icons.lock_outline_rounded,
+                                  obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty)
+                                      return 'Campo requerido';
+                                    if (v.length < 6)
+                                      return 'Mínimo 6 caracteres';
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Forgot password link
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: GestureDetector(
+                              onTap: () => Navigator.of(context)
+                                  .pushNamed(AppRoutes.forgotPassword),
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '¿Olvidaste tu contraseña? ',
+                                      style: AppTextStyles.caption
+                                          .copyWith(color: captionColor),
+                                    ),
+                                    TextSpan(
+                                      text: 'Recuperar',
+                                      style: AppTextStyles.link
+                                          .copyWith(color: linkColor),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                          // Login button
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            width: isLoading
+                                ? 52
+                                : MediaQuery.of(context).size.width - 56,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColors.blueMid : AppColors.blue,
+                              borderRadius: BorderRadius.circular(
+                                isLoading ? 26 : 12,
+                              ),
+                            ),
+                            child: GestureDetector(
+                              onTap: isLoading
+                                  ? null
+                                  : () => _onSubmit(context),
+                              child: Center(
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Entrar',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          // Social login + privacy policy
+                          Column(
+                            children: [
+                              const OrDivider(),
+                              const SizedBox(height: 16),
+                              SocialLoginButton(onTap: () {}),
+                              const SizedBox(height: 16),
+                              GestureDetector(
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const PrivacyPolicyPage(),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Política de privacidad',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkTextMuted
+                                          : AppColors.textMuted,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
