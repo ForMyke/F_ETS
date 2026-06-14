@@ -9,8 +9,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
-    url: 'https://dmbpvqhftfbpcuqawvyi.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtYnB2cWhmdGZicGN1cWF3dnlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzMwNjcsImV4cCI6MjA5NTc0OTA2N30.IAKOSOiOkC3sr9UpbOHFbpyXVBSvtVLEFq3eJSP_2A8',
+    url: 'https://qztkhyttuumtfhywamdp.supabase.co',
+    anonKey: 'sb_publishable_AN8bxmkNGmX63Gtmd09U4w_RTx4gj8M',
   );
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
