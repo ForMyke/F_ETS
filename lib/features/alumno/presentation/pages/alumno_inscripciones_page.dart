@@ -26,12 +26,182 @@ class AlumnoInscripcionesPage extends StatefulWidget {
 }
 
 class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
+  bool _exportando = false;
+
   @override
   void initState() {
     super.initState();
     context
         .read<AlumnoBloc>()
         .add(AlumnoInscripcionesLoaded(perfil: widget.perfil));
+  }
+
+  Future<void> _exportarPdf(List<InscripcionItem> inscripciones) async {
+    setState(() => _exportando = true);
+    try {
+      final pdf = pw.Document();
+      final now = DateTime.now();
+      final meses = [
+        'ene','feb','mar','abr','may','jun',
+        'jul','ago','sep','oct','nov','dic'
+      ];
+      String fmtDate(DateTime d) => '${d.day} ${meses[d.month - 1]} ${d.year}';
+      String estadoLabel(String e) {
+        switch (e) {
+          case 'aprobado': return 'Aprobado';
+          case 'reprobado': return 'Reprobado';
+          case 'calificado': return 'Calificado';
+          default: return 'Pendiente';
+        }
+      }
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (pw.Context ctx) => [
+            // Encabezado
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('ESCOM · IPN',
+                        style: pw.TextStyle(
+                            fontSize: 18,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.blue900)),
+                    pw.Text('Comprobante de Inscripciones ETS',
+                        style: pw.TextStyle(
+                            fontSize: 11, color: PdfColors.grey700)),
+                  ],
+                ),
+                pw.Text(fmtDate(now),
+                    style: pw.TextStyle(
+                        fontSize: 10, color: PdfColors.grey600)),
+              ],
+            ),
+            pw.SizedBox(height: 6),
+            pw.Divider(color: PdfColors.blue200, thickness: 1.5),
+            pw.SizedBox(height: 8),
+            // Datos del alumno
+            pw.Container(
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.blue50,
+                borderRadius:
+                    const pw.BorderRadius.all(pw.Radius.circular(8)),
+                border: pw.Border.all(color: PdfColors.blue100),
+              ),
+              child: pw.Row(
+                children: [
+                  pw.Text('Alumno: ',
+                      style: pw.TextStyle(
+                          fontSize: 10,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.blue900)),
+                  pw.Text(
+                      '${widget.perfil.nombre} ${widget.perfil.apellidoPaterno} ${widget.perfil.apellidoMaterno}',
+                      style: const pw.TextStyle(fontSize: 10)),
+                  pw.SizedBox(width: 24),
+                  pw.Text('Boleta: ',
+                      style: pw.TextStyle(
+                          fontSize: 10,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.blue900)),
+                  pw.Text(widget.perfil.boleta,
+                      style: const pw.TextStyle(fontSize: 10)),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 16),
+            // Tabla
+            pw.Table(
+              border: pw.TableBorder.all(
+                  color: PdfColors.blue100, width: 0.5),
+              columnWidths: {
+                0: const pw.FlexColumnWidth(3),
+                1: const pw.FlexColumnWidth(1.6),
+                2: const pw.FlexColumnWidth(1.1),
+                3: const pw.FlexColumnWidth(1.2),
+                4: const pw.FlexColumnWidth(1.3),
+                5: const pw.FlexColumnWidth(1.4),
+                6: const pw.FlexColumnWidth(1),
+              },
+              children: [
+                pw.TableRow(
+                  decoration:
+                      const pw.BoxDecoration(color: PdfColors.blue800),
+                  children: ['Materia', 'Fecha', 'Hora', 'Turno',
+                      'Salón', 'Estado', 'Cal.']
+                      .map((h) => pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 6),
+                            child: pw.Text(h,
+                                style: pw.TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: PdfColors.white)),
+                          ))
+                      .toList(),
+                ),
+                ...inscripciones.asMap().entries.map((e) {
+                  final i = e.key;
+                  final item = e.value;
+                  return pw.TableRow(
+                    decoration: pw.BoxDecoration(
+                        color: i % 2 == 0
+                            ? PdfColors.white
+                            : PdfColors.blue50),
+                    children: [
+                      item.materia,
+                      fmtDate(item.fechaInicio),
+                      item.hora,
+                      item.turno,
+                      '${item.salon}·E${item.edificio}',
+                      estadoLabel(item.estado),
+                      item.calificacion != null
+                          ? item.calificacion!.toStringAsFixed(1)
+                          : '—',
+                    ]
+                        .map((cell) => pw.Padding(
+                              padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 5),
+                              child: pw.Text(cell,
+                                  style:
+                                      const pw.TextStyle(fontSize: 8)),
+                            ))
+                        .toList(),
+                  );
+                }),
+              ],
+            ),
+            pw.SizedBox(height: 16),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Generado por la app ESCOM · IPN',
+                    style: pw.TextStyle(
+                        fontSize: 8, color: PdfColors.grey500)),
+                pw.Text(
+                    'Documento informativo — sujeto a cambios.',
+                    style: pw.TextStyle(
+                        fontSize: 8, color: PdfColors.grey500)),
+              ],
+            ),
+          ],
+        ),
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename:
+            'inscripciones_${widget.perfil.boleta}_${now.millisecondsSinceEpoch}.pdf',
+      );
+    } finally {
+      if (mounted) setState(() => _exportando = false);
+    }
   }
 
   @override
@@ -88,27 +258,98 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                       .fadeIn(duration: 400.ms)
                       .slideY(begin: 0.2, curve: Curves.easeOutCubic),
                   const SizedBox(height: 12),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Mis ',
-                          style: AppTextStyles.displayLarge.copyWith(
-                            color: isDark
-                                ? AppColors.darkTextPrimary
-                                : AppColors.textPrimary,
+                  BlocBuilder<AlumnoBloc, AlumnoState>(
+                    builder: (context, state) {
+                      final inscripciones =
+                          state is AlumnoInscripcionesSuccess
+                              ? state.inscripciones
+                              : <InscripcionItem>[];
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Mis ',
+                                  style: AppTextStyles.displayLarge.copyWith(
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.textPrimary,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'exámenes',
+                                  style: AppTextStyles.displayItalic.copyWith(
+                                    color: isDark
+                                        ? AppColors.darkBlueMid
+                                        : AppColors.blueMid,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'exámenes',
-                          style: AppTextStyles.displayItalic.copyWith(
-                            color: isDark
-                                ? AppColors.darkBlueMid
-                                : AppColors.blueMid,
-                          ),
-                        ),
-                      ],
-                    ),
+                          if (inscripciones.isNotEmpty)
+                            GestureDetector(
+                              onTap: _exportando
+                                  ? null
+                                  : () => _exportarPdf(inscripciones),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppColors.darkBlueLight
+                                      : AppColors.blueSurface,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? AppColors.darkBlueMid
+                                            .withOpacity(0.3)
+                                        : AppColors.blueLight,
+                                  ),
+                                ),
+                                child: _exportando
+                                    ? SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: isDark
+                                              ? AppColors.darkBlueMid
+                                              : AppColors.blueMid,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.picture_as_pdf_rounded,
+                                            size: 16,
+                                            color: isDark
+                                                ? AppColors.darkBlueMid
+                                                : AppColors.blueMid,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'PDF',
+                                            style:
+                                                AppTextStyles.caption.copyWith(
+                                              color: isDark
+                                                  ? AppColors.darkBlueMid
+                                                  : AppColors.blueMid,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   )
                       .animate()
                       .fadeIn(delay: 100.ms, duration: 500.ms)
