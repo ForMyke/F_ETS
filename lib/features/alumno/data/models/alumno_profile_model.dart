@@ -13,16 +13,16 @@ class AlumnoProfileModel extends AlumnoProfile {
   });
 
   factory AlumnoProfileModel.fromJson(Map<String, dynamic> json) {
-    final u = json['usuario'] as Map<String, dynamic>;
+    final u = (json['usuario'] as Map<String, dynamic>?) ?? {};
     return AlumnoProfileModel(
-      idAlumno: json['id_alumno'] as String,
-      boleta: json['boleta'] as String,
-      idCarrera: json['id_carrera'] as String,
-      idPlan: json['id_plan'] as String,
-      nombre: u['nombre'] as String,
-      apellidoPaterno: u['apellidopaterno'] as String,
-      apellidoMaterno: u['apellidomaterno'] as String,
-      correo: u['correo'] as String,
+      idAlumno: json['id_alumno'] as String? ?? '',
+      boleta: json['boleta'] as String? ?? '',
+      idCarrera: json['id_carrera'] as String? ?? '',
+      idPlan: json['id_plan'] as String? ?? '',
+      nombre: u['nombre'] as String? ?? '',
+      apellidoPaterno: u['apellidopaterno'] as String? ?? '',
+      apellidoMaterno: u['apellidomaterno'] as String? ?? '',
+      correo: u['correo'] as String? ?? '',
     );
   }
 
