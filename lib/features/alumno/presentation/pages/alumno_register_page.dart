@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/error_snackbar.dart';
 import '../../../../../core/error/failures.dart';
+import '../../../../../core/util/form_validators.dart';
 import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
 import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
 import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
@@ -38,11 +39,41 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
 
   late final AlumnoRemoteDataSource _ds;
 
+  // Guardamos snapshots para la validación cruzada en tiempo real.
+  String _nombreSnapshot = '';
+  String _apPaternoSnapshot = '';
+  String _apMaternoSnapshot = '';
+
   @override
   void initState() {
     super.initState();
     _ds = AlumnoRemoteDataSourceImpl(client: Supabase.instance.client);
     _loadCatalogos();
+
+    // Revalidar correo cuando cambia cualquier campo de nombre.
+    _nombreCtrl.addListener(_onNombreChanged);
+    _apPaternoCtrl.addListener(_onNombreChanged);
+    _apMaternoCtrl.addListener(_onNombreChanged);
+  }
+
+  void _onNombreChanged() {
+    final nuevoNombre = _nombreCtrl.text.trim();
+    final nuevoPaterno = _apPaternoCtrl.text.trim();
+    final nuevoMaterno = _apMaternoCtrl.text.trim();
+
+    // Solo revalidar si hubo cambio real para evitar loops.
+    if (nuevoNombre != _nombreSnapshot ||
+        nuevoPaterno != _apPaternoSnapshot ||
+        nuevoMaterno != _apMaternoSnapshot) {
+      _nombreSnapshot = nuevoNombre;
+      _apPaternoSnapshot = nuevoPaterno;
+      _apMaternoSnapshot = nuevoMaterno;
+
+      // Revalidar el formulario si ya fue tocado (tiene error o el correo tiene texto).
+      if (_correoCtrl.text.isNotEmpty) {
+        _formKey.currentState?.validate();
+      }
+    }
   }
 
   Future<void> _loadCatalogos() async {
@@ -63,6 +94,9 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
 
   @override
   void dispose() {
+    _nombreCtrl.removeListener(_onNombreChanged);
+    _apPaternoCtrl.removeListener(_onNombreChanged);
+    _apMaternoCtrl.removeListener(_onNombreChanged);
     _boletaCtrl.dispose();
     _nombreCtrl.dispose();
     _apPaternoCtrl.dispose();
@@ -207,74 +241,78 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      // ── Boleta ──────────────────────────
                                       LabeledTextField(
                                         label: 'Boleta',
                                         hint: '2023XXXXXX',
                                         controller: _boletaCtrl,
                                         prefixIcon: Icons.badge_outlined,
                                         keyboardType: TextInputType.number,
-                                        validator: (v) {
-                                          if (v == null || v.isEmpty)
-                                            return 'Campo requerido';
-                                          return null;
-                                        },
+                                        validator: (v) =>
+                                            FormValidators.boleta(v),
                                       ),
                                       const SizedBox(height: 16),
+
+                                      // ── Nombre(s) ────────────────────────
                                       LabeledTextField(
                                         label: 'Nombre(s)',
                                         hint: 'Juan',
                                         controller: _nombreCtrl,
                                         prefixIcon:
                                             Icons.person_outline_rounded,
-                                        validator: (v) {
-                                          if (v == null || v.trim().isEmpty)
-                                            return 'Campo requerido';
-                                          return null;
-                                        },
+                                        validator: (v) =>
+                                            FormValidators.nombre(v),
                                       ),
                                       const SizedBox(height: 16),
+
+                                      // ── Apellido paterno ─────────────────
                                       LabeledTextField(
                                         label: 'Apellido paterno',
                                         hint: 'García',
                                         controller: _apPaternoCtrl,
                                         prefixIcon:
                                             Icons.person_outline_rounded,
-                                        validator: (v) {
-                                          if (v == null || v.trim().isEmpty)
-                                            return 'Campo requerido';
-                                          return null;
-                                        },
+                                        validator: (v) => FormValidators.nombre(
+                                            v,
+                                            campo: 'Apellido paterno'),
                                       ),
                                       const SizedBox(height: 16),
+
+                                      // ── Apellido materno ─────────────────
                                       LabeledTextField(
                                         label: 'Apellido materno',
                                         hint: 'López',
                                         controller: _apMaternoCtrl,
                                         prefixIcon:
                                             Icons.person_outline_rounded,
-                                        validator: (v) {
-                                          if (v == null || v.trim().isEmpty)
-                                            return 'Campo requerido';
-                                          return null;
-                                        },
+                                        validator: (v) => FormValidators.nombre(
+                                            v,
+                                            campo: 'Apellido materno'),
                                       ),
                                       const SizedBox(height: 16),
+
+                                      // ── Correo con validación cruzada ────
                                       LabeledTextField(
-                                        label: 'Correo electrónico',
-                                        hint: 'correo@ejemplo.com',
+                                        label: 'Correo institucional',
+                                        hint: 'kgarcias1900@alumno.ipn.mx',
                                         controller: _correoCtrl,
                                         prefixIcon: Icons.mail_outline_rounded,
                                         keyboardType:
                                             TextInputType.emailAddress,
-                                        validator: (v) {
-                                          if (v == null || v.isEmpty)
-                                            return 'Campo requerido';
-                                          if (!v.contains('@'))
-                                            return 'Correo inválido';
-                                          return null;
-                                        },
+                                        validator: (_) => FormValidators
+                                            .correoAlumnoConNombre(
+                                          value: _correoCtrl.text,
+                                          nombre: _nombreCtrl.text,
+                                          apellidoPaterno: _apPaternoCtrl.text,
+                                          apellidoMaterno: _apMaternoCtrl.text,
+                                        ),
                                       ),
+                                      const SizedBox(height: 8),
+                                      // Tip de formato
+                                      _CorreoTip(isDark: isDark),
                                       const SizedBox(height: 16),
+
+                                      // ── Contraseña ───────────────────────
                                       LabeledTextField(
                                         label: 'Contraseña',
                                         hint: '••••••••',
@@ -282,16 +320,12 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
                                         prefixIcon: Icons.lock_outline_rounded,
                                         obscureText: true,
                                         textInputAction: TextInputAction.done,
-                                        validator: (v) {
-                                          if (v == null || v.isEmpty)
-                                            return 'Campo requerido';
-                                          if (v.length < 6)
-                                            return 'Mínimo 6 caracteres';
-                                          return null;
-                                        },
+                                        validator: (v) =>
+                                            FormValidators.password(v),
                                       ),
                                       const SizedBox(height: 20),
-                                      // Carrera dropdown
+
+                                      // ── Carrera dropdown ─────────────────
                                       Text(
                                         'CARRERA',
                                         style:
@@ -318,7 +352,8 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
                                             () => _selectedCarreraId = val),
                                       ),
                                       const SizedBox(height: 16),
-                                      // Plan dropdown
+
+                                      // ── Plan dropdown ────────────────────
                                       Text(
                                         'PLAN DE ESTUDIOS',
                                         style:
@@ -353,6 +388,8 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
                                           begin: 0.2,
                                           curve: Curves.easeOutCubic),
                                 const SizedBox(height: 28),
+
+                                // ── Botón crear cuenta ───────────────────
                                 AnimatedContainer(
                                   duration: 250.ms,
                                   curve: Curves.easeInOut,
@@ -488,6 +525,55 @@ class _AlumnoRegisterPageState extends State<AlumnoRegisterPage> {
         .animate()
         .fadeIn(duration: 500.ms)
         .slideY(begin: 0.2, curve: Curves.easeOutCubic);
+  }
+}
+
+// ── Widgets privados ──────────────────────────────────────────────────────────
+
+/// Tip informativo sobre el formato esperado del correo institucional.
+class _CorreoTip extends StatelessWidget {
+  final bool isDark;
+  const _CorreoTip({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.darkBlueLight.withOpacity(0.5)
+            : AppColors.blueSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBlueMid.withOpacity(0.2)
+              : AppColors.blueLight,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            size: 14,
+            color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Formato: inicial+apellido paterno+inicial ap. materno+4 dígitos\n'
+              'Ej: kcarrillor1900@alumno.ipn.mx',
+              style: AppTextStyles.caption.copyWith(
+                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                fontSize: 11,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/error_snackbar.dart';
 import '../../../../../core/error/failures.dart';
+import '../../../../../core/util/form_validators.dart';
 import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field.dart';
 import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
 import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource.dart';
@@ -126,17 +127,12 @@ class _JefeLoginPageState extends State<JefeLoginPage> {
                               children: [
                                 LabeledTextField(
                                   label: 'Correo institucional',
-                                  hint: 'jefe@escom.ipn.mx',
+                                  hint: 'jefe@ipn.mx',
                                   controller: _correoCtrl,
                                   prefixIcon: Icons.mail_outline_rounded,
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty)
-                                      return 'Campo requerido';
-                                    if (!v.contains('@'))
-                                      return 'Correo inválido';
-                                    return null;
-                                  },
+                                  // Jefes usan @ipn.mx
+                                  validator: (v) => FormValidators.correoIpn(v),
                                 ),
                                 const SizedBox(height: 16),
                                 LabeledTextField(
@@ -146,13 +142,7 @@ class _JefeLoginPageState extends State<JefeLoginPage> {
                                   prefixIcon: Icons.lock_outline_rounded,
                                   obscureText: true,
                                   textInputAction: TextInputAction.done,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty)
-                                      return 'Campo requerido';
-                                    if (v.length < 6)
-                                      return 'Mínimo 6 caracteres';
-                                    return null;
-                                  },
+                                  validator: (v) => FormValidators.password(v),
                                 ),
                               ],
                             )
