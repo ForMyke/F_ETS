@@ -12,7 +12,6 @@ import 'package:etsAndroid/features/auth/presentation/widgets/labeled_text_field
 import 'package:etsAndroid/features/auth/presentation/widgets/login_background.dart';
 import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
-import 'alumno_register_page.dart';
 import 'alumno_shell_page.dart';
 
 class AlumnoLoginPage extends StatefulWidget {
@@ -195,38 +194,6 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
                                 .animate()
                                 .fadeIn(delay: 260.ms, duration: 500.ms)
                                 .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                            const SizedBox(height: 24),
-                            Center(
-                              child: GestureDetector(
-                                onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const AlumnoRegisterPage(),
-                                  ),
-                                ),
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '¿No tienes cuenta? ',
-                                        style: AppTextStyles.caption.copyWith(
-                                          color: isDark
-                                              ? AppColors.darkTextSecondary
-                                              : AppColors.textSecondary,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: 'Regístrate',
-                                        style: AppTextStyles.link.copyWith(
-                                          color: isDark
-                                              ? AppColors.darkBlueMid
-                                              : AppColors.blueMid,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ).animate().fadeIn(delay: 340.ms, duration: 500.ms),
                           ],
                         ),
                       ),
