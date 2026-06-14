@@ -1,3 +1,5 @@
+import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
 import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 import 'package:etsAndroid/features/search/data/models/exam_model.dart';

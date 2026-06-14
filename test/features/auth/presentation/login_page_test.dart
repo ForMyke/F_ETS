@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import 'package:etsAndroid/core/error/failures.dart';
+import 'package:etsAndroid/features/auth/domain/entities/user.dart';
 import 'package:etsAndroid/features/auth/domain/usecases/login_usecase.dart';
 import 'package:etsAndroid/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:etsAndroid/features/auth/presentation/pages/login_page.dart';
@@ -7,7 +10,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-class MockLoginUseCase extends Mock implements LoginUseCase {}
+// Null-safe mock: override call() so Mockito has a valid non-null default
+// return value instead of null for Future<Either<Failure, User>>.
+class MockLoginUseCase extends Mock implements LoginUseCase {
+  @override
+  Future<Either<Failure, User>> call(LoginParams params) =>
+      super.noSuchMethod(
+        Invocation.method(#call, [params]),
+        returnValue: Future.value(
+          const Left<Failure, User>(InvalidCredentialsFailure()),
+        ),
+      ) as Future<Either<Failure, User>>;
+}
 
 void main() {
   late MockLoginUseCase useCase;

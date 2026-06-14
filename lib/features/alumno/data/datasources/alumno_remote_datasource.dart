@@ -6,9 +6,6 @@ import 'package:etsAndroid/features/alumno/data/models/alumno_profile_model.dart
 import 'package:etsAndroid/features/alumno/data/models/inscripcion_model.dart';
 import 'package:etsAndroid/features/search/data/models/exam_model.dart';
 
-export 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
-export 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
-
 // ── Contrato ─────────────────────────────────────────────────────────────────
 
 abstract class AlumnoRemoteDataSource {

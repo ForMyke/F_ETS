@@ -3,7 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 
 // Estado string constants (match DB values)

@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
 import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 import 'alumno_exams_page.dart';

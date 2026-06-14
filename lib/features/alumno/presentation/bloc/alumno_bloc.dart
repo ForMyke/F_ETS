@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:etsAndroid/features/search/data/models/exam_model.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
 import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_datasource.dart';
 
 part 'alumno_event.dart';
