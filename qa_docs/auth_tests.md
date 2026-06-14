@@ -17,7 +17,7 @@ All tests live under `test/features/auth/`.
 | `bloc/register_bloc_test.dart` | BLoC unit | ✅ 6/6 pass | New |
 | `domain/login_usecase_test.dart` | UseCase unit | ✅ 2/2 pass | Pre-existing, fixed |
 | `domain/register_usecase_test.dart` | UseCase unit | ✅ 3/3 pass | New |
-| `presentation/login_page_test.dart` | Widget | ❌ 0/3 pass | Pre-existing, source issue |
+| `presentation/login_page_test.dart` | Widget | ❌ 0/3 pass | Mock fixed (2026-06-13); still fails — new `lib/` compile error |
 
 **Total: 26 tests (23 pass, 3 fail)**
 
@@ -81,13 +81,19 @@ All tests live under `test/features/auth/`.
 | 2 | returns Left(failure) when repository fails | `Left<Failure, User>(ServerFailure())` |
 | 3 | forwards all params to repository | `verify(repository.register(name:…,email:…,password:…)).called(1)` |
 
-### `login_page_test.dart` (FAILING — source issue)
+### `login_page_test.dart` (FAILING — updated 2026-06-13)
+
+**Mock fix applied:** `MockLoginUseCase` was a bare `class MockLoginUseCase extends Mock implements LoginUseCase {}`. On 2026-06-13 this was upgraded to the proper `noSuchMethod` override pattern (adds `dartz`, `failures`, and `user` imports; overrides `call(LoginParams)` returning `Future<Either<Failure, User>>`).
+
+The 3 tests still fail, but now for a **new reason** — a compile error introduced by the task #2 frontend-dev fix:
 
 | # | Test name | Status | Root cause |
 |---|-----------|--------|-----------|
-| 1 | renders email field | ❌ | `flutter_animate` pending Timer after widget disposal |
-| 2 | renders password field | ❌ | same |
-| 3 | submits on button press | ❌ | same |
+| 1 | renders without crashing | ❌ | `lib/login_page.dart` compile error: `kIsTest` undefined in Flutter 3.41.1 |
+| 2 | shows email and password fields | ❌ | same compile error (file won't load) |
+| 3 | shows the submit button | ❌ | same compile error (file won't load) |
+
+**Root cause detail:** `login_page.dart` uses `kIsTest` (lines 241, 251, 261, 273, 283, 294) as a guard around `.animate()` calls. `kIsTest` does **not exist** in Flutter 3.41.1's `flutter/foundation.dart`. The fix should replace `kIsTest` with `const bool.fromEnvironment('flutter.test')` or a project-level constant.
 
 ---
 
@@ -114,6 +120,6 @@ class MockLoginUseCase extends Mock implements LoginUseCase {
 
 | Gap | Recommendation |
 |-----|---------------|
-| `LoginPage` widget tests fail due to `flutter_animate` timers | Guard animations with a test-mode flag or use `pumpAndSettle` + `fakeAsync` |
-| No widget tests for `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage` | Add widget tests once the `flutter_animate` source issue is resolved |
+| `LoginPage` widget tests fail — `kIsTest` undefined in Flutter 3.41.1 | Replace all `kIsTest` in `login_page.dart` with `const bool.fromEnvironment('flutter.test')` or a project-level `_kTest` constant |
+| No widget tests for `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage` | Add widget tests once the `login_page.dart` compile error is resolved |
 | `AuthRepository` implementation (`AuthRepositoryImpl`) has no tests | Add data-layer unit tests for HTTP response mapping |

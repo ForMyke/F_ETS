@@ -128,6 +128,7 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
         idEts: event.idEts,
       );
       emit(AlumnoInscripcionSuccess(perfil: event.perfil));
+      add(AlumnoExamsLoaded(perfil: event.perfil));
     } catch (e) {
       emit(AlumnoInscripcionFailure(
         perfil: event.perfil,

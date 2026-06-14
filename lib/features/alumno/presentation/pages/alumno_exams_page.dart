@@ -240,17 +240,25 @@ class _AlumnoExamsPageState extends State<AlumnoExamsPage> {
                         index: i,
                         isDark: isDark,
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => BlocProvider.value(
-                                value: context.read<AlumnoBloc>(),
-                                child: AlumnoEtsDetailPage(
-                                  exam: filtered[i],
-                                  perfil: widget.perfil,
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider.value(
+                                    value: context.read<AlumnoBloc>(),
+                                    child: AlumnoEtsDetailPage(
+                                      exam: filtered[i],
+                                      perfil: widget.perfil,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
+                              )
+                              .then((_) {
+                            if (mounted) {
+                              context.read<AlumnoBloc>().add(
+                                    AlumnoExamsLoaded(perfil: widget.perfil),
+                                  );
+                            }
+                          });
                         },
                       ),
                     );

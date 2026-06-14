@@ -23,6 +23,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -68,12 +69,15 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     _passwordController.dispose();
     _entryController.dispose();
     _shakeController.dispose();
+    _entryController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
   void _onSubmit(BuildContext context) {
     if (!(_formKey.currentState?.validate() ?? false)) {
       HapticFeedback.mediumImpact();
+      _shakeController.forward(from: 0);
       _shakeController.forward(from: 0);
       return;
     }
@@ -101,6 +105,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           }
           if (state is LoginFailure) {
             HapticFeedback.mediumImpact();
+            _shakeController.forward(from: 0);
             _shakeController.forward(from: 0);
             ErrorSnackbar.show(
               context,
@@ -290,4 +295,5 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       ),
     );
   }
+}
 }

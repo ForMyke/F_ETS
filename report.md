@@ -159,3 +159,55 @@ test/
 ```
 
 **Grand total: 86 pass, 3 fail**
+
+---
+
+## 5. Bug Fix Re-run (2026-06-13)
+
+### Fixes Applied
+
+| # | File | Fix | Result |
+|---|------|-----|--------|
+| 1 | `test/features/auth/presentation/login_page_test.dart` | Replaced bare `class MockLoginUseCase extends Mock implements LoginUseCase {}` with `noSuchMethod` override returning `Future<Either<Failure, User>>` | Mock now null-safe |
+| 2 | All other test files | Scanned — no other bare mocks found; dartz list-equality already uses `fold` throughout | No changes needed |
+
+### Test Run Results
+
+```
+flutter test --reporter=compact
+```
+
+| Metric | Count |
+|--------|-------|
+| ✅ Pass | 86 |
+| ❌ Fail | 3 |
+| **Total** | **89** |
+
+All 86 previously-passing tests still pass. The 86 tests that were already green remain green.
+
+### Remaining Issues
+
+**`login_page_test.dart` — 3 tests still fail (compile error in `lib/`)**
+
+The 3 `LoginPage` widget tests continue to fail, but for a **new reason** introduced by the task #2 (frontend-dev) fix:
+
+**Root cause:** `lib/features/auth/presentation/pages/login_page.dart` uses `kIsTest` (lines 241, 251, 261, 273, 283, 294) to guard `.animate()` calls. However, `kIsTest` does **not exist** in Flutter 3.41.1 — it is not exported by `package:flutter/foundation.dart` in this SDK version. Despite `import 'package:flutter/foundation.dart'` being present on line 1, the constant is undefined, causing:
+
+```
+Error: The getter 'kIsTest' isn't defined for the type '_LoginPageState'.
+```
+
+**Impact:** `login_page_test.dart` fails to compile; all 3 widget tests are reported as a load failure.
+
+**Required fix (in `lib/`):** Replace all `kIsTest` references with the correct Flutter 3.x idiom:
+```dart
+// Instead of:
+kIsTest ? widget : widget.animate()...
+
+// Use:
+const bool _kTest = bool.fromEnvironment('flutter.test');
+_kTest ? widget : widget.animate()...
+```
+Or define a project-level constant `const bool kRunningTests = bool.fromEnvironment('flutter.test');` and use that throughout `login_page.dart`.
+
+**Note:** This is a `lib/` issue — QA cannot fix it per task constraints. Needs frontend-dev follow-up.

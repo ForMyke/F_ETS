@@ -27,15 +27,15 @@ COPY . .
 RUN flutter build web --release
 
 
-FROM dart:stable-slim AS prod
+FROM nginx:alpine AS prod
 
-RUN dart pub global activate dhttpd
+COPY --from=builder /app/build/web /usr/share/nginx/html
 
-WORKDIR /app
-COPY --from=builder /app/build/web ./build/web
+RUN printf 'server {\n    listen 8080;\n    root /usr/share/nginx/html;\n    index index.html;\n    location / { try_files $uri $uri/ /index.html; }\n}\n' \
+    > /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
-CMD ["dhttpd", "--path", "build/web", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["nginx", "-g", "daemon off;"]
 
 FROM base AS dev
 
