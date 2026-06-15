@@ -360,7 +360,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 14),
               fillField('Unidad de Aprendizaje a presentar ETS'),
               pw.SizedBox(height: 14),
-              fillField('Turno a presentar ETS'),
+              fillField('Turno a presentar ETS'),s
               pw.SizedBox(height: 14),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
@@ -1667,7 +1667,7 @@ class _InscripcionCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Inicio del mes',
+                        '1 de Junio',
                         style: AppTextStyles.caption.copyWith(
                           fontSize: 10,
                           color: isDark
