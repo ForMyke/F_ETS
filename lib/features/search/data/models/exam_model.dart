@@ -20,35 +20,49 @@ class ExamModel extends Exam {
   });
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
-    final carreraMateria = json['carrera_materia'] as Map<String, dynamic>;
-    final materiaData = carreraMateria['materia'] as Map<String, dynamic>;
-    final carreraData = carreraMateria['carrera'] as Map<String, dynamic>;
-    final planData = carreraMateria['planestudios'] as Map<String, dynamic>;
-    final salonData = json['salon'] as Map<String, dynamic>;
-    final edificioData = salonData['edificio'] as Map<String, dynamic>;
-    final jefeData = json['jefeacademia'] as Map<String, dynamic>;
-    final usuarioData = jefeData['usuario'] as Map<String, dynamic>;
+    final carreraMateria =
+        (json['carrera_materia'] as Map<String, dynamic>?) ?? {};
+    final materiaData =
+        (carreraMateria['materia'] as Map<String, dynamic>?) ?? {};
+    final carreraData =
+        (carreraMateria['carrera'] as Map<String, dynamic>?) ?? {};
+    final planData =
+        (carreraMateria['planestudios'] as Map<String, dynamic>?) ?? {};
+    final salonData = (json['salon'] as Map<String, dynamic>?) ?? {};
+    final edificioData =
+        (salonData['edificio'] as Map<String, dynamic>?) ?? {};
+    final jefeData =
+        (json['jefeacademia'] as Map<String, dynamic>?) ?? {};
+    final usuarioData =
+        (jefeData['usuario'] as Map<String, dynamic>?) ?? {};
 
-    final fechaInicio = DateTime.parse(json['fechahorainicio'] as String);
+    final fechaInicio =
+        DateTime.parse(json['fechahorainicio'] as String? ?? '2000-01-01');
+
+    final nombreProfesor = [
+      usuarioData['nombre'] as String? ?? '',
+      usuarioData['apellidopaterno'] as String? ?? '',
+      usuarioData['apellidomaterno'] as String? ?? '',
+    ].where((s) => s.isNotEmpty).join(' ');
 
     return ExamModel(
-      id: json['id_ets'] as String,
-      materia: materiaData['nombre'] as String,
-      carrera: carreraData['acronimo'] as String,
-      semestre: carreraMateria['semestre'] as int,
-      plan: planData['nombre'] as String,
+      id: json['id_ets'] as String? ?? '',
+      materia: materiaData['nombre'] as String? ?? '',
+      carrera: carreraData['acronimo'] as String? ?? '',
+      semestre: carreraMateria['semestre'] as int? ?? 0,
+      plan: planData['nombre'] as String? ?? '',
       fechaInicio: fechaInicio,
-      fechaFin: DateTime.parse(json['fechahorafin'] as String),
+      fechaFin: DateTime.parse(
+          json['fechahorafin'] as String? ?? '2000-01-01'),
       turno: json['turno'] as String? ?? '',
       hora:
           '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}',
-      salon: salonData['codigo'] as String? ?? salonData['id_salon'] as String,
-      edificio: edificioData['numero'] as String,
+      salon: salonData['codigo'] as String? ?? '',
+      edificio: edificioData['numero'] as String? ?? '',
       piso: salonData['piso'] as String? ?? '',
-      profesor:
-          '${usuarioData['nombre']} ${usuarioData['apellidopaterno']} ${usuarioData['apellidomaterno']}',
-      periodoETS: json['id_periodoets'] as String,
-      estado: json['estado'] as String,
+      profesor: nombreProfesor,
+      periodoETS: json['id_periodoets'] as String? ?? '',
+      estado: json['estado'] as String? ?? '',
     );
   }
 

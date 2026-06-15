@@ -44,7 +44,7 @@ class ExportIcsUseCase implements UseCase<void, ExportIcsParams> {
 
       return const Right(null);
     } catch (e) {
-      return const Left(ServerFailure('Error al generar el archivo ICS.'));
+      return Left(ServerFailure('Error al generar el archivo ICS: $e'));
     }
   }
 

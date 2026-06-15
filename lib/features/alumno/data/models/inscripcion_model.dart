@@ -17,28 +17,31 @@ class InscripcionModel extends InscripcionItem {
   });
 
   factory InscripcionModel.fromJson(Map<String, dynamic> json) {
-    final ets = json['ets'] as Map<String, dynamic>;
-    final salonMap = ets['salon'] as Map<String, dynamic>;
-    final cm = ets['carrera_materia'] as Map<String, dynamic>;
-    final fechaInicio =
-        DateTime.parse(ets['fechahorainicio'] as String);
+    final ets = (json['ets'] as Map<String, dynamic>?) ?? {};
+    final salonMap = (ets['salon'] as Map<String, dynamic>?) ?? {};
+    final cm = (ets['carrera_materia'] as Map<String, dynamic>?) ?? {};
+    final fechaInicio = DateTime.parse(
+        ets['fechahorainicio'] as String? ?? '2000-01-01');
     final hora =
         '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}';
 
     return InscripcionModel(
-      idInscripcion: json['id_inscripcionets'] as String,
-      idEts: json['id_ets'] as String,
-      materia:
-          (cm['materia'] as Map<String, dynamic>)['nombre'] as String,
-      carrera:
-          (cm['carrera'] as Map<String, dynamic>)['acronimo'] as String,
-      salon: salonMap['codigo'] as String,
-      edificio:
-          (salonMap['edificio'] as Map<String, dynamic>)['numero'] as String,
+      idInscripcion: json['id_inscripcionets'] as String? ?? '',
+      idEts: json['id_ets'] as String? ?? '',
+      materia: ((cm['materia'] as Map<String, dynamic>?)
+              ?['nombre'] as String?) ??
+          '',
+      carrera: ((cm['carrera'] as Map<String, dynamic>?)
+              ?['acronimo'] as String?) ??
+          '',
+      salon: salonMap['codigo'] as String? ?? '',
+      edificio: ((salonMap['edificio'] as Map<String, dynamic>?)
+              ?['numero'] as String?) ??
+          '',
       fechaInicio: fechaInicio,
       hora: hora,
       turno: ets['turno'] as String? ?? '',
-      estado: json['estado'] as String,
+      estado: json['estado'] as String? ?? '',
       calificacion: (json['calificacion'] as num?)?.toDouble(),
       resultado: json['resultado'] as String?,
     );
