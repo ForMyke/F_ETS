@@ -15,7 +15,6 @@ import 'package:etsAndroid/features/search/domain/usecases/get_exams_usecase.dar
 import 'package:etsAndroid/features/search/presentation/bloc/search_bloc.dart';
 import 'package:etsAndroid/features/search/presentation/widgets/exam_card.dart';
 import 'package:etsAndroid/features/search/presentation/widgets/filter_sheet.dart';
-import 'package:etsAndroid/features/search/presentation/widgets/ics_export_button.dart';
 import 'package:etsAndroid/features/search/presentation/widgets/pdf_export_button.dart';
 import 'package:etsAndroid/features/favorites/presentation/bloc/favorites_bloc.dart';
 
@@ -387,8 +386,6 @@ class _SearchViewState extends State<_SearchView> {
                               ),
                               Row(
                                 children: [
-                                  IcsExportButton(exams: state.exams, isDark: isDark),
-                                  const SizedBox(width: 8),
                                   PdfExportButton(
                                     exams: state.exams,
                                     carrera: state.carrera,

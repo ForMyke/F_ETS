@@ -8,6 +8,9 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource.dart';
 import 'package:etsAndroid/features/jefe/presentation/bloc/jefe_bloc.dart';
+import 'package:etsAndroid/features/jefe/presentation/pages/jefe_revisiones_page.dart';
+import 'package:etsAndroid/features/notificaciones/data/datasources/notificaciones_datasource.dart';
+import 'package:etsAndroid/features/notificaciones/presentation/pages/notificaciones_page.dart';
 
 // Estado / resultado string constants (match DB values)
 const String _kEstadoAprobado = 'aprobado';
@@ -31,6 +34,7 @@ class JefeShellPage extends StatefulWidget {
 
 class _JefeShellPageState extends State<JefeShellPage> {
   late final JefeBloc _jefeBloc;
+  int _unread = 0;
 
   @override
   void initState() {
@@ -41,6 +45,15 @@ class _JefeShellPageState extends State<JefeShellPage> {
       ),
     );
     _jefeBloc.add(JefeEtsLoaded(perfil: widget.perfil));
+    _loadUnread();
+  }
+
+  Future<void> _loadUnread() async {
+    try {
+      final ds = NotificacionesDataSource(client: Supabase.instance.client);
+      final count = await ds.getUnreadCount(widget.perfil.idJefe);
+      if (mounted) setState(() => _unread = count);
+    } catch (_) {}
   }
 
   @override
@@ -159,6 +172,98 @@ class _JefeShellPageState extends State<JefeShellPage> {
                           ],
                         ),
                       ),
+                      GestureDetector(
+                        onTap: () => Navigator.of(ctx).push(
+                          MaterialPageRoute(
+                            builder: (_) => JefeRevisionesPage(
+                              perfil: widget.perfil,
+                            ),
+                          ),
+                        ),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBlueLight
+                                : AppColors.blueSurface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBlueMid.withOpacity(0.3)
+                                  : AppColors.blueLight,
+                            ),
+                          ),
+                          child: Icon(Icons.rate_review_outlined,
+                              size: 18,
+                              color: isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Bell
+                      GestureDetector(
+                        onTap: () async {
+                          await Navigator.of(ctx).push(
+                            MaterialPageRoute(
+                              builder: (_) => NotificacionesPage(
+                                receptorId: widget.perfil.idJefe,
+                              ),
+                            ),
+                          );
+                          _loadUnread();
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkBlueLight
+                                    : AppColors.blueSurface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.darkBlueMid.withOpacity(0.3)
+                                      : AppColors.blueLight,
+                                ),
+                              ),
+                              child: Icon(Icons.notifications_outlined,
+                                  size: 18,
+                                  color: isDark
+                                      ? AppColors.darkBlueMid
+                                      : AppColors.blueMid),
+                            ),
+                            if (_unread > 0)
+                              Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.error,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      _unread > 9 ? '9+' : '$_unread',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       GestureDetector(
                         onTap: _onLogout,
                         child: Container(

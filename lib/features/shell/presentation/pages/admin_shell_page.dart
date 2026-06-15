@@ -9,6 +9,8 @@ import 'package:etsAndroid/features/exams/presentation/pages/exams_page.dart';
 import 'package:etsAndroid/features/catalogs/presentation/pages/catalogs_page.dart';
 import 'package:etsAndroid/features/jefes/presentation/pages/jefes_admin_page.dart';
 import 'package:etsAndroid/features/inscripciones/presentation/pages/admin_inscripciones_page.dart';
+import 'package:etsAndroid/features/notificaciones/data/datasources/notificaciones_datasource.dart';
+import 'package:etsAndroid/features/notificaciones/presentation/pages/notificaciones_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShellPage extends StatefulWidget {
@@ -20,6 +22,21 @@ class AdminShellPage extends StatefulWidget {
 
 class _AdminShellPageState extends State<AdminShellPage> {
   int _currentIndex = 0;
+  int _unread = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnread();
+  }
+
+  Future<void> _loadUnread() async {
+    try {
+      final ds = NotificacionesDataSource(client: Supabase.instance.client);
+      final count = await ds.getAdminUnreadCount();
+      if (mounted) setState(() => _unread = count);
+    } catch (_) {}
+  }
 
   final List<Widget> _pages = const [
     DashboardPage(),
@@ -109,6 +126,15 @@ class _AdminShellPageState extends State<AdminShellPage> {
         items: _navItems,
         onTap: _onTap,
         onLogout: _onLogout,
+        unreadCount: _unread,
+        onNotificaciones: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const NotificacionesPage(paraAdmin: true),
+            ),
+          );
+          _loadUnread();
+        },
         isDark: isDark,
       ),
     );
@@ -120,6 +146,8 @@ class _AdminBottomNav extends StatelessWidget {
   final List<_NavItem> items;
   final ValueChanged<int> onTap;
   final VoidCallback onLogout;
+  final VoidCallback onNotificaciones;
+  final int unreadCount;
   final bool isDark;
 
   const _AdminBottomNav({
@@ -127,6 +155,8 @@ class _AdminBottomNav extends StatelessWidget {
     required this.items,
     required this.onTap,
     required this.onLogout,
+    required this.onNotificaciones,
+    required this.unreadCount,
     required this.isDark,
   });
 
@@ -161,6 +191,71 @@ class _AdminBottomNav extends StatelessWidget {
                   ),
                 );
               }),
+              // Bell
+              GestureDetector(
+                onTap: onNotificaciones,
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 48,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkBlueLight
+                                  : AppColors.blueSurface,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.darkBlueMid.withOpacity(0.3)
+                                    : AppColors.blueLight,
+                                width: 1,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.notifications_outlined,
+                              size: 16,
+                              color: isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid,
+                            ),
+                          ),
+                          if (unreadCount > 0)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    unreadCount > 9 ? '9+' : '$unreadCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Logout
               GestureDetector(
                 onTap: onLogout,
                 behavior: HitTestBehavior.opaque,

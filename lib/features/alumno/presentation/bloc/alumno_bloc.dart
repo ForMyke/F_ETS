@@ -19,6 +19,11 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
     on<AlumnoInscripcionesLoaded>(_onInscripcionesLoaded);
     on<AlumnoInscribirseRequested>(_onInscribirse);
     on<AlumnoSolicitarBajaRequested>(_onSolicitarBaja);
+    on<AlumnoSolicitarRevisionRequested>(_onSolicitarRevision);
+    on<AlumnoSolicitarEtsEspecialRequested>(_onSolicitarEtsEspecial);
+    on<AlumnoSolicitarBajaEtsEspecialRequested>(_onSolicitarBajaEtsEspecial);
+    on<AlumnoSolicitarRevisionEtsEspecialRequested>(
+        _onSolicitarRevisionEtsEspecial);
   }
 
   Future<void> _onLogin(
@@ -153,6 +158,87 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
       emit(AlumnoBajaFailure(
         perfil: event.perfil,
         message: 'No se pudo solicitar la baja. Intenta de nuevo.',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    }
+  }
+
+  Future<void> _onSolicitarRevision(
+    AlumnoSolicitarRevisionRequested event,
+    Emitter<AlumnoState> emit,
+  ) async {
+    emit(AlumnoRevisionSolicitando(perfil: event.perfil));
+    try {
+      await dataSource.solicitarRevision(event.idInscripcion);
+      emit(AlumnoRevisionSuccess(perfil: event.perfil));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    } catch (e) {
+      emit(AlumnoRevisionFailure(
+        perfil: event.perfil,
+        message: 'No se pudo solicitar la revisión. Intenta de nuevo.',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    }
+  }
+
+  Future<void> _onSolicitarEtsEspecial(
+    AlumnoSolicitarEtsEspecialRequested event,
+    Emitter<AlumnoState> emit,
+  ) async {
+    emit(AlumnoEtsEspLoading(perfil: event.perfil));
+    try {
+      await dataSource.solicitarEtsEspecial(event.idInscripcion);
+      emit(AlumnoEtsEspSuccess(
+        perfil: event.perfil,
+        message: 'Solicitud de ETS especial enviada al administrador',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    } catch (e) {
+      emit(AlumnoEtsEspFailure(
+        perfil: event.perfil,
+        message: 'No se pudo solicitar el ETS especial. Intenta de nuevo.',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    }
+  }
+
+  Future<void> _onSolicitarBajaEtsEspecial(
+    AlumnoSolicitarBajaEtsEspecialRequested event,
+    Emitter<AlumnoState> emit,
+  ) async {
+    emit(AlumnoEtsEspLoading(perfil: event.perfil));
+    try {
+      await dataSource.solicitarBajaEtsEspecial(event.idEtsEspecial);
+      emit(AlumnoEtsEspSuccess(
+        perfil: event.perfil,
+        message: 'Solicitud de baja del ETS especial enviada',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    } catch (e) {
+      emit(AlumnoEtsEspFailure(
+        perfil: event.perfil,
+        message: 'No se pudo solicitar la baja. Intenta de nuevo.',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    }
+  }
+
+  Future<void> _onSolicitarRevisionEtsEspecial(
+    AlumnoSolicitarRevisionEtsEspecialRequested event,
+    Emitter<AlumnoState> emit,
+  ) async {
+    emit(AlumnoEtsEspLoading(perfil: event.perfil));
+    try {
+      await dataSource.solicitarRevisionEtsEspecial(event.idEtsEspecial);
+      emit(AlumnoEtsEspSuccess(
+        perfil: event.perfil,
+        message: 'Solicitud de revisión del ETS especial enviada',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    } catch (e) {
+      emit(AlumnoEtsEspFailure(
+        perfil: event.perfil,
+        message: 'No se pudo solicitar la revisión. Intenta de nuevo.',
       ));
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     }

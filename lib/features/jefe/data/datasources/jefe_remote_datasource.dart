@@ -6,6 +6,7 @@ import 'package:etsAndroid/features/jefe/domain/entities/alumno_inscrito_item.da
 import 'package:etsAndroid/features/jefe/data/models/jefe_profile_model.dart';
 import 'package:etsAndroid/features/jefe/data/models/ets_de_jefe_model.dart';
 import 'package:etsAndroid/features/jefe/data/models/alumno_inscrito_model.dart';
+import 'package:etsAndroid/features/notificaciones/data/datasources/notificaciones_datasource.dart';
 
 export 'package:etsAndroid/features/jefe/domain/entities/jefe_profile.dart';
 export 'package:etsAndroid/features/jefe/domain/entities/ets_de_jefe_item.dart';
@@ -140,5 +141,24 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
       Cols.resultado: resultado,
       Cols.estado: ColValues.estadoCalificado,
     }).eq(Cols.idInscripcionEts, idInscripcion);
+    // Notificar al alumno
+    try {
+      final res = await client
+          .from(Tables.inscripcionEts)
+          .select('id_alumno, ets(carrera_materia(materia(nombre)))')
+          .eq(Cols.idInscripcionEts, idInscripcion)
+          .maybeSingle();
+      final alumnoId = res?['id_alumno'] as String?;
+      final materia = (res?['ets']?['carrera_materia']?['materia']?['nombre'] as String?) ?? 'ETS';
+      if (alumnoId != null) {
+        await crearNotificacion(client,
+            receptorId: alumnoId,
+            tipo: resultado == ColValues.resultadoAprobado
+                ? 'calificacion_aprobado'
+                : 'calificacion_reprobado',
+            mensaje: '$materia: $calificacion · $resultado',
+            refId: idInscripcion);
+      }
+    } catch (_) {}
   }
 }

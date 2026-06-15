@@ -11,6 +11,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
 import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/revision_item.dart';
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 
 // Estado string constants (match DB values)
@@ -22,6 +23,10 @@ const String _kEstadoBajaAprobada = 'baja_aprobada';
 const String _kEstadoAprobado = 'aprobado';
 const String _kEstadoReprobado = 'reprobado';
 const String _kEstadoCalificado = 'calificado';
+
+// Revisión estado constants
+const String _kRevAsignada = 'asignada';
+const String _kRevCalificada = 'calificada';
 
 class AlumnoInscripcionesPage extends StatefulWidget {
   final AlumnoProfile perfil;
@@ -393,6 +398,432 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     }
   }
 
+  Future<void> _generarComprobante(InscripcionItem item) async {
+    final rev = item.revision;
+    if (rev == null || rev.fechaRevision == null) return;
+
+    pw.Widget infoRow(String label, String value) => pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 5),
+          child: pw.Row(children: [
+            pw.Text('$label ',
+                style: pw.TextStyle(
+                    fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+            pw.Expanded(
+                child: pw.Text(value,
+                    style: const pw.TextStyle(fontSize: 9.5))),
+          ]),
+        );
+
+    final fecha = rev.fechaRevision!;
+    const meses = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    final fechaStr =
+        '${fecha.day} de ${meses[fecha.month - 1]} de ${fecha.year}';
+    final horaStr =
+        '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')} hrs';
+
+    try {
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 52, vertical: 44),
+          build: (pw.Context ctx) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Center(
+                child: pw.Column(children: [
+                  pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
+                      style: pw.TextStyle(
+                          fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCOM · ESCOMUNIDAD',
+                      style: pw.TextStyle(
+                          fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                ]),
+              ),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey500, thickness: 0.8),
+              pw.SizedBox(height: 6),
+              pw.Center(
+                child: pw.Text('COMPROBANTE DE REVISIÓN DE ETS',
+                    style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue900)),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.blue50,
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  border: pw.Border.all(color: PdfColors.blue200),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    infoRow('Alumno:',
+                        '${widget.perfil.nombre} ${widget.perfil.apellidoPaterno} ${widget.perfil.apellidoMaterno}'),
+                    infoRow('Boleta:', widget.perfil.boleta),
+                    infoRow('Unidad de aprendizaje:', item.materia),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 14),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  border: pw.Border.all(color: PdfColors.grey300),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('DATOS DE LA REVISIÓN',
+                        style: pw.TextStyle(
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.grey600)),
+                    pw.SizedBox(height: 8),
+                    infoRow('Fecha:', fechaStr),
+                    infoRow('Hora:', horaStr),
+                    if (rev.lugar != null && rev.lugar!.isNotEmpty)
+                      infoRow('Lugar:', rev.lugar!),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                'Presentar este comprobante al momento de la revisión.',
+                style: pw.TextStyle(
+                    fontSize: 9, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                'Este documento acredita el derecho a revisión de ETS y es válido '
+                'únicamente para la unidad de aprendizaje indicada.',
+                style: const pw.TextStyle(fontSize: 9),
+              ),
+              pw.Spacer(),
+              pw.Center(
+                child: pw.Column(children: [
+                  pw.Text('escom.ipn.mx',
+                      style: pw.TextStyle(
+                          fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCUELA SUPERIOR DE CÓMPUTO',
+                      style: pw.TextStyle(
+                          fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('2  0  2  6',
+                      style: pw.TextStyle(
+                          fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                ]),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'Comprobante_Revision_ETS.pdf',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al generar comprobante: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ));
+      }
+    }
+  }
+
+  bool _puedeEtsEspecial(InscripcionItem ins) {
+    if (ins.estado != _kEstadoCalificado) return false;
+    if ((ins.calificacion ?? 10.0) >= 6.0) return false;
+    if (ins.etsEspecial != null) return false;
+    final revisionCalificada = ins.revision?.estado == _kRevCalificada;
+    final dosSemanasTranscurridas =
+        DateTime.now().isAfter(ins.fechaInicio.add(const Duration(days: 14)));
+    return revisionCalificada || dosSemanasTranscurridas;
+  }
+
+  Future<void> _generarFichaEtsEspecial(InscripcionItem item) async {
+    final fechaEtsEsp = item.fechaInicio.add(const Duration(days: 21));
+    final fechaPago = item.fechaInicio.add(const Duration(days: 19));
+    const meses = [
+      'enero','febrero','marzo','abril','mayo','junio',
+      'julio','agosto','septiembre','octubre','noviembre','diciembre'
+    ];
+    String fmtLong(DateTime d) =>
+        '${d.day} de ${meses[d.month - 1]} de ${d.year}';
+
+    pw.Widget infoRow(String label, String value) => pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 3),
+          child: pw.Row(children: [
+            pw.Text('$label ', style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+            pw.Expanded(child: pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
+          ]),
+        );
+
+    pw.Widget fillField(String label) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(label, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 6),
+            pw.Container(
+              height: 14,
+              decoration: const pw.BoxDecoration(
+                border: pw.Border(bottom: pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
+              ),
+            ),
+          ],
+        );
+
+    try {
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 52, vertical: 44),
+          build: (pw.Context ctx) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Center(child: pw.Column(children: [
+                pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
+                    style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ESCOM',
+                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ESCOMUNIDAD', style: const pw.TextStyle(fontSize: 10)),
+              ])),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey500, thickness: 0.8),
+              pw.SizedBox(height: 6),
+              pw.Center(child: pw.Column(children: [
+                pw.Text('ETS ESPECIAL — Evaluación a Título de Suficiencia',
+                    style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Semestre 2026/2/2', style: const pw.TextStyle(fontSize: 10)),
+              ])),
+              pw.SizedBox(height: 10),
+              pw.Text('Fecha límite para realizar el pago: ${fmtLong(fechaPago)}',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 4),
+              pw.Text('Fecha de aplicación del ETS Especial: ${fmtLong(fechaEtsEsp)}',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('Deberás realizar el pago del ETS especial en:',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 4),
+              infoRow('Banco:', 'BBVA'),
+              infoRow('Cuenta:', '0120599727'),
+              infoRow('Nombre:', 'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
+              infoRow('Concepto:', 'Número de boleta'),
+              infoRow('Monto:', '\$20.00 (Veinte pesos 00/100 M.N.)'),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('Anota aquí los siguientes datos para poder hacer válido el pago:',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 14),
+              fillField('Boleta'),
+              pw.SizedBox(height: 14),
+              fillField('Nombre Completo'),
+              pw.SizedBox(height: 14),
+              fillField('Unidad de Aprendizaje a presentar ETS'),
+              pw.SizedBox(height: 14),
+              fillField('Turno a presentar ETS'),
+              pw.SizedBox(height: 14),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('Consulta horario y logística para la presentación de los ETS en:',
+                  style: const pw.TextStyle(fontSize: 9)),
+              pw.Text('https://uteycv.escom.ipn.mx/sacad/ets/',
+                  style: pw.TextStyle(fontSize: 9, color: PdfColors.blue600)),
+              pw.Spacer(),
+              pw.Center(child: pw.Column(children: [
+                pw.Text('escom.ipn.mx',
+                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ESCUELA SUPERIOR DE CÓMPUTO',
+                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                pw.Text('2  0  2  6',
+                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+              ])),
+            ],
+          ),
+        ),
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'Ficha_ETS_Especial.pdf',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al generar ficha: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ));
+      }
+    }
+  }
+
+  Future<void> _generarComprobanteEtsEspecial(InscripcionItem item) async {
+    final rev = item.etsEspecial?.revision;
+    if (rev == null || rev.fechaRevision == null) return;
+
+    pw.Widget infoRow(String label, String value) => pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 5),
+          child: pw.Row(children: [
+            pw.Text('$label ',
+                style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+            pw.Expanded(
+                child: pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
+          ]),
+        );
+
+    final fecha = rev.fechaRevision!;
+    const meses = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    final fechaStr =
+        '${fecha.day} de ${meses[fecha.month - 1]} de ${fecha.year}';
+    final horaStr =
+        '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')} hrs';
+
+    try {
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 52, vertical: 44),
+          build: (pw.Context ctx) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Center(
+                child: pw.Column(children: [
+                  pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
+                      style: pw.TextStyle(
+                          fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCOM · ESCOMUNIDAD',
+                      style: pw.TextStyle(
+                          fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                ]),
+              ),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey500, thickness: 0.8),
+              pw.SizedBox(height: 6),
+              pw.Center(
+                child: pw.Text('COMPROBANTE DE REVISIÓN DE ETS ESPECIAL',
+                    style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue900)),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.blue50,
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  border: pw.Border.all(color: PdfColors.blue200),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    infoRow('Alumno:',
+                        '${widget.perfil.nombre} ${widget.perfil.apellidoPaterno} ${widget.perfil.apellidoMaterno}'),
+                    infoRow('Boleta:', widget.perfil.boleta),
+                    infoRow('Unidad de aprendizaje:', item.materia),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 14),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  border: pw.Border.all(color: PdfColors.grey300),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('DATOS DE LA REVISIÓN DEL ETS ESPECIAL',
+                        style: pw.TextStyle(
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.grey600)),
+                    pw.SizedBox(height: 8),
+                    infoRow('Fecha:', fechaStr),
+                    infoRow('Hora:', horaStr),
+                    if (rev.lugar != null && rev.lugar!.isNotEmpty)
+                      infoRow('Lugar:', rev.lugar!),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                'Presentar este comprobante al momento de la revisión.',
+                style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                'Este documento acredita el derecho a revisión de ETS especial '
+                'y es válido únicamente para la unidad de aprendizaje indicada.',
+                style: const pw.TextStyle(fontSize: 9),
+              ),
+              pw.Spacer(),
+              pw.Center(
+                child: pw.Column(children: [
+                  pw.Text('escom.ipn.mx',
+                      style: pw.TextStyle(
+                          fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCUELA SUPERIOR DE CÓMPUTO',
+                      style: pw.TextStyle(
+                          fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('2  0  2  6',
+                      style: pw.TextStyle(
+                          fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                ]),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'Comprobante_Revision_ETS_Especial.pdf',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al generar comprobante: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -407,6 +838,34 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         } else if (state is AlumnoBajaFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ));
+        } else if (state is AlumnoRevisionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text('Solicitud de revisión enviada al jefe de academia'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ));
+        } else if (state is AlumnoRevisionFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ));
+        } else if (state is AlumnoEtsEspSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ));
+        } else if (state is AlumnoEtsEspFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
             backgroundColor: AppColors.error,
@@ -656,6 +1115,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                       itemCount: state.inscripciones.length,
                       itemBuilder: (ctx, i) {
                         final ins = state.inscripciones[i];
+                        final puedeEsp = _puedeEtsEspecial(ins);
                         return _InscripcionCard(
                           item: ins,
                           index: i,
@@ -671,6 +1131,57 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                                     ),
                                   )
                               : null,
+                          onSolicitarRevision: ins.estado == _kEstadoCalificado &&
+                                  ins.revision == null
+                              ? () => ctx.read<AlumnoBloc>().add(
+                                    AlumnoSolicitarRevisionRequested(
+                                      perfil: state.perfil,
+                                      idInscripcion: ins.idInscripcion,
+                                    ),
+                                  )
+                              : null,
+                          onDescargarComprobante:
+                              ins.revision?.estado == _kRevAsignada
+                                  ? () => _generarComprobante(ins)
+                                  : null,
+                          onSolicitarEtsEspecial: puedeEsp
+                              ? () => ctx.read<AlumnoBloc>().add(
+                                    AlumnoSolicitarEtsEspecialRequested(
+                                      perfil: state.perfil,
+                                      idInscripcion: ins.idInscripcion,
+                                    ),
+                                  )
+                              : null,
+                          onGenerarFichaEtsEspecial: ins.etsEspecial != null &&
+                                  (ins.etsEspecial!.estado == _kEstadoPendiente ||
+                                   ins.etsEspecial!.estado == _kEstadoConfirmada)
+                              ? () => _generarFichaEtsEspecial(ins)
+                              : null,
+                          onSolicitarBajaEtsEspecial:
+                              ins.etsEspecial?.estado == _kEstadoConfirmada
+                                  ? () => ctx.read<AlumnoBloc>().add(
+                                        AlumnoSolicitarBajaEtsEspecialRequested(
+                                          perfil: state.perfil,
+                                          idEtsEspecial:
+                                              ins.etsEspecial!.idEtsEspecial,
+                                        ),
+                                      )
+                                  : null,
+                          onSolicitarRevisionEtsEspecial:
+                              ins.etsEspecial?.estado == _kEstadoCalificado &&
+                                      ins.etsEspecial?.revision == null
+                                  ? () => ctx.read<AlumnoBloc>().add(
+                                        AlumnoSolicitarRevisionEtsEspecialRequested(
+                                          perfil: state.perfil,
+                                          idEtsEspecial:
+                                              ins.etsEspecial!.idEtsEspecial,
+                                        ),
+                                      )
+                                  : null,
+                          onDescargarComprobanteEtsEspecial:
+                              ins.etsEspecial?.revision?.estado == _kRevAsignada
+                                  ? () => _generarComprobanteEtsEspecial(ins)
+                                  : null,
                         );
                       },
                     );
@@ -693,6 +1204,13 @@ class _InscripcionCard extends StatelessWidget {
   final bool isDark;
   final VoidCallback? onGenerarFicha;
   final VoidCallback? onSolicitarBaja;
+  final VoidCallback? onSolicitarRevision;
+  final VoidCallback? onDescargarComprobante;
+  final VoidCallback? onSolicitarEtsEspecial;
+  final VoidCallback? onGenerarFichaEtsEspecial;
+  final VoidCallback? onSolicitarBajaEtsEspecial;
+  final VoidCallback? onSolicitarRevisionEtsEspecial;
+  final VoidCallback? onDescargarComprobanteEtsEspecial;
 
   const _InscripcionCard({
     required this.item,
@@ -700,6 +1218,13 @@ class _InscripcionCard extends StatelessWidget {
     required this.isDark,
     this.onGenerarFicha,
     this.onSolicitarBaja,
+    this.onSolicitarRevision,
+    this.onDescargarComprobante,
+    this.onSolicitarEtsEspecial,
+    this.onGenerarFichaEtsEspecial,
+    this.onSolicitarBajaEtsEspecial,
+    this.onSolicitarRevisionEtsEspecial,
+    this.onDescargarComprobanteEtsEspecial,
   });
 
   String _formatDate(DateTime date) {
@@ -767,6 +1292,304 @@ class _InscripcionCard extends StatelessWidget {
     if (progress >= 0.75) return AppColors.error;
     if (progress >= 0.5) return AppColors.warning;
     return AppColors.success;
+  }
+
+  Widget _buildRevisionSection({
+    required RevisionItem? revision,
+    VoidCallback? onSolicitar,
+    VoidCallback? onDescargar,
+  }) {
+    const meses = [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    String fmtFecha(DateTime d) =>
+        '${d.day} ${meses[d.month - 1]} ${d.year} · '
+        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+    if (revision == null) {
+      return Row(
+        children: [
+          Icon(Icons.rate_review_outlined,
+              size: 14,
+              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'Tienes derecho a solicitar revisión',
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 11,
+                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+              ),
+            ),
+          ),
+          if (onSolicitar != null) ...[
+            const SizedBox(width: 8),
+            _CardButton(
+              label: 'Solicitar',
+              icon: Icons.edit_note_rounded,
+              onTap: onSolicitar,
+              isDark: isDark,
+            ),
+          ],
+        ],
+      );
+    }
+
+    if (revision.estado == _kRevCalificada) {
+      return Row(
+        children: [
+          Icon(Icons.check_circle_outline_rounded,
+              size: 14, color: AppColors.success),
+          const SizedBox(width: 6),
+          Text('Revisión calificada: ',
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 11,
+                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+              )),
+          Text(
+            revision.calificacion != null
+                ? revision.calificacion!.toStringAsFixed(1)
+                : '—',
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.success,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (revision.estado == _kRevAsignada) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                      color: AppColors.success.withValues(alpha: 0.3)),
+                ),
+                child: Text('Revisión asignada',
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.success,
+                    )),
+              ),
+            ],
+          ),
+          if (revision.fechaRevision != null) ...[
+            const SizedBox(height: 6),
+            _Row(
+              icon: Icons.event_rounded,
+              label: 'Fecha revisión',
+              value: fmtFecha(revision.fechaRevision!),
+              isDark: isDark,
+            ),
+          ],
+          if (revision.lugar != null && revision.lugar!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            _Row(
+              icon: Icons.room_outlined,
+              label: 'Lugar',
+              value: revision.lugar!,
+              isDark: isDark,
+            ),
+          ],
+          if (onDescargar != null) ...[
+            const SizedBox(height: 8),
+            _CardButton(
+              label: 'Descargar comprobante',
+              icon: Icons.download_rounded,
+              onTap: onDescargar,
+              isDark: isDark,
+            ),
+          ],
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: AppColors.warning.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            border:
+                Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+          ),
+          child: Text('Revisión en proceso',
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppColors.warning,
+              )),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEtsEspEstadoBadge(String estado) {
+    Color color;
+    String label;
+    switch (estado) {
+      case _kEstadoPendiente:
+        color = AppColors.warning;
+        label = 'ETS Especial: Pend. confirmación';
+        break;
+      case _kEstadoConfirmada:
+        color = AppColors.success;
+        label = 'ETS Especial: Confirmado';
+        break;
+      case _kEstadoBajaSolicitada:
+        color = AppColors.warning;
+        label = 'Baja del ETS especial solicitada';
+        break;
+      case _kEstadoBajaAprobada:
+        color = AppColors.textMuted;
+        label = 'Baja del ETS especial aprobada';
+        break;
+      case _kEstadoRechazada:
+        color = AppColors.error;
+        label = 'ETS Especial rechazado';
+        break;
+      case _kEstadoCalificado:
+        color = isDark ? AppColors.darkBlueMid : AppColors.blueMid;
+        label = 'ETS Especial calificado';
+        break;
+      default:
+        color = AppColors.textMuted;
+        label = estado;
+    }
+    return Row(children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Text(label,
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color,
+            )),
+      ),
+    ]);
+  }
+
+  Widget _buildEtsEspecialSection() {
+    final esp = item.etsEspecial;
+
+    if (esp == null) {
+      if (onSolicitarEtsEspecial == null) return const SizedBox.shrink();
+      return Row(
+        children: [
+          Icon(Icons.school_outlined,
+              size: 14,
+              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'Puedes solicitar un ETS especial',
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 11,
+                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _CardButton(
+            label: 'ETS Especial',
+            icon: Icons.add_circle_outline_rounded,
+            onTap: onSolicitarEtsEspecial!,
+            isDark: isDark,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('ETS Especial',
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+            )),
+        const SizedBox(height: 8),
+        _buildEtsEspEstadoBadge(esp.estado),
+        if (esp.calificacion != null) ...[
+          const SizedBox(height: 6),
+          Row(children: [
+            Icon(Icons.grade_outlined,
+                size: 14,
+                color: isDark ? AppColors.darkBlueMid : AppColors.blueMid),
+            const SizedBox(width: 6),
+            Text('Calificación ETS especial: ',
+                style: AppTextStyles.caption.copyWith(
+                  fontSize: 11,
+                  color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                )),
+            Text(
+              esp.calificacion!.toStringAsFixed(1),
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: esp.calificacion! >= 6.0
+                    ? AppColors.success
+                    : AppColors.error,
+              ),
+            ),
+          ]),
+        ],
+        if (esp.estado == _kEstadoCalificado) ...[
+          const SizedBox(height: 8),
+          _buildRevisionSection(
+            revision: esp.revision,
+            onSolicitar: onSolicitarRevisionEtsEspecial,
+            onDescargar: onDescargarComprobanteEtsEspecial,
+          ),
+        ],
+        if (onGenerarFichaEtsEspecial != null ||
+            onSolicitarBajaEtsEspecial != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (onGenerarFichaEtsEspecial != null)
+                _CardButton(
+                  label: 'Ficha ETS Esp.',
+                  icon: Icons.download_rounded,
+                  onTap: onGenerarFichaEtsEspecial!,
+                  isDark: isDark,
+                ),
+              if (onSolicitarBajaEtsEspecial != null) ...[
+                if (onGenerarFichaEtsEspecial != null)
+                  const SizedBox(width: 8),
+                _CardButton(
+                  label: 'Dar de baja',
+                  icon: Icons.remove_circle_outline_rounded,
+                  onTap: onSolicitarBajaEtsEspecial!,
+                  isDark: isDark,
+                  isDestructive: true,
+                ),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
   }
 
   String _diasRestantes() {
@@ -926,6 +1749,36 @@ class _InscripcionCard extends StatelessWidget {
                 ],
               ),
             ),
+
+            // ── Sección revisión ──────────────────────────────────────
+            if (item.estado == _kEstadoCalificado) ...[
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderLight,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                child: _buildRevisionSection(
+                  revision: item.revision,
+                  onSolicitar: onSolicitarRevision,
+                  onDescargar: onDescargarComprobante,
+                ),
+              ),
+            ],
+
+            // ── Sección ETS especial ───────────────────────────────────
+            if (item.estado == _kEstadoCalificado &&
+                (item.etsEspecial != null ||
+                    onSolicitarEtsEspecial != null)) ...[
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderLight,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                child: _buildEtsEspecialSection(),
+              ),
+            ],
 
             // ── Acciones ─────────────────────────────────────────────
             if (onGenerarFicha != null || onSolicitarBaja != null)

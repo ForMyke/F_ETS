@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:etsAndroid/core/theme/app_colors.dart';
 import 'package:etsAndroid/core/theme/app_text_styles.dart';
+import 'package:etsAndroid/features/notificaciones/data/datasources/notificaciones_datasource.dart';
 
 class AdminInscripcionesPage extends StatefulWidget {
   const AdminInscripcionesPage({super.key});
@@ -16,12 +17,14 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
   late final TabController _tab;
   List<Map<String, dynamic>> _pendientes = [];
   List<Map<String, dynamic>> _bajas = [];
+  List<Map<String, dynamic>> _especiales = [];
   bool _loading = true;
   String? _error;
 
   static const _kSelect = '''
     id_inscripcionets,
     id_ets,
+    id_alumno,
     estado,
     fechainscripcion,
     alumno (
@@ -41,7 +44,7 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 2, vsync: this);
+    _tab = TabController(length: 3, vsync: this);
     _cargar();
   }
 
@@ -69,10 +72,45 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
           .select(_kSelect)
           .eq('estado', 'baja_solicitada')
           .order('fechainscripcion', ascending: true);
+      final e = await client
+          .from('etsespecial')
+          .select('''
+            id_ets_especial,
+            estado,
+            fecha_solicitud,
+            inscripcionets (
+              id_alumno,
+              alumno (
+                boleta,
+                usuario ( nombre, apellidopaterno, apellidomaterno )
+              ),
+              ets (
+                fechahorainicio,
+                turno,
+                carrera_materia (
+                  materia ( nombre ),
+                  carrera ( acronimo )
+                )
+              )
+            )
+          ''')
+          .or('estado.eq.pendiente,estado.eq.baja_solicitada')
+          .order('fecha_solicitud', ascending: true);
       if (!mounted) return;
+      final especiales = (e as List).map((row) {
+        final r = row as Map<String, dynamic>;
+        final ins = (r['inscripcionets'] as Map<String, dynamic>?) ?? {};
+        return {
+          ...r,
+          'id_alumno': ins['id_alumno'],
+          'alumno': ins['alumno'],
+          'ets': ins['ets'],
+        };
+      }).toList();
       setState(() {
         _pendientes = List<Map<String, dynamic>>.from(p);
         _bajas = List<Map<String, dynamic>>.from(b);
+        _especiales = List<Map<String, dynamic>>.from(especiales);
         _loading = false;
       });
     } catch (e) {
@@ -84,18 +122,107 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
     }
   }
 
-  Future<void> _update(String id, String estado) async {
+  Future<void> _notifAlumno(
+    String? alumnoId,
+    String tipo,
+    String mensaje,
+    String refId,
+  ) async {
+    if (alumnoId == null) return;
+    await crearNotificacion(
+      Supabase.instance.client,
+      receptorId: alumnoId,
+      tipo: tipo,
+      mensaje: mensaje,
+      refId: refId,
+    );
+  }
+
+  Future<void> _update(String id, String estado, {String? alumnoId, String? materia}) async {
     await Supabase.instance.client
         .from('inscripcionets')
         .update({'estado': estado})
         .eq('id_inscripcionets', id);
+    final m = materia ?? 'ETS';
+    if (estado == 'confirmada') {
+      await _notifAlumno(alumnoId, 'inscripcion_confirmada', 'Tu inscripción fue confirmada: $m', id);
+    } else if (estado == 'rechazada') {
+      await _notifAlumno(alumnoId, 'inscripcion_rechazada', 'Tu inscripción fue rechazada: $m', id);
+    } else if (estado == 'baja_aprobada') {
+      await _notifAlumno(alumnoId, 'baja_aprobada', 'Tu baja fue aprobada: $m', id);
+    }
     _cargar();
   }
 
-  void _confirmar(String id) => _update(id, 'confirmada');
-  void _rechazar(String id) => _update(id, 'rechazada');
-  void _aprobarBaja(String id) => _update(id, 'baja_aprobada');
-  void _rechazarBaja(String id) => _update(id, 'confirmada');
+  String _materiaDeRow(Map<String, dynamic> row) {
+    final e = (row['ets'] as Map<String, dynamic>?) ?? {};
+    final cm = (e['carrera_materia'] as Map<String, dynamic>?) ?? {};
+    final m = (cm['materia'] as Map<String, dynamic>?) ?? {};
+    return m['nombre'] as String? ?? 'ETS';
+  }
+
+  void _confirmar(Map<String, dynamic> row) => _update(
+        row['id_inscripcionets'] as String,
+        'confirmada',
+        alumnoId: row['id_alumno'] as String?,
+        materia: _materiaDeRow(row),
+      );
+  void _rechazar(Map<String, dynamic> row) => _update(
+        row['id_inscripcionets'] as String,
+        'rechazada',
+        alumnoId: row['id_alumno'] as String?,
+        materia: _materiaDeRow(row),
+      );
+  void _aprobarBaja(Map<String, dynamic> row) => _update(
+        row['id_inscripcionets'] as String,
+        'baja_aprobada',
+        alumnoId: row['id_alumno'] as String?,
+        materia: _materiaDeRow(row),
+      );
+  void _rechazarBaja(Map<String, dynamic> row) => _update(
+        row['id_inscripcionets'] as String,
+        'confirmada',
+        // baja rechazada = vuelve a confirmada, no notificamos
+      );
+
+  Future<void> _updateEtsEspecial(String id, String estado, {String? alumnoId, String? materia}) async {
+    await Supabase.instance.client
+        .from('etsespecial')
+        .update({'estado': estado})
+        .eq('id_ets_especial', id);
+    final m = materia ?? 'ETS';
+    if (estado == 'confirmada') {
+      await _notifAlumno(alumnoId, 'ets_especial_confirmado', 'Tu ETS especial fue confirmado: $m', id);
+    } else if (estado == 'rechazada') {
+      await _notifAlumno(alumnoId, 'ets_especial_rechazado', 'Tu ETS especial fue rechazado: $m', id);
+    } else if (estado == 'baja_aprobada') {
+      await _notifAlumno(alumnoId, 'baja_especial_aprobada', 'Tu baja de ETS especial fue aprobada: $m', id);
+    }
+    _cargar();
+  }
+
+  void _confirmarEsp(Map<String, dynamic> row) => _updateEtsEspecial(
+        row['id_ets_especial'] as String,
+        'confirmada',
+        alumnoId: row['id_alumno'] as String?,
+        materia: _materiaDeRow(row),
+      );
+  void _rechazarEsp(Map<String, dynamic> row) => _updateEtsEspecial(
+        row['id_ets_especial'] as String,
+        'rechazada',
+        alumnoId: row['id_alumno'] as String?,
+        materia: _materiaDeRow(row),
+      );
+  void _aprobarBajaEsp(Map<String, dynamic> row) => _updateEtsEspecial(
+        row['id_ets_especial'] as String,
+        'baja_aprobada',
+        alumnoId: row['id_alumno'] as String?,
+        materia: _materiaDeRow(row),
+      );
+  void _rechazarBajaEsp(Map<String, dynamic> row) => _updateEtsEspecial(
+        row['id_ets_especial'] as String,
+        'confirmada',
+      );
 
   Future<bool?> _confirm(String title, String body) => showDialog<bool>(
         context: context,
@@ -294,6 +421,17 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                       ],
                     ),
                   ),
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.star_outline_rounded, size: 14),
+                        const SizedBox(width: 6),
+                        Text('ETS Esp.'
+                            '${_especiales.isEmpty ? '' : ' (${_especiales.length})'}'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -348,7 +486,7 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                                         'Confirmar inscripción',
                                         'El alumno quedará oficialmente inscrito.',
                                       );
-                                      if (ok == true) _confirmar(row['id_inscripcionets'] as String);
+                                      if (ok == true) _confirmar(row);
                                     },
                                   ),
                                   _AdminAction(
@@ -360,7 +498,7 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                                         'Rechazar inscripción',
                                         'Se notificará al alumno que su inscripción fue rechazada.',
                                       );
-                                      if (ok == true) _rechazar(row['id_inscripcionets'] as String);
+                                      if (ok == true) _rechazar(row);
                                     },
                                   ),
                                 ],
@@ -384,7 +522,7 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                                         'Aprobar baja',
                                         'El alumno quedará dado de baja del examen.',
                                       );
-                                      if (ok == true) _aprobarBaja(row['id_inscripcionets'] as String);
+                                      if (ok == true) _aprobarBaja(row);
                                     },
                                   ),
                                   _AdminAction(
@@ -396,11 +534,84 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                                         'Rechazar solicitud de baja',
                                         'La inscripción volverá a estado confirmada.',
                                       );
-                                      if (ok == true) _rechazarBaja(row['id_inscripcionets'] as String);
+                                      if (ok == true) _rechazarBaja(row);
                                     },
                                   ),
                                 ],
                               ),
+                            ),
+                            _buildList(
+                              isDark: isDark,
+                              items: _especiales,
+                              emptyMsg: 'No hay ETS especiales pendientes',
+                              emptyIcon: Icons.star_border_rounded,
+                              itemBuilder: (row) {
+                                final estado = row['estado'] as String? ?? '';
+                                final esPendiente = estado == 'pendiente';
+                                return _InscripcionAdminCard(
+                                  row: row,
+                                  isDark: isDark,
+                                  badge: esPendiente
+                                      ? 'ETS Esp. · Pend. confirmación'
+                                      : 'ETS Esp. · Baja solicitada',
+                                  badgeColor: esPendiente
+                                      ? AppColors.warning
+                                      : AppColors.error,
+                                  actions: esPendiente
+                                      ? [
+                                          _AdminAction(
+                                            label: 'Confirmar',
+                                            icon: Icons.check_circle_rounded,
+                                            color: AppColors.success,
+                                            onTap: () async {
+                                              final ok = await _confirm(
+                                                'Confirmar ETS especial',
+                                                'El alumno quedará inscrito en el ETS especial.',
+                                              );
+                                              if (ok == true) _confirmarEsp(row);
+                                            },
+                                          ),
+                                          _AdminAction(
+                                            label: 'Rechazar',
+                                            icon: Icons.cancel_rounded,
+                                            color: AppColors.error,
+                                            onTap: () async {
+                                              final ok = await _confirm(
+                                                'Rechazar ETS especial',
+                                                'Se cancelará la solicitud del alumno.',
+                                              );
+                                              if (ok == true) _rechazarEsp(row);
+                                            },
+                                          ),
+                                        ]
+                                      : [
+                                          _AdminAction(
+                                            label: 'Aprobar baja',
+                                            icon: Icons.remove_circle_rounded,
+                                            color: AppColors.warning,
+                                            onTap: () async {
+                                              final ok = await _confirm(
+                                                'Aprobar baja del ETS especial',
+                                                'El alumno quedará dado de baja del ETS especial.',
+                                              );
+                                              if (ok == true) _aprobarBajaEsp(row);
+                                            },
+                                          ),
+                                          _AdminAction(
+                                            label: 'Rechazar baja',
+                                            icon: Icons.undo_rounded,
+                                            color: AppColors.textMuted,
+                                            onTap: () async {
+                                              final ok = await _confirm(
+                                                'Rechazar baja del ETS especial',
+                                                'El ETS especial volverá a estado confirmado.',
+                                              );
+                                              if (ok == true) _rechazarBajaEsp(row);
+                                            },
+                                          ),
+                                        ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -480,11 +691,15 @@ class _InscripcionAdminCard extends StatelessWidget {
   final Map<String, dynamic> row;
   final bool isDark;
   final List<_AdminAction> actions;
+  final String? badge;
+  final Color? badgeColor;
 
   const _InscripcionAdminCard({
     required this.row,
     required this.isDark,
     required this.actions,
+    this.badge,
+    this.badgeColor,
   });
 
   String _nombre() {
@@ -572,6 +787,29 @@ class _InscripcionAdminCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (badge != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: (badgeColor ?? AppColors.warning)
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: (badgeColor ?? AppColors.warning)
+                                .withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: AppTextStyles.caption.copyWith(
+                          color: badgeColor ?? AppColors.warning,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),

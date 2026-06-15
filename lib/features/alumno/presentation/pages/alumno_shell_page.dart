@@ -11,6 +11,8 @@ import 'package:etsAndroid/features/alumno/data/datasources/alumno_remote_dataso
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 import 'alumno_exams_page.dart';
 import 'alumno_inscripciones_page.dart';
+import 'package:etsAndroid/features/notificaciones/data/datasources/notificaciones_datasource.dart';
+import 'package:etsAndroid/features/notificaciones/presentation/pages/notificaciones_page.dart';
 
 class AlumnoShellPage extends StatefulWidget {
   final AlumnoProfile perfil;
@@ -124,7 +126,7 @@ class _AlumnoShellPageState extends State<AlumnoShellPage> {
   }
 }
 
-class _BottomNav extends StatelessWidget {
+class _BottomNav extends StatefulWidget {
   final int currentIndex;
   final List<_NavItem> items;
   final ValueChanged<int> onTap;
@@ -140,7 +142,30 @@ class _BottomNav extends StatelessWidget {
   });
 
   @override
+  State<_BottomNav> createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State<_BottomNav> {
+  int _unread = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnread();
+  }
+
+  Future<void> _loadUnread() async {
+    try {
+      final ds = NotificacionesDataSource(client: Supabase.instance.client);
+      final uid = Supabase.instance.client.auth.currentUser?.id ?? '';
+      final count = await ds.getUnreadCount(uid);
+      if (mounted) setState(() => _unread = count);
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = widget.isDark;
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkBgSurface : AppColors.bgPrimary,
@@ -156,25 +181,99 @@ class _BottomNav extends StatelessWidget {
           height: 64,
           child: Row(
             children: [
-              ...List.generate(items.length, (i) {
-                final isActive = i == currentIndex;
+              ...List.generate(widget.items.length, (i) {
+                final isActive = i == widget.currentIndex;
                 return Expanded(
                   child: GestureDetector(
-                    onTap: () => onTap(i),
+                    onTap: () => widget.onTap(i),
                     behavior: HitTestBehavior.opaque,
                     child: _NavTile(
-                      item: items[i],
+                      item: widget.items[i],
                       isActive: isActive,
                       isDark: isDark,
                     ),
                   ),
                 );
               }),
+              // Bell
               GestureDetector(
-                onTap: onLogout,
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => NotificacionesPage(
+                        receptorId: Supabase.instance.client.auth.currentUser?.id,
+                      ),
+                    ),
+                  );
+                  _loadUnread();
+                },
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
-                  width: 56,
+                  width: 48,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkBlueLight
+                                  : AppColors.blueSurface,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.darkBlueMid.withOpacity(0.3)
+                                    : AppColors.blueLight,
+                                width: 1,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.notifications_outlined,
+                              size: 16,
+                              color: isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid,
+                            ),
+                          ),
+                          if (_unread > 0)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    _unread > 9 ? '9+' : '$_unread',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Logout
+              GestureDetector(
+                onTap: widget.onLogout,
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 48,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

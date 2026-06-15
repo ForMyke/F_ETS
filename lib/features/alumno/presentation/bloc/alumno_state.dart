@@ -159,3 +159,61 @@ class AlumnoBajaFailure extends AlumnoState {
   @override
   List<Object> get props => [perfil.idAlumno, message];
 }
+
+// ── Estados de solicitar revisión ─────────────────────────────────────────────
+
+class AlumnoRevisionSolicitando extends AlumnoState {
+  final AlumnoProfile perfil;
+  const AlumnoRevisionSolicitando({required this.perfil});
+
+  @override
+  List<Object> get props => [perfil.idAlumno];
+}
+
+class AlumnoRevisionSuccess extends AlumnoState {
+  final AlumnoProfile perfil;
+  const AlumnoRevisionSuccess({required this.perfil});
+
+  @override
+  List<Object> get props => [perfil.idAlumno];
+}
+
+class AlumnoRevisionFailure extends AlumnoState {
+  final AlumnoProfile perfil;
+  final String message;
+
+  const AlumnoRevisionFailure({required this.perfil, required this.message});
+
+  @override
+  List<Object> get props => [perfil.idAlumno, message];
+}
+
+// ── Estados de ETS Especial ───────────────────────────────────────────────────
+
+class AlumnoEtsEspLoading extends AlumnoState {
+  final AlumnoProfile perfil;
+  const AlumnoEtsEspLoading({required this.perfil});
+
+  @override
+  List<Object> get props => [perfil.idAlumno];
+}
+
+class AlumnoEtsEspSuccess extends AlumnoState {
+  final AlumnoProfile perfil;
+  final String message;
+
+  const AlumnoEtsEspSuccess({required this.perfil, required this.message});
+
+  @override
+  List<Object> get props => [perfil.idAlumno, message];
+}
+
+class AlumnoEtsEspFailure extends AlumnoState {
+  final AlumnoProfile perfil;
+  final String message;
+
+  const AlumnoEtsEspFailure({required this.perfil, required this.message});
+
+  @override
+  List<Object> get props => [perfil.idAlumno, message];
+}

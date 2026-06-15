@@ -87,3 +87,55 @@ class AlumnoSolicitarBajaRequested extends AlumnoEvent {
   @override
   List<Object> get props => [perfil.idAlumno, idInscripcion];
 }
+
+class AlumnoSolicitarRevisionRequested extends AlumnoEvent {
+  final AlumnoProfile perfil;
+  final String idInscripcion;
+
+  const AlumnoSolicitarRevisionRequested({
+    required this.perfil,
+    required this.idInscripcion,
+  });
+
+  @override
+  List<Object> get props => [perfil.idAlumno, idInscripcion];
+}
+
+class AlumnoSolicitarEtsEspecialRequested extends AlumnoEvent {
+  final AlumnoProfile perfil;
+  final String idInscripcion;
+
+  const AlumnoSolicitarEtsEspecialRequested({
+    required this.perfil,
+    required this.idInscripcion,
+  });
+
+  @override
+  List<Object> get props => [perfil.idAlumno, idInscripcion];
+}
+
+class AlumnoSolicitarBajaEtsEspecialRequested extends AlumnoEvent {
+  final AlumnoProfile perfil;
+  final String idEtsEspecial;
+
+  const AlumnoSolicitarBajaEtsEspecialRequested({
+    required this.perfil,
+    required this.idEtsEspecial,
+  });
+
+  @override
+  List<Object> get props => [perfil.idAlumno, idEtsEspecial];
+}
+
+class AlumnoSolicitarRevisionEtsEspecialRequested extends AlumnoEvent {
+  final AlumnoProfile perfil;
+  final String idEtsEspecial;
+
+  const AlumnoSolicitarRevisionEtsEspecialRequested({
+    required this.perfil,
+    required this.idEtsEspecial,
+  });
+
+  @override
+  List<Object> get props => [perfil.idAlumno, idEtsEspecial];
+}

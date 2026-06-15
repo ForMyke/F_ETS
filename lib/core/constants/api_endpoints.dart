@@ -18,6 +18,7 @@ abstract class Tables {
   static const String usuario = 'usuario';
   static const String planEstudios = 'planestudios';
   static const String materia = 'materia';
+  static const String revisionEts = 'revisionets';
 }
 
 abstract class Cols {
@@ -96,4 +97,7 @@ abstract class ColValues {
   static const String estadoBajaAprobada = 'baja_aprobada';
   static const String resultadoAprobado = 'aprobado';
   static const String resultadoReprobado = 'reprobado';
+  static const String revisionSolicitada = 'solicitada';
+  static const String revisionAsignada = 'asignada';
+  static const String revisionCalificada = 'calificada';
 }

@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/revision_item.dart';
+import 'package:etsAndroid/features/alumno/domain/entities/ets_especial_item.dart';
 
 class InscripcionItem extends Equatable {
   final String idInscripcion;
@@ -13,6 +15,8 @@ class InscripcionItem extends Equatable {
   final String estado;
   final double? calificacion;
   final String? resultado;
+  final RevisionItem? revision;
+  final EtsEspecialItem? etsEspecial;
 
   const InscripcionItem({
     required this.idInscripcion,
@@ -27,6 +31,8 @@ class InscripcionItem extends Equatable {
     required this.estado,
     this.calificacion,
     this.resultado,
+    this.revision,
+    this.etsEspecial,
   });
 
   @override
@@ -43,5 +49,7 @@ class InscripcionItem extends Equatable {
         estado,
         calificacion,
         resultado,
+        revision,
+        etsEspecial,
       ];
 }
