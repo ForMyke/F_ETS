@@ -345,7 +345,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text('En el anverso del comprobante de pago deberás anotar:',
+              pw.Text('Anota aqui los siguientes datos para poder hacer valido el pago:',
                   style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 14),
               // ── Campos para rellenar con pluma ──────────────────────
@@ -379,7 +379,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
 
       await Printing.sharePdf(
         bytes: await pdf.save(),
-        filename: 'ficha_ets_${item.idEts}.pdf',
+        filename: 'Ficha_ETS.pdf',
       );
     } catch (e) {
       if (mounted) {
@@ -660,7 +660,9 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                           item: ins,
                           index: i,
                           isDark: isDark,
-                          onGenerarFicha: () => _generarFichaEts(ins),
+                          onGenerarFicha: ins.estado == _kEstadoPendiente
+                              ? () => _generarFichaEts(ins)
+                              : null,
                           onSolicitarBaja: ins.estado == _kEstadoConfirmada
                               ? () => ctx.read<AlumnoBloc>().add(
                                     AlumnoSolicitarBajaRequested(
@@ -689,14 +691,14 @@ class _InscripcionCard extends StatelessWidget {
   final InscripcionItem item;
   final int index;
   final bool isDark;
-  final VoidCallback onGenerarFicha;
+  final VoidCallback? onGenerarFicha;
   final VoidCallback? onSolicitarBaja;
 
   const _InscripcionCard({
     required this.item,
     required this.index,
     required this.isDark,
-    required this.onGenerarFicha,
+    this.onGenerarFicha,
     this.onSolicitarBaja,
   });
 
@@ -926,30 +928,32 @@ class _InscripcionCard extends StatelessWidget {
             ),
 
             // ── Acciones ─────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _CardButton(
-                    label: 'Ficha ETS',
-                    icon: Icons.download_rounded,
-                    onTap: onGenerarFicha,
-                    isDark: isDark,
-                  ),
-                  if (onSolicitarBaja != null) ...[
-                    const SizedBox(width: 8),
-                    _CardButton(
-                      label: 'Solicitar baja',
-                      icon: Icons.remove_circle_outline_rounded,
-                      onTap: onSolicitarBaja!,
-                      isDark: isDark,
-                      isDestructive: true,
-                    ),
+            if (onGenerarFicha != null || onSolicitarBaja != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (onGenerarFicha != null)
+                      _CardButton(
+                        label: 'Ficha ETS',
+                        icon: Icons.download_rounded,
+                        onTap: onGenerarFicha!,
+                        isDark: isDark,
+                      ),
+                    if (onSolicitarBaja != null) ...[
+                      if (onGenerarFicha != null) const SizedBox(width: 8),
+                      _CardButton(
+                        label: 'Solicitar baja',
+                        icon: Icons.remove_circle_outline_rounded,
+                        onTap: onSolicitarBaja!,
+                        isDark: isDark,
+                        isDestructive: true,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
           ],
         ),
       ),
