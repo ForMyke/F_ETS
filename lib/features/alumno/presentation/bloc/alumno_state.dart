@@ -131,3 +131,31 @@ class AlumnoInscripcionFailure extends AlumnoState {
   @override
   List<Object> get props => [perfil.idAlumno, message];
 }
+
+// ── Estados de solicitar baja ─────────────────────────────────────────────────
+
+class AlumnoBajando extends AlumnoState {
+  final AlumnoProfile perfil;
+  const AlumnoBajando({required this.perfil});
+
+  @override
+  List<Object> get props => [perfil.idAlumno];
+}
+
+class AlumnoBajaSuccess extends AlumnoState {
+  final AlumnoProfile perfil;
+  const AlumnoBajaSuccess({required this.perfil});
+
+  @override
+  List<Object> get props => [perfil.idAlumno];
+}
+
+class AlumnoBajaFailure extends AlumnoState {
+  final AlumnoProfile perfil;
+  final String message;
+
+  const AlumnoBajaFailure({required this.perfil, required this.message});
+
+  @override
+  List<Object> get props => [perfil.idAlumno, message];
+}

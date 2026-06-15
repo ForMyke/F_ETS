@@ -246,7 +246,12 @@ class _AlumnoEtsDetailPageState extends State<AlumnoEtsDetailPage> {
                           .fadeIn(delay: 160.ms, duration: 500.ms)
                           .slideY(begin: 0.1, curve: Curves.easeOutCubic),
 
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
+
+                      // Aviso oficial del proceso ETS
+                      _EtsNoticeCard(isDark: isDark),
+
+                      const SizedBox(height: 24),
 
                       // Botón Inscribirme
                       BlocBuilder<AlumnoBloc, AlumnoState>(
@@ -344,6 +349,276 @@ class _AlumnoEtsDetailPageState extends State<AlumnoEtsDetailPage> {
         ),
       ),
     );
+  }
+}
+
+// ── Aviso oficial del proceso ETS ────────────────────────────────────────────
+
+class _EtsNoticeCard extends StatelessWidget {
+  final bool isDark;
+  const _EtsNoticeCard({required this.isDark});
+
+  Widget _section(String title, List<String> lines) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title.isNotEmpty) ...[
+            Text(title,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+          ],
+          ...lines.map((l) => Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(l,
+                    style: const TextStyle(fontSize: 10.5)),
+              )),
+        ],
+      );
+
+  Widget _infoRow(String label, String value) => Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$label ',
+                style: const TextStyle(
+                    fontSize: 10.5, fontWeight: FontWeight.w700)),
+            Expanded(
+                child: Text(value,
+                    style: const TextStyle(fontSize: 10.5))),
+          ],
+        ),
+      );
+
+  Widget _fillField(String label, bool isDark) => Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary)),
+            const SizedBox(height: 6),
+            Container(
+              height: 30,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.darkBgOverlay
+                    : AppColors.bgSurface,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  topRight: Radius.circular(4),
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBlueMid
+                        : AppColors.blueMid,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('(escribe aquí)',
+                      style: TextStyle(
+                          fontSize: 9.5,
+                          fontStyle: FontStyle.italic,
+                          color: isDark
+                              ? AppColors.darkTextMuted
+                              : AppColors.textMuted)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor =
+        isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final mutedColor =
+        isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final divColor =
+        isDark ? AppColors.darkBorder : AppColors.borderLight;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkBgSurface : AppColors.bgPrimary,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.borderLight,
+          width: 1.5,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          children: [
+            // ── Encabezado institucional ────────────────────────────
+            Container(
+              width: double.infinity,
+              padding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              color:
+                  isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  color:
+                      isDark ? AppColors.darkBlueMid : AppColors.blue,
+                  fontFamily: 'inherit',
+                ),
+                child: Column(
+                  children: [
+                    Text('INSTITUTO POLITÉCNICO NACIONAL',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: isDark
+                                ? AppColors.darkBlueMid
+                                : AppColors.blue)),
+                    Text('ESCOM',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: isDark
+                                ? AppColors.darkBlueMid
+                                : AppColors.blue)),
+                    Text('ESCOMUNIDAD',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary)),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Evaluación a Título de Suficiencia (ETS)',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: textColor),
+                    ),
+                    Text('Semestre 2026/2/2',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 10.5, color: mutedColor)),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Cuerpo ──────────────────────────────────────────────
+            DefaultTextStyle(
+              style: TextStyle(
+                  fontSize: 10.5,
+                  color: textColor,
+                  height: 1.4),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fechas de inscripción
+                    _section('', [
+                      'Las inscripciones a ETS se realizarán los días 9, 10 y 11 de julio de 2026',
+                      'directamente en ventanillas de Gestión Escolar',
+                      'en un horario de 10:00 a 19:00 hrs.',
+                      'Presentar copia del dictamen vigente (en caso de aplicar)',
+                    ]),
+                    Divider(color: divColor, height: 20, thickness: 0.5),
+
+                    // Aplicación
+                    _section('Los ETS se aplicarán:', [
+                      'Del 15 al 18 de julio de 2025',
+                    ]),
+                    Divider(color: divColor, height: 20, thickness: 0.5),
+
+                    // Pago
+                    _section('Deberás realizar el pago del ETS en:', []),
+                    const SizedBox(height: 6),
+                    _infoRow('Banco:', 'BBVA'),
+                    _infoRow('Cuenta:', '0120599727'),
+                    _infoRow('Nombre:',
+                        'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
+                    _infoRow('Concepto:', 'Número de boleta'),
+                    _infoRow('Monto:', '\$20.00 (Veinte pesos 00/100 M.N.)'),
+                    Divider(color: divColor, height: 20, thickness: 0.5),
+
+                    // Campos a anotar en el comprobante
+                    _section(
+                        'En el anverso del comprobante de pago deberás anotar:',
+                        ['']),
+                    const SizedBox(height: 10),
+                    _fillField('Boleta', isDark),
+                    _fillField('Nombre Completo', isDark),
+                    _fillField('Unidad de Aprendizaje a presentar ETS', isDark),
+                    _fillField('Turno a presentar ETS', isDark),
+                    Divider(color: divColor, height: 4, thickness: 0.5),
+                    const SizedBox(height: 12),
+
+                    // Footer
+                    Text(
+                      'Consulta horario y logística para la presentación de los ETS en:',
+                      style: TextStyle(fontSize: 10, color: mutedColor),
+                    ),
+                    Text(
+                      'https://uteycv.escom.ipn.mx/sacad/ets/',
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: isDark
+                              ? AppColors.darkBlueMid
+                              : AppColors.blue,
+                          decoration: TextDecoration.underline),
+                    ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Column(
+                        children: [
+                          Text('escom.ipn.mx',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: textColor)),
+                          Text('ESCUELA SUPERIOR DE CÓMPUTO',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: textColor)),
+                          const SizedBox(height: 2),
+                          Text('2  0  2  6',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 4,
+                                  color:
+                                      isDark ? AppColors.darkBlueMid : AppColors.blue)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    )
+        .animate()
+        .fadeIn(delay: 200.ms, duration: 500.ms)
+        .slideY(begin: 0.08, curve: Curves.easeOutCubic);
   }
 }
 

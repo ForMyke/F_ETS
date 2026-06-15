@@ -43,6 +43,8 @@ abstract class AlumnoRemoteDataSource {
 
   Future<List<InscripcionItem>> getMisInscripciones(String idAlumno);
 
+  Future<void> solicitarBaja(String idInscripcion);
+
   Future<List<Map<String, dynamic>>> getCarreras();
   Future<List<Map<String, dynamic>>> getPlanes();
 }
@@ -267,6 +269,14 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
     return res
         .map((e) => InscripcionModel.fromJson(e))
         .toList();
+  }
+
+  @override
+  Future<void> solicitarBaja(String idInscripcion) async {
+    await client
+        .from(Tables.inscripcionEts)
+        .update({Cols.estado: ColValues.estadoBajaSolicitada})
+        .eq(Cols.idInscripcionEts, idInscripcion);
   }
 
   @override

@@ -18,6 +18,7 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
     on<AlumnoExamsLoaded>(_onExamsLoaded);
     on<AlumnoInscripcionesLoaded>(_onInscripcionesLoaded);
     on<AlumnoInscribirseRequested>(_onInscribirse);
+    on<AlumnoSolicitarBajaRequested>(_onSolicitarBaja);
   }
 
   Future<void> _onLogin(
@@ -136,6 +137,24 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
         message: 'Error al inscribirse. Intenta de nuevo.',
       ));
       add(AlumnoExamsLoaded(perfil: event.perfil));
+    }
+  }
+
+  Future<void> _onSolicitarBaja(
+    AlumnoSolicitarBajaRequested event,
+    Emitter<AlumnoState> emit,
+  ) async {
+    emit(AlumnoBajando(perfil: event.perfil));
+    try {
+      await dataSource.solicitarBaja(event.idInscripcion);
+      emit(AlumnoBajaSuccess(perfil: event.perfil));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
+    } catch (e) {
+      emit(AlumnoBajaFailure(
+        perfil: event.perfil,
+        message: 'No se pudo solicitar la baja. Intenta de nuevo.',
+      ));
+      add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     }
   }
 }

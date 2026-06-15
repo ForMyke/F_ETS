@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -15,6 +14,11 @@ import 'package:etsAndroid/features/alumno/domain/entities/inscripcion_item.dart
 import 'package:etsAndroid/features/alumno/presentation/bloc/alumno_bloc.dart';
 
 // Estado string constants (match DB values)
+const String _kEstadoPendiente = 'pendiente';
+const String _kEstadoConfirmada = 'confirmada';
+const String _kEstadoBajaSolicitada = 'baja_solicitada';
+const String _kEstadoRechazada = 'rechazada';
+const String _kEstadoBajaAprobada = 'baja_aprobada';
 const String _kEstadoAprobado = 'aprobado';
 const String _kEstadoReprobado = 'reprobado';
 const String _kEstadoCalificado = 'calificado';
@@ -263,11 +267,155 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     }
   }
 
+  Future<void> _generarFichaEts(InscripcionItem item) async {
+    pw.Widget infoRow(String label, String value) => pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 3),
+          child: pw.Row(children: [
+            pw.Text('$label ', style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+            pw.Expanded(child: pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
+          ]),
+        );
+
+    pw.Widget fillField(String label) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(label, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 6),
+            pw.Container(
+              height: 14,
+              decoration: const pw.BoxDecoration(
+                border: pw.Border(bottom: pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
+              ),
+            ),
+          ],
+        );
+
+    try {
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 52, vertical: 44),
+          build: (pw.Context ctx) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              // ── Encabezado ──────────────────────────────────────────
+              pw.Center(child: pw.Column(children: [
+                pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
+                    style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ESCOM',
+                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ESCOMUNIDAD', style: const pw.TextStyle(fontSize: 10)),
+              ])),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey500, thickness: 0.8),
+              pw.SizedBox(height: 6),
+              pw.Center(child: pw.Column(children: [
+                pw.Text('Evaluación a Título de Suficiencia (ETS)',
+                    style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Semestre 2026/2/2', style: const pw.TextStyle(fontSize: 10)),
+              ])),
+              pw.SizedBox(height: 10),
+              // ── Texto informativo ───────────────────────────────────
+              pw.Text('Las inscripciones a ETS se realizarán los días 9, 10 y 11 de julio de 2026',
+                  style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('directamente en ventanillas de Gestión Escolar',
+                  style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('en un horario de 10:00 a 19:00 hrs.',
+                  style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('Presentar copia del dictamen vigente (en caso de aplicar)',
+                  style: const pw.TextStyle(fontSize: 9.5)),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('Los ETS se aplicarán:',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Del 15 al 18 de julio de 2025', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('Deberás realizar el pago del ETS en:',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 4),
+              infoRow('Banco:', 'BBVA'),
+              infoRow('Cuenta:', '0120599727'),
+              infoRow('Nombre:', 'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
+              infoRow('Concepto:', 'Número de boleta'),
+              infoRow('Monto:', '\$20.00 (Veinte pesos 00/100 M.N.)'),
+              pw.SizedBox(height: 8),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('En el anverso del comprobante de pago deberás anotar:',
+                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 14),
+              // ── Campos para rellenar con pluma ──────────────────────
+              fillField('Boleta'),
+              pw.SizedBox(height: 14),
+              fillField('Nombre Completo'),
+              pw.SizedBox(height: 14),
+              fillField('Unidad de Aprendizaje a presentar ETS'),
+              pw.SizedBox(height: 14),
+              fillField('Turno a presentar ETS'),
+              pw.SizedBox(height: 14),
+              pw.Divider(color: PdfColors.grey400, thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Text('Consulta horario y logística para la presentación de los ETS en:',
+                  style: const pw.TextStyle(fontSize: 9)),
+              pw.Text('https://uteycv.escom.ipn.mx/sacad/ets/',
+                  style: pw.TextStyle(fontSize: 9, color: PdfColors.blue600)),
+              pw.Spacer(),
+              pw.Center(child: pw.Column(children: [
+                pw.Text('escom.ipn.mx',
+                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ESCUELA SUPERIOR DE CÓMPUTO',
+                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                pw.Text('2  0  2  6',
+                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+              ])),
+            ],
+          ),
+        ),
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'ficha_ets_${item.idEts}.pdf',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al generar ficha: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
+    return BlocListener<AlumnoBloc, AlumnoState>(
+      listener: (context, state) {
+        if (state is AlumnoBajaSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text('Solicitud de baja enviada al administrador'),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ));
+        } else if (state is AlumnoBajaFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ));
+        }
+      },
+      child: Scaffold(
       backgroundColor: isDark ? AppColors.darkBgPrimary : AppColors.bgPrimary,
       body: SafeArea(
         child: Column(
@@ -506,11 +654,23 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                     return ListView.builder(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                       itemCount: state.inscripciones.length,
-                      itemBuilder: (_, i) => _InscripcionCard(
-                        item: state.inscripciones[i],
-                        index: i,
-                        isDark: isDark,
-                      ),
+                      itemBuilder: (ctx, i) {
+                        final ins = state.inscripciones[i];
+                        return _InscripcionCard(
+                          item: ins,
+                          index: i,
+                          isDark: isDark,
+                          onGenerarFicha: () => _generarFichaEts(ins),
+                          onSolicitarBaja: ins.estado == _kEstadoConfirmada
+                              ? () => ctx.read<AlumnoBloc>().add(
+                                    AlumnoSolicitarBajaRequested(
+                                      perfil: state.perfil,
+                                      idInscripcion: ins.idInscripcion,
+                                    ),
+                                  )
+                              : null,
+                        );
+                      },
                     );
                   }
                   return const SizedBox.shrink();
@@ -520,7 +680,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -528,11 +689,15 @@ class _InscripcionCard extends StatelessWidget {
   final InscripcionItem item;
   final int index;
   final bool isDark;
+  final VoidCallback onGenerarFicha;
+  final VoidCallback? onSolicitarBaja;
 
   const _InscripcionCard({
     required this.item,
     required this.index,
     required this.isDark,
+    required this.onGenerarFicha,
+    this.onSolicitarBaja,
   });
 
   String _formatDate(DateTime date) {
@@ -545,10 +710,17 @@ class _InscripcionCard extends StatelessWidget {
 
   Color _estadoColor(String estado) {
     switch (estado) {
+      case _kEstadoConfirmada:
       case _kEstadoAprobado:
         return AppColors.success;
       case _kEstadoReprobado:
+      case _kEstadoRechazada:
         return AppColors.error;
+      case _kEstadoBajaSolicitada:
+        return AppColors.warning;
+      case _kEstadoBajaAprobada:
+        return AppColors.textMuted;
+      case _kEstadoPendiente:
       default:
         return AppColors.warning;
     }
@@ -556,6 +728,16 @@ class _InscripcionCard extends StatelessWidget {
 
   String _estadoLabel(String estado) {
     switch (estado) {
+      case _kEstadoPendiente:
+        return 'Pend. confirmación';
+      case _kEstadoConfirmada:
+        return 'Confirmada';
+      case _kEstadoBajaSolicitada:
+        return 'Baja solicitada';
+      case _kEstadoRechazada:
+        return 'Rechazada';
+      case _kEstadoBajaAprobada:
+        return 'Baja aprobada';
       case _kEstadoAprobado:
         return 'Aprobado';
       case _kEstadoReprobado:
@@ -567,9 +749,37 @@ class _InscripcionCard extends StatelessWidget {
     }
   }
 
+  // Progreso desde inicio del mes actual hasta la fecha del ETS.
+  double _calcProgress() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, 1);
+    final end = item.fechaInicio;
+    if (!end.isAfter(start)) return 1.0;
+    final total = end.difference(start).inSeconds;
+    final elapsed = now.difference(start).inSeconds;
+    return (elapsed / total).clamp(0.0, 1.0);
+  }
+
+  Color _barColor(double progress) {
+    if (progress >= 1.0) return AppColors.textMuted;
+    if (progress >= 0.75) return AppColors.error;
+    if (progress >= 0.5) return AppColors.warning;
+    return AppColors.success;
+  }
+
+  String _diasRestantes() {
+    final diff = item.fechaInicio.difference(DateTime.now());
+    if (diff.isNegative) return 'Examen aplicado';
+    if (diff.inDays == 0) return 'Hoy';
+    if (diff.inDays == 1) return 'Mañana';
+    return '${diff.inDays} días restantes';
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = _estadoColor(item.estado);
+    final progress = _calcProgress();
+    final barColor = _barColor(progress);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -585,6 +795,7 @@ class _InscripcionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Column(
           children: [
+            // ── Header ──────────────────────────────────────────────
             Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -604,9 +815,9 @@ class _InscripcionCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: color.withOpacity(0.3)),
+                      border: Border.all(color: color.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       _estadoLabel(item.estado),
@@ -620,6 +831,61 @@ class _InscripcionCard extends StatelessWidget {
                 ],
               ),
             ),
+
+            // ── Barra de progreso temporal ───────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Inicio del mes',
+                        style: AppTextStyles.caption.copyWith(
+                          fontSize: 10,
+                          color: isDark
+                              ? AppColors.darkTextMuted
+                              : AppColors.textMuted,
+                        ),
+                      ),
+                      Text(
+                        _diasRestantes(),
+                        style: AppTextStyles.caption.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: barColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: SizedBox(
+                      height: 6,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: progress),
+                        duration: Duration(
+                            milliseconds: 600 + (index * 80).clamp(0, 400)),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, value, __) => LinearProgressIndicator(
+                          value: value,
+                          backgroundColor: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.borderLight,
+                          valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Detalles ─────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -658,6 +924,32 @@ class _InscripcionCard extends StatelessWidget {
                 ],
               ),
             ),
+
+            // ── Acciones ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _CardButton(
+                    label: 'Ficha ETS',
+                    icon: Icons.download_rounded,
+                    onTap: onGenerarFicha,
+                    isDark: isDark,
+                  ),
+                  if (onSolicitarBaja != null) ...[
+                    const SizedBox(width: 8),
+                    _CardButton(
+                      label: 'Solicitar baja',
+                      icon: Icons.remove_circle_outline_rounded,
+                      onTap: onSolicitarBaja!,
+                      isDark: isDark,
+                      isDestructive: true,
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -665,6 +957,57 @@ class _InscripcionCard extends StatelessWidget {
         .animate()
         .fadeIn(delay: Duration(milliseconds: 60 * index), duration: 400.ms)
         .slideY(begin: 0.1, curve: Curves.easeOutCubic);
+  }
+}
+
+class _CardButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isDark;
+  final bool isDestructive;
+
+  const _CardButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    required this.isDark,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isDestructive
+        ? AppColors.error
+        : (isDark ? AppColors.darkBlueMid : AppColors.blueMid);
+    final bg = isDestructive
+        ? AppColors.error.withValues(alpha: 0.08)
+        : (isDark ? AppColors.darkBlueLight : AppColors.blueSurface);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 5),
+            Text(label,
+                style: AppTextStyles.caption.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                )),
+          ],
+        ),
+      ),
+    );
   }
 }
 

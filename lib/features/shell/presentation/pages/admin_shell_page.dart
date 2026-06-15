@@ -8,6 +8,7 @@ import 'package:etsAndroid/features/dashboard/presentation/pages/dashboard_page.
 import 'package:etsAndroid/features/exams/presentation/pages/exams_page.dart';
 import 'package:etsAndroid/features/catalogs/presentation/pages/catalogs_page.dart';
 import 'package:etsAndroid/features/jefes/presentation/pages/jefes_admin_page.dart';
+import 'package:etsAndroid/features/inscripciones/presentation/pages/admin_inscripciones_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShellPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _AdminShellPageState extends State<AdminShellPage> {
   final List<Widget> _pages = const [
     DashboardPage(),
     ExamsPage(),
+    AdminInscripcionesPage(),
     CatalogsPage(),
     JefesAdminPage(),
   ];
@@ -37,6 +39,11 @@ class _AdminShellPageState extends State<AdminShellPage> {
       icon: Icons.assignment_outlined,
       activeIcon: Icons.assignment_rounded,
       label: 'Exámenes',
+    ),
+    _NavItem(
+      icon: Icons.how_to_reg_outlined,
+      activeIcon: Icons.how_to_reg_rounded,
+      label: 'Inscripciones',
     ),
     _NavItem(
       icon: Icons.folder_outlined,

@@ -74,3 +74,16 @@ class AlumnoInscribirseRequested extends AlumnoEvent {
   @override
   List<Object> get props => [perfil.idAlumno, idEts];
 }
+
+class AlumnoSolicitarBajaRequested extends AlumnoEvent {
+  final AlumnoProfile perfil;
+  final String idInscripcion;
+
+  const AlumnoSolicitarBajaRequested({
+    required this.perfil,
+    required this.idInscripcion,
+  });
+
+  @override
+  List<Object> get props => [perfil.idAlumno, idInscripcion];
+}

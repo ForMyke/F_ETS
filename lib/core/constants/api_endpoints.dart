@@ -90,6 +90,10 @@ abstract class ColValues {
   static const String estadoCalificado = 'calificado';
   static const String turnoMatutino = 'Matutino';
   static const String turnoVespertino = 'Vespertino';
+  static const String estadoConfirmada = 'confirmada';
+  static const String estadoBajaSolicitada = 'baja_solicitada';
+  static const String estadoRechazada = 'rechazada';
+  static const String estadoBajaAprobada = 'baja_aprobada';
   static const String resultadoAprobado = 'aprobado';
   static const String resultadoReprobado = 'reprobado';
 }
