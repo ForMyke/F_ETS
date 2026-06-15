@@ -1,7 +1,7 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:etsAndroid/core/error/failures.dart';
 import 'package:etsAndroid/core/usecases/usecase.dart';
@@ -22,9 +22,9 @@ class ExportIcsUseCase implements UseCase<void, ExportIcsParams> {
       for (final exam in params.exams) {
         buffer.writeln('BEGIN:VEVENT');
         buffer.writeln('UID:${exam.id}@escom.ipn.mx');
-        buffer.writeln('DTSTAMP:${_toICSDate(DateTime.now())}');
-        buffer.writeln('DTSTART:${_toICSDate(exam.fechaInicio)}');
-        buffer.writeln('DTEND:${_toICSDate(exam.fechaFin)}');
+        buffer.writeln('DTSTAMP:${_toICSDate(DateTime.now().toUtc())}Z');
+        buffer.writeln('DTSTART:${_toICSDate(exam.fechaInicio.toUtc())}Z');
+        buffer.writeln('DTEND:${_toICSDate(exam.fechaFin.toUtc())}Z');
         buffer.writeln('SUMMARY:${exam.materia} — ETS');
         buffer.writeln('LOCATION:Salón ${exam.salon} · Edificio ${exam.edificio} · ESCOM IPN');
         buffer.writeln('DESCRIPTION:Profesor: ${exam.profesor}\\nCarrera: ${exam.carrera}\\nPlan: ${exam.plan}\\nSemestre: ${exam.semestre}');
@@ -33,12 +33,15 @@ class ExportIcsUseCase implements UseCase<void, ExportIcsParams> {
 
       buffer.writeln('END:VCALENDAR');
 
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/ETS_${DateTime.now().millisecondsSinceEpoch}.ics');
-      await file.writeAsString(buffer.toString());
+      final bytes = Uint8List.fromList(utf8.encode(buffer.toString()));
+      final xFile = XFile.fromData(
+        bytes,
+        mimeType: 'text/calendar',
+        name: 'ETS_ESCOM.ics',
+      );
 
       await Share.shareXFiles(
-        [XFile(file.path)],
+        [xFile],
         subject: 'Calendario ETS ESCOM',
       );
 
@@ -49,13 +52,12 @@ class ExportIcsUseCase implements UseCase<void, ExportIcsParams> {
   }
 
   String _toICSDate(DateTime dt) {
-    final y = dt.year.toString().padLeft(4, '0');
-    final mo = dt.month.toString().padLeft(2, '0');
-    final d = dt.day.toString().padLeft(2, '0');
-    final h = dt.hour.toString().padLeft(2, '0');
-    final mi = dt.minute.toString().padLeft(2, '0');
-    final s = dt.second.toString().padLeft(2, '0');
-    return '${y}${mo}${d}T${h}${mi}${s}';
+    return '${dt.year.toString().padLeft(4, '0')}'
+        '${dt.month.toString().padLeft(2, '0')}'
+        '${dt.day.toString().padLeft(2, '0')}T'
+        '${dt.hour.toString().padLeft(2, '0')}'
+        '${dt.minute.toString().padLeft(2, '0')}'
+        '${dt.second.toString().padLeft(2, '0')}';
   }
 }
 

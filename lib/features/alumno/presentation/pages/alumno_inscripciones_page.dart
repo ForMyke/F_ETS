@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
@@ -27,6 +31,7 @@ class AlumnoInscripcionesPage extends StatefulWidget {
 
 class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
   bool _exportando = false;
+  bool _exportandoIcs = false;
 
   @override
   void initState() {
@@ -204,6 +209,60 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     }
   }
 
+  Future<void> _exportarIcs(List<InscripcionItem> inscripciones) async {
+    if (_exportandoIcs) return;
+    HapticFeedback.mediumImpact();
+    setState(() => _exportandoIcs = true);
+    try {
+      final buf = StringBuffer();
+      buf.writeln('BEGIN:VCALENDAR');
+      buf.writeln('VERSION:2.0');
+      buf.writeln('PRODID:-//ESCOM IPN//ETS App//ES');
+      buf.writeln('CALSCALE:GREGORIAN');
+
+      for (final ins in inscripciones) {
+        final inicio = ins.fechaInicio.toUtc();
+        final fin = inicio.add(const Duration(hours: 2));
+        String fmt(DateTime d) =>
+            '${d.year.toString().padLeft(4, '0')}'
+            '${d.month.toString().padLeft(2, '0')}'
+            '${d.day.toString().padLeft(2, '0')}T'
+            '${d.hour.toString().padLeft(2, '0')}'
+            '${d.minute.toString().padLeft(2, '0')}'
+            '${d.second.toString().padLeft(2, '0')}Z';
+
+        buf.writeln('BEGIN:VEVENT');
+        buf.writeln('UID:${ins.idEts}@escom.ipn.mx');
+        buf.writeln('DTSTAMP:${fmt(DateTime.now().toUtc())}');
+        buf.writeln('DTSTART:${fmt(inicio)}');
+        buf.writeln('DTEND:${fmt(fin)}');
+        buf.writeln('SUMMARY:${ins.materia} — ETS');
+        buf.writeln('LOCATION:Salón ${ins.salon} · Edificio ${ins.edificio} · ESCOM IPN');
+        buf.writeln('DESCRIPTION:Carrera: ${ins.carrera}');
+        buf.writeln('END:VEVENT');
+      }
+
+      buf.writeln('END:VCALENDAR');
+
+      final bytes = Uint8List.fromList(utf8.encode(buf.toString()));
+      await Share.shareXFiles(
+        [XFile.fromData(bytes, mimeType: 'text/calendar', name: 'mis_ets.ics')],
+        subject: 'Mis ETS — ESCOM IPN',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al exportar calendario: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _exportandoIcs = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -291,6 +350,63 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                             ),
                           ),
                           if (inscripciones.isNotEmpty)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                            // ── Botón ICS ──
+                            GestureDetector(
+                              onTap: _exportandoIcs
+                                  ? null
+                                  : () => _exportarIcs(inscripciones),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppColors.darkBlueLight
+                                      : AppColors.blueSurface,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? AppColors.darkBlueMid.withOpacity(0.3)
+                                        : AppColors.blueLight,
+                                  ),
+                                ),
+                                child: _exportandoIcs
+                                    ? SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: isDark
+                                              ? AppColors.darkBlueMid
+                                              : AppColors.blueMid,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.calendar_month_outlined,
+                                              size: 16,
+                                              color: isDark
+                                                  ? AppColors.darkBlueMid
+                                                  : AppColors.blueMid),
+                                          const SizedBox(width: 6),
+                                          Text('ICS',
+                                              style: AppTextStyles.caption
+                                                  .copyWith(
+                                                color: isDark
+                                                    ? AppColors.darkBlueMid
+                                                    : AppColors.blueMid,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12,
+                                              )),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // ── Botón PDF ──
                             GestureDetector(
                               onTap: _exportando
                                   ? null
@@ -348,7 +464,9 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                               ),
                             ),
                         ],
-                      );
+                      ),
+                    ],
+                  );
                     },
                   )
                       .animate()
