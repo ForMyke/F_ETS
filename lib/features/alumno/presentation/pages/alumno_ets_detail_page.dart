@@ -391,55 +391,6 @@ class _EtsNoticeCard extends StatelessWidget {
         ),
       );
 
-  Widget _fillField(String label, bool isDark) => Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary)),
-            const SizedBox(height: 6),
-            Container(
-              height: 30,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.darkBgOverlay
-                    : AppColors.bgSurface,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
-                ),
-                border: Border(
-                  bottom: BorderSide(
-                    color: isDark
-                        ? AppColors.darkBlueMid
-                        : AppColors.blueMid,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('(escribe aquí)',
-                      style: TextStyle(
-                          fontSize: 9.5,
-                          fontStyle: FontStyle.italic,
-                          color: isDark
-                              ? AppColors.darkTextMuted
-                              : AppColors.textMuted)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
 
   @override
   Widget build(BuildContext context) {
@@ -556,18 +507,6 @@ class _EtsNoticeCard extends StatelessWidget {
                     _infoRow('Concepto:', 'Número de boleta'),
                     _infoRow('Monto:', '\$20.00 (Veinte pesos 00/100 M.N.)'),
                     Divider(color: divColor, height: 20, thickness: 0.5),
-
-                    // Campos a anotar en el comprobante
-                    _section(
-                        'En el anverso del comprobante de pago deberás anotar:',
-                        ['']),
-                    const SizedBox(height: 10),
-                    _fillField('Boleta', isDark),
-                    _fillField('Nombre Completo', isDark),
-                    _fillField('Unidad de Aprendizaje a presentar ETS', isDark),
-                    _fillField('Turno a presentar ETS', isDark),
-                    Divider(color: divColor, height: 4, thickness: 0.5),
-                    const SizedBox(height: 12),
 
                     // Footer
                     Text(
