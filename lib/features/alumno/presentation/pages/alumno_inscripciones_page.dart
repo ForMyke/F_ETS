@@ -53,7 +53,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
   // ── Helper: carga el logo desde assets ──────────────────────────────────
   Future<pw.ImageProvider?> _loadLogo() async {
     try {
-      final logoBytes = await rootBundle.load('assets/images/logo_escom.png');
+      final logoBytes = await rootBundle.load('assets/images/escom_logo.png');
       return pw.MemoryImage(logoBytes.buffer.asUint8List());
     } catch (_) {
       return null;
