@@ -82,6 +82,52 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     });
   }
 
+  Future<void> _eliminarConDeshacer(NotificacionItem n) async {
+    HapticFeedback.mediumImpact();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final index = _items.indexWhere((item) => item.id == n.id);
+
+    setState(() {
+      _items.removeWhere((item) => item.id == n.id);
+    });
+
+    await _ds.eliminarNotificacion(n.id);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Notificación eliminada',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: isDark ? AppColors.darkBgSurface : AppColors.textPrimary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        action: SnackBarAction(
+          label: 'Deshacer',
+          textColor: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+          onPressed: () async {
+            await _ds.restaurarNotificacion(n.id);
+
+            if (!mounted) return;
+
+            setState(() {
+              final safeIndex = index.clamp(0, _items.length);
+              _items.insert(safeIndex, n);
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   String _formatFecha(DateTime fecha) {
     final now = DateTime.now();
     final diff = now.difference(fecha);
@@ -220,83 +266,131 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
                           itemBuilder: (_, i) {
                             final n = _items[i];
                             final color = _colorForTipo(n.tipo, isDark);
-                            return GestureDetector(
-                              onTap: n.leida ? null : () => _marcarLeida(n.id),
-                              child: Container(
+                            return Dismissible(
+                              key: ValueKey(n.id),
+                              direction: DismissDirection.horizontal,
+                              dismissThresholds: const {
+                                DismissDirection.startToEnd: 0.25,
+                                DismissDirection.endToStart: 0.25,
+                              },
+                              background: Container(
                                 margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.all(14),
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                alignment: Alignment.centerLeft,
                                 decoration: BoxDecoration(
-                                  color: n.leida
-                                      ? (isDark ? AppColors.darkBgSurface : AppColors.bgPrimary)
-                                      : (isDark
-                                          ? AppColors.darkBlueMid.withOpacity(0.06)
-                                          : AppColors.blueSurface),
+                                  color: AppColors.error,
                                   borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: n.leida
-                                        ? (isDark ? AppColors.darkBorder : AppColors.borderLight)
-                                        : (isDark
-                                            ? AppColors.darkBlueMid.withOpacity(0.25)
-                                            : AppColors.blueLight),
-                                    width: 1.5,
-                                  ),
                                 ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        color: color.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Icon(_iconForTipo(n.tipo), size: 18, color: color),
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              secondaryBackground: Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                alignment: Alignment.centerRight,
+                                decoration: BoxDecoration(
+                                  color: AppColors.error,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              confirmDismiss: (_) async {
+                                await _eliminarConDeshacer(n);
+                                return false;
+                              },
+                              child: GestureDetector(
+                                onTap: n.leida ? null : () => _marcarLeida(n.id),
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: n.leida
+                                        ? (isDark ? AppColors.darkBgSurface : AppColors.bgPrimary)
+                                        : (isDark
+                                            ? AppColors.darkBlueMid.withOpacity(0.06)
+                                            : AppColors.blueSurface),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: n.leida
+                                          ? (isDark ? AppColors.darkBorder : AppColors.borderLight)
+                                          : (isDark
+                                              ? AppColors.darkBlueMid.withOpacity(0.25)
+                                              : AppColors.blueLight),
+                                      width: 1.5,
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            n.mensaje,
-                                            style: AppTextStyles.body.copyWith(
-                                              fontSize: 13,
-                                              fontWeight: n.leida ? FontWeight.w400 : FontWeight.w600,
-                                              color: isDark
-                                                  ? AppColors.darkTextPrimary
-                                                  : AppColors.textPrimary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            _formatFecha(n.fecha),
-                                            style: AppTextStyles.caption.copyWith(
-                                              fontSize: 11,
-                                              color: isDark
-                                                  ? AppColors.darkTextMuted
-                                                  : AppColors.textMuted,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (!n.leida)
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
                                       Container(
-                                        width: 8,
-                                        height: 8,
-                                        margin: const EdgeInsets.only(top: 4, left: 8),
+                                        width: 36,
+                                        height: 36,
                                         decoration: BoxDecoration(
-                                          color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
-                                          shape: BoxShape.circle,
+                                          color: color.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Icon(
+                                          _iconForTipo(n.tipo),
+                                          size: 18,
+                                          color: color,
                                         ),
                                       ),
-                                  ],
-                                ),
-                              )
-                                  .animate()
-                                  .fadeIn(delay: Duration(milliseconds: 40 * i), duration: 350.ms)
-                                  .slideY(begin: 0.06, curve: Curves.easeOutCubic),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              n.mensaje,
+                                              style: AppTextStyles.body.copyWith(
+                                                fontSize: 13,
+                                                fontWeight: n.leida ? FontWeight.w400 : FontWeight.w600,
+                                                color: isDark
+                                                    ? AppColors.darkTextPrimary
+                                                    : AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              _formatFecha(n.fecha),
+                                              style: AppTextStyles.caption.copyWith(
+                                                fontSize: 11,
+                                                color: isDark
+                                                    ? AppColors.darkTextMuted
+                                                    : AppColors.textMuted,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (!n.leida)
+                                        Container(
+                                          width: 8,
+                                          height: 8,
+                                          margin: const EdgeInsets.only(top: 4, left: 8),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? AppColors.darkBlueMid : AppColors.blueMid,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                )
+                                    .animate()
+                                    .fadeIn(
+                                      delay: Duration(milliseconds: 40 * i),
+                                      duration: 350.ms,
+                                    )
+                                    .slideY(
+                                      begin: 0.06,
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                              ),
                             );
                           },
                         ),

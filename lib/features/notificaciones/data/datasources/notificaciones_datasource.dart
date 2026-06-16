@@ -36,7 +36,9 @@ class NotificacionesDataSource {
         .from(_table)
         .select()
         .eq('receptor_id', receptorId)
+        .eq('eliminada', false)
         .order('fecha', ascending: false);
+
     return (res as List)
         .map((e) => NotificacionItem.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -47,7 +49,9 @@ class NotificacionesDataSource {
         .from(_table)
         .select()
         .eq('para_admin', true)
+        .eq('eliminada', false)
         .order('fecha', ascending: false);
+
     return (res as List)
         .map((e) => NotificacionItem.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -58,7 +62,9 @@ class NotificacionesDataSource {
         .from(_table)
         .select('id_notificacion')
         .eq('receptor_id', receptorId)
-        .eq('leida', false);
+        .eq('leida', false)
+        .eq('eliminada', false);
+
     return (res as List).length;
   }
 
@@ -67,14 +73,17 @@ class NotificacionesDataSource {
         .from(_table)
         .select('id_notificacion')
         .eq('para_admin', true)
-        .eq('leida', false);
+        .eq('leida', false)
+        .eq('eliminada', false);
+
     return (res as List).length;
   }
 
   Future<void> marcarLeida(String id) async {
     await client
         .from(_table)
-        .update({'leida': true}).eq('id_notificacion', id);
+        .update({'leida': true})
+        .eq('id_notificacion', id);
   }
 
   Future<void> marcarTodasLeidas({
@@ -86,14 +95,30 @@ class NotificacionesDataSource {
           .from(_table)
           .update({'leida': true})
           .eq('receptor_id', receptorId)
-          .eq('leida', false);
+          .eq('leida', false)
+          .eq('eliminada', false);
     } else if (paraAdmin) {
       await client
           .from(_table)
           .update({'leida': true})
           .eq('para_admin', true)
-          .eq('leida', false);
+          .eq('leida', false)
+          .eq('eliminada', false);
     }
+  }
+
+  Future<void> eliminarNotificacion(String id) async {
+    await client
+        .from(_table)
+        .update({'eliminada': true})
+        .eq('id_notificacion', id);
+  }
+
+  Future<void> restaurarNotificacion(String id) async {
+    await client
+        .from(_table)
+        .update({'eliminada': false})
+        .eq('id_notificacion', id);
   }
 }
 
@@ -115,6 +140,7 @@ Future<void> crearNotificacion(
       'tipo': tipo,
       'mensaje': mensaje,
       'leida': false,
+      'eliminada': false,
       if (refId != null) 'ref_id': refId,
     });
   } catch (_) {}

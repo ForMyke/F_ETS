@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:etsAndroid/core/theme/app_colors.dart';
@@ -50,6 +51,11 @@ class _NotificationButtonState extends State<NotificationButton> {
   }
 
   Future<void> _toggle() async {
+    if (kIsWeb) {
+  _showSnack('Recordatorios disponibles en la app móvil.', success: false);
+  return;
+}
+
     HapticFeedback.mediumImpact();
     setState(() => _isLoading = true);
 
