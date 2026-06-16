@@ -363,15 +363,13 @@ class _EtsNoticeCard extends StatelessWidget {
         children: [
           if (title.isNotEmpty) ...[
             Text(title,
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700)),
+                style:
+                    const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
           ],
           ...lines.map((l) => Padding(
                 padding: const EdgeInsets.only(bottom: 2),
-                child: Text(l,
-                    style: const TextStyle(fontSize: 10.5)),
+                child: Text(l, style: const TextStyle(fontSize: 10.5)),
               )),
         ],
       );
@@ -385,12 +383,10 @@ class _EtsNoticeCard extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 10.5, fontWeight: FontWeight.w700)),
             Expanded(
-                child: Text(value,
-                    style: const TextStyle(fontSize: 10.5))),
+                child: Text(value, style: const TextStyle(fontSize: 10.5))),
           ],
         ),
       );
-
 
   @override
   Widget build(BuildContext context) {
@@ -398,8 +394,7 @@ class _EtsNoticeCard extends StatelessWidget {
         isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
     final mutedColor =
         isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-    final divColor =
-        isDark ? AppColors.darkBorder : AppColors.borderLight;
+    final divColor = isDark ? AppColors.darkBorder : AppColors.borderLight;
 
     return Container(
       width: double.infinity,
@@ -418,14 +413,11 @@ class _EtsNoticeCard extends StatelessWidget {
             // ── Encabezado institucional ────────────────────────────
             Container(
               width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              color:
-                  isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
               child: DefaultTextStyle(
                 style: TextStyle(
-                  color:
-                      isDark ? AppColors.darkBlueMid : AppColors.blue,
+                  color: isDark ? AppColors.darkBlueMid : AppColors.blue,
                   fontFamily: 'inherit',
                 ),
                 child: Column(
@@ -464,8 +456,7 @@ class _EtsNoticeCard extends StatelessWidget {
                     ),
                     Text('Semestre 2026/2/2',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 10.5, color: mutedColor)),
+                        style: TextStyle(fontSize: 10.5, color: mutedColor)),
                   ],
                 ),
               ),
@@ -473,10 +464,7 @@ class _EtsNoticeCard extends StatelessWidget {
 
             // ── Cuerpo ──────────────────────────────────────────────
             DefaultTextStyle(
-              style: TextStyle(
-                  fontSize: 10.5,
-                  color: textColor,
-                  height: 1.4),
+              style: TextStyle(fontSize: 10.5, color: textColor, height: 1.4),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -493,7 +481,7 @@ class _EtsNoticeCard extends StatelessWidget {
 
                     // Aplicación
                     _section('Los ETS se aplicarán:', [
-                      'Del 15 al 18 de julio de 2025',
+                      'Del 15 al 18 de julio de 2026',
                     ]),
                     Divider(color: divColor, height: 20, thickness: 0.5),
 
@@ -517,9 +505,8 @@ class _EtsNoticeCard extends StatelessWidget {
                       'https://uteycv.escom.ipn.mx/sacad/ets/',
                       style: TextStyle(
                           fontSize: 10,
-                          color: isDark
-                              ? AppColors.darkBlueMid
-                              : AppColors.blue,
+                          color:
+                              isDark ? AppColors.darkBlueMid : AppColors.blue,
                           decoration: TextDecoration.underline),
                     ),
                     const SizedBox(height: 12),
@@ -542,8 +529,9 @@ class _EtsNoticeCard extends StatelessWidget {
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 4,
-                                  color:
-                                      isDark ? AppColors.darkBlueMid : AppColors.blue)),
+                                  color: isDark
+                                      ? AppColors.darkBlueMid
+                                      : AppColors.blue)),
                         ],
                       ),
                     ),
