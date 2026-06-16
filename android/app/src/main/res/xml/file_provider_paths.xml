@@ -2,4 +2,6 @@
 <paths>
     <cache-path name="share_files" path="."/>
     <external-cache-path name="share_files_external" path="."/>
+    <files-path name="app_files" path="."/>
+    <external-files-path name="external_files" path="."/>
 </paths>

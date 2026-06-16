@@ -58,7 +58,7 @@ class ExamModel extends Exam {
       hora:
           '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}',
       salon: salonData['codigo'] as String? ?? '',
-      edificio: edificioData['numero'] as String? ?? '',
+      edificio: edificioData['numero']?.toString() ?? '',
       piso: salonData['piso'] as String? ?? '',
       profesor: nombreProfesor,
       periodoETS: json['id_periodoets'] as String? ?? '',

@@ -52,7 +52,8 @@ class InscripcionModel extends InscripcionItem {
           '',
       salon: salonMap['codigo'] as String? ?? '',
       edificio: ((salonMap['edificio'] as Map<String, dynamic>?)
-              ?['numero'] as String?) ??
+              ?['numero'])
+          ?.toString() ??
           '',
       fechaInicio: fechaInicio,
       hora: hora,
