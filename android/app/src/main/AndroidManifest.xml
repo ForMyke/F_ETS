@@ -7,7 +7,7 @@
     <application
         android:label="ETS ESCOM"
         android:name="${applicationName}"
-        android:icon="@mipmap/ets_ic"
+        android:icon="@mipmap/ic_launcher"
     >
         <activity
             android:name=".MainActivity"
