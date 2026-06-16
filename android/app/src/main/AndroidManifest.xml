@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="WTBRegular"
+        android:label="ETS ESCOM"
         android:name="${applicationName}"
         android:icon="@mipmap/ets_ic"
     >

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:etsAndroid/core/error/failures.dart';
 import 'package:etsAndroid/core/usecases/usecase.dart';
 import 'package:etsAndroid/features/search/domain/entities/exam.dart';
@@ -13,6 +14,12 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
   @override
   Future<Either<Failure, void>> call(ExportPdfParams params) async {
     try {
+      pw.ImageProvider? logo;
+      try {
+        final logoBytes = await rootBundle.load('assets/images/escom_logo.png');
+        logo = pw.MemoryImage(logoBytes.buffer.asUint8List());
+      } catch (_) {}
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -20,7 +27,7 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(32),
           build: (pw.Context context) => [
-            _buildHeader(params),
+            _buildHeader(params, logo),
             pw.SizedBox(height: 20),
             _buildTable(params.exams),
             pw.SizedBox(height: 16),
@@ -40,7 +47,7 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
     }
   }
 
-  pw.Widget _buildHeader(ExportPdfParams params) {
+  pw.Widget _buildHeader(ExportPdfParams params, pw.ImageProvider? logo) {
     final filters = <String>[];
     if (params.carrera != null) filters.add('Carrera: ${params.carrera}');
     if (params.plan != null) filters.add('Plan: ${params.plan}');
@@ -51,33 +58,48 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
       children: [
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
-                pw.Text(
-                  'ESCOM · IPN',
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blue900,
-                  ),
-                ),
-                pw.Text(
-                  'Calendario de Exámenes a Título de Suficiencia',
-                  style: pw.TextStyle(
-                    fontSize: 11,
-                    color: PdfColors.grey700,
-                  ),
+                if (logo != null) ...[
+                  pw.Image(logo, width: 48, height: 48),
+                  pw.SizedBox(width: 12),
+                ],
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'INSTITUTO POLITÉCNICO NACIONAL',
+                      style: pw.TextStyle(
+                        fontSize: 8,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                    pw.Text(
+                      'ESCOM',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue900,
+                      ),
+                    ),
+                    pw.Text(
+                      'Calendario de Exámenes a Título de Suficiencia',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
             pw.Text(
               _formatDate(DateTime.now()),
-              style: pw.TextStyle(
-                fontSize: 10,
-                color: PdfColors.grey600,
-              ),
+              style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
             ),
           ],
         ),
@@ -99,10 +121,8 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
                       ),
                       child: pw.Text(
                         f,
-                        style: pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.blue800,
-                        ),
+                        style:
+                            pw.TextStyle(fontSize: 9, color: PdfColors.blue800),
                       ),
                     ))
                 .toList(),
@@ -135,7 +155,6 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
         6: const pw.FlexColumnWidth(1.2),
       },
       children: [
-        // Header row
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColors.blue800),
           children: headers
@@ -153,7 +172,6 @@ class ExportPdfUseCase implements UseCase<void, ExportPdfParams> {
                   ))
               .toList(),
         ),
-        // Data rows
         ...exams.asMap().entries.map((entry) {
           final i = entry.key;
           final exam = entry.value;
