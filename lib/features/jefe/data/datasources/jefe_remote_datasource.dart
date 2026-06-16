@@ -22,6 +22,8 @@ abstract class JefeRemoteDataSource {
 
   Future<void> logout();
 
+  Future<JefeProfile?> getPerfilActual();
+
   Future<List<EtsDeJefeItem>> getEtsDeJefe(String idJefe);
 
   Future<List<AlumnoInscritoItem>> getAlumnosInscritos(String idEts);
@@ -73,6 +75,23 @@ class JefeRemoteDataSourceImpl implements JefeRemoteDataSource {
   @override
   Future<void> logout() async {
     await client.auth.signOut();
+  }
+
+  @override
+  Future<JefeProfile?> getPerfilActual() async {
+    final user = client.auth.currentUser;
+    if (user == null) return null;
+
+    final jefeRes = await client
+        .from(Tables.jefeAcademia)
+        .select(
+            'id_jefeacademia, usuario(nombre, apellidopaterno, apellidomaterno, correo)')
+        .eq(Cols.idJefeAcademiaCol, user.id)
+        .maybeSingle();
+
+    if (jefeRes == null) return null;
+
+    return JefeProfileModel.fromJson(jefeRes);
   }
 
   @override

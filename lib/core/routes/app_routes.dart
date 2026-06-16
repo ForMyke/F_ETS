@@ -10,6 +10,7 @@ import 'package:etsAndroid/features/auth/data/datasources/auth_remote_datasource
 import 'package:etsAndroid/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:etsAndroid/features/shell/presentation/pages/public_shell_page.dart';
 import 'package:etsAndroid/features/shell/presentation/pages/admin_shell_page.dart';
+import 'package:etsAndroid/features/shell/presentation/pages/auth_gate_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -31,7 +32,7 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case home:
-        return _fadeRoute(const PublicShellPage());
+        return _fadeRoute(const AuthGatePage());
 
       case adminHome:
         return _fadeRoute(const AdminShellPage());

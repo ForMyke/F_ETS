@@ -8,7 +8,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:etsAndroid/core/util/platform_file.dart';
+import 'package:etsAndroid/core/util/calendar_event_data.dart';
+import 'package:etsAndroid/core/util/calendar_export.dart';
+import 'package:etsAndroid/core/util/pdf_downloader.dart';
+import 'package:etsAndroid/features/search/presentation/widgets/notification_button.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
@@ -60,6 +63,32 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     } catch (_) {
       return null;
     }
+  }
+
+  // ── Helper: descarga un PDF directamente al almacenamiento del dispositivo
+  Future<void> _downloadPdf(String name, List<int> bytes) async {
+    final fileName = name.endsWith('.pdf') ? name : '$name.pdf';
+    await savePdfToDownloads(fileName, Uint8List.fromList(bytes));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('PDF descargado.'),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ));
+    }
+  }
+
+  // ── Helper: agrega eventos directamente al calendario del dispositivo ────
+  Future<void> _addToDeviceCalendar(List<CalendarEventData> events) async {
+    final result = await addEventsToDeviceCalendar(events);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result.message),
+      backgroundColor: result.success ? AppColors.success : AppColors.error,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ));
   }
 
   // ── Helper: encabezado centrado con logo (fichas y comprobantes) ─────────
@@ -275,7 +304,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
       if (kIsWeb) {
         await Printing.sharePdf(bytes: pdfBytes, filename: fname);
       } else {
-        await openBytesAsFile(fname, pdfBytes, 'application/pdf');
+        await _downloadPdf(fname, pdfBytes);
       }
     } finally {
       if (mounted) setState(() => _exportando = false);
@@ -317,8 +346,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
 
       buf.writeln('END:VCALENDAR');
 
-      final bytes = Uint8List.fromList(utf8.encode(buf.toString()));
       if (kIsWeb) {
+        final bytes = Uint8List.fromList(utf8.encode(buf.toString()));
         await Share.shareXFiles(
           [
             XFile.fromData(bytes,
@@ -327,7 +356,16 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           subject: 'Mis ETS — ESCOM IPN',
         );
       } else {
-        await openBytesAsFile('mis_ets.ics', bytes, 'text/calendar');
+        await _addToDeviceCalendar(inscripciones.map((ins) {
+          final inicio = ins.fechaInicio;
+          return CalendarEventData(
+            title: '${ins.materia} — ETS',
+            description: 'Carrera: ${ins.carrera}',
+            location: 'Salón ${ins.salon} · Edificio ${ins.edificio} · ESCOM IPN',
+            start: inicio,
+            end: inicio.add(const Duration(hours: 2)),
+          );
+        }).toList());
       }
     } catch (e) {
       if (mounted) {
@@ -492,7 +530,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
       if (kIsWeb) {
         await Printing.sharePdf(bytes: pdfBytes, filename: 'Ficha_ETS.pdf');
       } else {
-        await openBytesAsFile('Ficha_ETS.pdf', pdfBytes, 'application/pdf');
+        await _downloadPdf('Ficha_ETS.pdf', pdfBytes);
       }
     } catch (e) {
       if (mounted) {
@@ -659,8 +697,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         await Printing.sharePdf(
             bytes: pdfBytes, filename: 'Comprobante_Revision_ETS.pdf');
       } else {
-        await openBytesAsFile(
-            'Comprobante_Revision_ETS.pdf', pdfBytes, 'application/pdf');
+        await _downloadPdf('Comprobante_Revision_ETS.pdf', pdfBytes);
       }
     } catch (e) {
       if (mounted) {
@@ -842,8 +879,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         await Printing.sharePdf(
             bytes: pdfBytes, filename: 'Ficha_ETS_Especial.pdf');
       } else {
-        await openBytesAsFile(
-            'Ficha_ETS_Especial.pdf', pdfBytes, 'application/pdf');
+        await _downloadPdf('Ficha_ETS_Especial.pdf', pdfBytes);
       }
     } catch (e) {
       if (mounted) {
@@ -1011,8 +1047,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
             bytes: pdfBytes,
             filename: 'Comprobante_Revision_ETS_Especial.pdf');
       } else {
-        await openBytesAsFile('Comprobante_Revision_ETS_Especial.pdf',
-            pdfBytes, 'application/pdf');
+        await _downloadPdf('Comprobante_Revision_ETS_Especial.pdf', pdfBytes);
       }
     } catch (e) {
       if (mounted) {
@@ -2030,6 +2065,14 @@ class _InscripcionCard extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
+                    NotificationButton(
+                      id: item.idInscripcion,
+                      materia: item.materia,
+                      salon: item.salon,
+                      hora: item.hora,
+                      fecha: item.fechaInicio,
+                      isDark: isDark,
+                    ),
                     if (onGenerarFicha != null)
                       _CardButton(
                         label: 'Ficha ETS',

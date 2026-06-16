@@ -4,15 +4,22 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:etsAndroid/core/theme/app_colors.dart';
 import 'package:etsAndroid/core/theme/app_text_styles.dart';
 import 'package:etsAndroid/core/services/notification_service.dart';
-import 'package:etsAndroid/features/search/domain/entities/exam.dart';
 
 class NotificationButton extends StatefulWidget {
-  final Exam exam;
+  final String id;
+  final String materia;
+  final String salon;
+  final String hora;
+  final DateTime fecha;
   final bool isDark;
 
   const NotificationButton({
     super.key,
-    required this.exam,
+    required this.id,
+    required this.materia,
+    required this.salon,
+    required this.hora,
+    required this.fecha,
     required this.isDark,
   });
 
@@ -25,7 +32,7 @@ class _NotificationButtonState extends State<NotificationButton> {
   bool _isLoading = true;
 
   // Convertimos el id del examen a int para las notificaciones
-  int get _notifId => widget.exam.id.hashCode.abs() % 100000;
+  int get _notifId => widget.id.hashCode.abs() % 100000;
 
   @override
   void initState() {
@@ -67,10 +74,10 @@ class _NotificationButtonState extends State<NotificationButton> {
 
       await NotificationService.instance.scheduleExamNotification(
         id: _notifId,
-        materia: widget.exam.materia,
-        salon: widget.exam.salon,
-        hora: widget.exam.hora,
-        examDate: widget.exam.fecha,
+        materia: widget.materia,
+        salon: widget.salon,
+        hora: widget.hora,
+        examDate: widget.fecha,
       );
 
       if (mounted) {

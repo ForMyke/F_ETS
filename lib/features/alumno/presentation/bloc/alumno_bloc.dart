@@ -175,6 +175,7 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
       emit(AlumnoRevisionSuccess(perfil: event.perfil));
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     } catch (e) {
+      print('DEBUG solicitarRevision error: $e');
       emit(AlumnoRevisionFailure(
         perfil: event.perfil,
         message: 'No se pudo solicitar la revisión. Intenta de nuevo.',
@@ -238,6 +239,7 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
       ));
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     } catch (e) {
+      print('DEBUG solicitarRevisionEtsEspecial error: $e');
       emit(AlumnoEtsEspFailure(
         perfil: event.perfil,
         message: 'No se pudo solicitar la revisión. Intenta de nuevo.',

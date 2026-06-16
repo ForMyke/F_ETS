@@ -244,7 +244,11 @@ class ExamCard extends StatelessWidget {
 
                       // Botón notificación
                       NotificationButton(
-                        exam: exam,
+                        id: exam.id,
+                        materia: exam.materia,
+                        salon: exam.salon,
+                        hora: exam.hora,
+                        fecha: exam.fecha,
                         isDark: isDark,
                       ),
                     ],
