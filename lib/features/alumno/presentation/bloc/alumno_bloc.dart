@@ -176,10 +176,21 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     } catch (e) {
       print('DEBUG solicitarRevision error: $e');
+
+      final message = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('PostgrestException(message: ', '')
+          .split(', code:')[0]
+          .trim();
+
       emit(AlumnoRevisionFailure(
         perfil: event.perfil,
-        message: 'No se pudo solicitar la revisión. Intenta de nuevo.',
+        message: message.isNotEmpty
+            ? message
+            : 'No se pudo solicitar la revisión. Intenta de nuevo.',
       ));
+
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     }
   }
@@ -240,10 +251,21 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     } catch (e) {
       print('DEBUG solicitarRevisionEtsEspecial error: $e');
+
+      final message = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('PostgrestException(message: ', '')
+          .split(', code:')[0]
+          .trim();
+
       emit(AlumnoEtsEspFailure(
         perfil: event.perfil,
-        message: 'No se pudo solicitar la revisión. Intenta de nuevo.',
+        message: message.isNotEmpty
+            ? message
+            : 'No se pudo solicitar la revisión. Intenta de nuevo.',
       ));
+
       add(AlumnoInscripcionesLoaded(perfil: event.perfil));
     }
   }

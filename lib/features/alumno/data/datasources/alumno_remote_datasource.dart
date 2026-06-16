@@ -364,13 +364,25 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
   @override
   Future<void> solicitarRevision(String idInscripcion) async {
+    final existente = await client
+        .from(Tables.revisionEts)
+        .select('id_revision')
+        .eq('id_inscripcion', idInscripcion)
+        .maybeSingle();
+
+    if (existente != null) {
+      throw Exception('Ya existe una solicitud de revisión para este ETS.');
+    }
+
     final id = 'REV${DateTime.now().millisecondsSinceEpoch}';
+
     await client.from(Tables.revisionEts).insert({
       'id_revision': id,
       'id_inscripcion': idInscripcion,
       'estado': ColValues.revisionSolicitada,
       'fecha_solicitud': DateTime.now().toIso8601String().substring(0, 10),
     });
+
     // Notificar al jefe de academia del ETS
     try {
       final res = await client
@@ -378,14 +390,20 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
           .select('ets(id_jefeacademia, carrera_materia(materia(nombre)))')
           .eq(Cols.idInscripcionEts, idInscripcion)
           .maybeSingle();
+
       final jefeId = res?['ets']?['id_jefeacademia'] as String?;
-      final materia = (res?['ets']?['carrera_materia']?['materia']?['nombre'] as String?) ?? 'ETS';
+      final materia =
+          (res?['ets']?['carrera_materia']?['materia']?['nombre'] as String?) ??
+              'ETS';
+
       if (jefeId != null) {
-        await crearNotificacion(client,
-            receptorId: jefeId,
-            tipo: 'revision_solicitada',
-            mensaje: 'Solicitud de revisión: $materia',
-            refId: idInscripcion);
+        await crearNotificacion(
+          client,
+          receptorId: jefeId,
+          tipo: 'revision_solicitada',
+          mensaje: 'Solicitud de revisión: $materia',
+          refId: idInscripcion,
+        );
       }
     } catch (_) {}
   }
@@ -429,32 +447,24 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
 
   @override
   Future<void> solicitarRevisionEtsEspecial(String idEtsEspecial) async {
+    final existente = await client
+        .from('revisionetsespecial')
+        .select('id_revision_esp')
+        .eq('id_ets_especial', idEtsEspecial)
+        .maybeSingle();
+
+    if (existente != null) {
+      throw Exception('Ya existe una solicitud de revisión para este ETS especial.');
+    }
+
     final id = 'REVE${DateTime.now().millisecondsSinceEpoch}';
+
     await client.from('revisionetsespecial').insert({
       'id_revision_esp': id,
       'id_ets_especial': idEtsEspecial,
       'estado': ColValues.revisionSolicitada,
       'fecha_solicitud': DateTime.now().toIso8601String().substring(0, 10),
     });
-    // Notificar al jefe de academia del ETS especial
-    try {
-      final res = await client
-          .from('etsespecial')
-          .select('inscripcionets(ets(id_jefeacademia, carrera_materia(materia(nombre))))')
-          .eq('id_ets_especial', idEtsEspecial)
-          .maybeSingle();
-      final ets = res?['inscripcionets']?['ets'];
-      final jefeId = ets?['id_jefeacademia'] as String?;
-      final materia = (ets?['carrera_materia']?['materia']?['nombre'] as String?) ?? 'ETS';
-      if (jefeId != null) {
-        await crearNotificacion(client,
-            receptorId: jefeId,
-            tipo: 'revision_especial_solicitada',
-            mensaje: 'Solicitud de revisión ETS especial: $materia',
-            refId: idEtsEspecial);
-      }
-    } catch (_) {}
-  }
 
   @override
   Future<List<Map<String, dynamic>>> getCarreras() async {
