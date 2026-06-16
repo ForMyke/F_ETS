@@ -465,6 +465,25 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
       'estado': ColValues.revisionSolicitada,
       'fecha_solicitud': DateTime.now().toIso8601String().substring(0, 10),
     });
+    // Notificar al jefe de academia del ETS especial
+    try {
+      final res = await client
+          .from('etsespecial')
+          .select('inscripcionets(ets(id_jefeacademia, carrera_materia(materia(nombre))))')
+          .eq('id_ets_especial', idEtsEspecial)
+          .maybeSingle();
+      final ets = res?['inscripcionets']?['ets'];
+      final jefeId = ets?['id_jefeacademia'] as String?;
+      final materia = (ets?['carrera_materia']?['materia']?['nombre'] as String?) ?? 'ETS';
+      if (jefeId != null) {
+        await crearNotificacion(client,
+            receptorId: jefeId,
+            tipo: 'revision_especial_solicitada',
+            mensaje: 'Solicitud de revisión ETS especial: $materia',
+            refId: idEtsEspecial);
+      }
+    } catch (_) {}
+  }
 
   @override
   Future<List<Map<String, dynamic>>> getCarreras() async {
