@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:etsAndroid/features/alumno/presentation/pages/alumno_admin_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:etsAndroid/core/routes/app_routes.dart';
 import 'package:etsAndroid/core/theme/app_colors.dart';
@@ -44,6 +45,7 @@ class _AdminShellPageState extends State<AdminShellPage> {
     AdminInscripcionesPage(),
     CatalogsPage(),
     JefesAdminPage(),
+    AlumnosAdminPage(),
   ];
 
   final List<_NavItem> _navItems = const [
@@ -72,6 +74,10 @@ class _AdminShellPageState extends State<AdminShellPage> {
       activeIcon: Icons.supervisor_account_rounded,
       label: 'Jefes',
     ),
+    _NavItem(
+        icon: Icons.group_outlined,
+        activeIcon: Icons.group_rounded,
+        label: 'Alumnos'),
   ];
 
   void _onTap(int index) {

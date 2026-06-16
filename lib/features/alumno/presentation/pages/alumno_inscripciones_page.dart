@@ -56,16 +56,30 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
       final pdf = pw.Document();
       final now = DateTime.now();
       final meses = [
-        'ene','feb','mar','abr','may','jun',
-        'jul','ago','sep','oct','nov','dic'
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic'
       ];
       String fmtDate(DateTime d) => '${d.day} ${meses[d.month - 1]} ${d.year}';
       String estadoLabel(String e) {
         switch (e) {
-          case 'aprobado': return 'Aprobado';
-          case 'reprobado': return 'Reprobado';
-          case 'calificado': return 'Calificado';
-          default: return 'Pendiente';
+          case 'aprobado':
+            return 'Aprobado';
+          case 'reprobado':
+            return 'Reprobado';
+          case 'calificado':
+            return 'Calificado';
+          default:
+            return 'Pendiente';
         }
       }
 
@@ -92,8 +106,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                   ],
                 ),
                 pw.Text(fmtDate(now),
-                    style: pw.TextStyle(
-                        fontSize: 10, color: PdfColors.grey600)),
+                    style:
+                        pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
               ],
             ),
             pw.SizedBox(height: 6),
@@ -104,8 +118,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               padding: const pw.EdgeInsets.all(10),
               decoration: pw.BoxDecoration(
                 color: PdfColors.blue50,
-                borderRadius:
-                    const pw.BorderRadius.all(pw.Radius.circular(8)),
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
                 border: pw.Border.all(color: PdfColors.blue100),
               ),
               child: pw.Row(
@@ -132,8 +145,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
             pw.SizedBox(height: 16),
             // Tabla
             pw.Table(
-              border: pw.TableBorder.all(
-                  color: PdfColors.blue100, width: 0.5),
+              border: pw.TableBorder.all(color: PdfColors.blue100, width: 0.5),
               columnWidths: {
                 0: const pw.FlexColumnWidth(3),
                 1: const pw.FlexColumnWidth(1.6),
@@ -145,10 +157,16 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               },
               children: [
                 pw.TableRow(
-                  decoration:
-                      const pw.BoxDecoration(color: PdfColors.blue800),
-                  children: ['Materia', 'Fecha', 'Hora', 'Turno',
-                      'Salón', 'Estado', 'Cal.']
+                  decoration: const pw.BoxDecoration(color: PdfColors.blue800),
+                  children: [
+                    'Materia',
+                    'Fecha',
+                    'Hora',
+                    'Turno',
+                    'Salón',
+                    'Estado',
+                    'Cal.'
+                  ]
                       .map((h) => pw.Padding(
                             padding: const pw.EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 6),
@@ -165,9 +183,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                   final item = e.value;
                   return pw.TableRow(
                     decoration: pw.BoxDecoration(
-                        color: i % 2 == 0
-                            ? PdfColors.white
-                            : PdfColors.blue50),
+                        color: i % 2 == 0 ? PdfColors.white : PdfColors.blue50),
                     children: [
                       item.materia,
                       fmtDate(item.fechaInicio),
@@ -183,8 +199,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                               padding: const pw.EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 5),
                               child: pw.Text(cell,
-                                  style:
-                                      const pw.TextStyle(fontSize: 8)),
+                                  style: const pw.TextStyle(fontSize: 8)),
                             ))
                         .toList(),
                   );
@@ -196,12 +211,9 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('Generado por la app ESCOM · IPN',
-                    style: pw.TextStyle(
-                        fontSize: 8, color: PdfColors.grey500)),
-                pw.Text(
-                    'Documento informativo — sujeto a cambios.',
-                    style: pw.TextStyle(
-                        fontSize: 8, color: PdfColors.grey500)),
+                    style: pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+                pw.Text('Documento informativo — sujeto a cambios.',
+                    style: pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
               ],
             ),
           ],
@@ -232,8 +244,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
       for (final ins in inscripciones) {
         final inicio = ins.fechaInicio.toUtc();
         final fin = inicio.add(const Duration(hours: 2));
-        String fmt(DateTime d) =>
-            '${d.year.toString().padLeft(4, '0')}'
+        String fmt(DateTime d) => '${d.year.toString().padLeft(4, '0')}'
             '${d.month.toString().padLeft(2, '0')}'
             '${d.day.toString().padLeft(2, '0')}T'
             '${d.hour.toString().padLeft(2, '0')}'
@@ -246,7 +257,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         buf.writeln('DTSTART:${fmt(inicio)}');
         buf.writeln('DTEND:${fmt(fin)}');
         buf.writeln('SUMMARY:${ins.materia} — ETS');
-        buf.writeln('LOCATION:Salón ${ins.salon} · Edificio ${ins.edificio} · ESCOM IPN');
+        buf.writeln(
+            'LOCATION:Salón ${ins.salon} · Edificio ${ins.edificio} · ESCOM IPN');
         buf.writeln('DESCRIPTION:Carrera: ${ins.carrera}');
         buf.writeln('END:VEVENT');
       }
@@ -264,7 +276,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           content: Text('Error al exportar calendario: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     } finally {
@@ -276,20 +289,28 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     pw.Widget infoRow(String label, String value) => pw.Padding(
           padding: const pw.EdgeInsets.only(bottom: 3),
           child: pw.Row(children: [
-            pw.Text('$label ', style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-            pw.Expanded(child: pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
+            pw.Text('$label ',
+                style: pw.TextStyle(
+                    fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+            pw.Expanded(
+                child:
+                    pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
           ]),
         );
 
     pw.Widget fillField(String label) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text(label, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+            pw.Text(label,
+                style:
+                    pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 6),
             pw.Container(
               height: 14,
               decoration: const pw.BoxDecoration(
-                border: pw.Border(bottom: pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
+                border: pw.Border(
+                    bottom:
+                        pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
               ),
             ),
           ],
@@ -305,53 +326,67 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
               // ── Encabezado ──────────────────────────────────────────
-              pw.Center(child: pw.Column(children: [
+              pw.Center(
+                  child: pw.Column(children: [
                 pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
-                    style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 13, fontWeight: pw.FontWeight.bold)),
                 pw.Text('ESCOM',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.Text('ESCOMUNIDAD', style: const pw.TextStyle(fontSize: 10)),
               ])),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey500, thickness: 0.8),
               pw.SizedBox(height: 6),
-              pw.Center(child: pw.Column(children: [
+              pw.Center(
+                  child: pw.Column(children: [
                 pw.Text('Evaluación a Título de Suficiencia (ETS)',
-                    style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Semestre 2026/2/2', style: const pw.TextStyle(fontSize: 10)),
+                    style: pw.TextStyle(
+                        fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Semestre 2026/2/2',
+                    style: const pw.TextStyle(fontSize: 10)),
               ])),
               pw.SizedBox(height: 10),
               // ── Texto informativo ───────────────────────────────────
-              pw.Text('Las inscripciones a ETS se realizarán los días 9, 10 y 11 de julio de 2026',
+              pw.Text(
+                  'Las inscripciones a ETS se realizarán los días 9, 10 y 11 de julio de 2026',
                   style: const pw.TextStyle(fontSize: 9.5)),
               pw.Text('directamente en ventanillas de Gestión Escolar',
                   style: const pw.TextStyle(fontSize: 9.5)),
               pw.Text('en un horario de 10:00 a 19:00 hrs.',
                   style: const pw.TextStyle(fontSize: 9.5)),
-              pw.Text('Presentar copia del dictamen vigente (en caso de aplicar)',
+              pw.Text(
+                  'Presentar copia del dictamen vigente (en caso de aplicar)',
                   style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
               pw.Text('Los ETS se aplicarán:',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Del 15 al 18 de julio de 2025', style: const pw.TextStyle(fontSize: 9.5)),
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Del 15 al 18 de julio de 2025',
+                  style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
               pw.Text('Deberás realizar el pago del ETS en:',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 4),
               infoRow('Banco:', 'BBVA'),
               infoRow('Cuenta:', '0120599727'),
-              infoRow('Nombre:', 'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
+              infoRow('Nombre:',
+                  'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
               infoRow('Concepto:', 'Número de boleta'),
               infoRow('Monto:', '\$20.00 (Veinte pesos 00/100 M.N.)'),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text('Anota aqui los siguientes datos para poder hacer valido el pago:',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                  'Anota aqui los siguientes datos para poder hacer valido el pago:',
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 14),
               // ── Campos para rellenar con pluma ──────────────────────
               fillField('Boleta'),
@@ -360,22 +395,27 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 14),
               fillField('Unidad de Aprendizaje a presentar ETS'),
               pw.SizedBox(height: 14),
-              fillField('Turno a presentar ETS'),s
+              fillField('Turno a presentar ETS'),
               pw.SizedBox(height: 14),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text('Consulta horario y logística para la presentación de los ETS en:',
+              pw.Text(
+                  'Consulta horario y logística para la presentación de los ETS en:',
                   style: const pw.TextStyle(fontSize: 9)),
               pw.Text('https://uteycv.escom.ipn.mx/sacad/ets/',
                   style: pw.TextStyle(fontSize: 9, color: PdfColors.blue600)),
               pw.Spacer(),
-              pw.Center(child: pw.Column(children: [
+              pw.Center(
+                  child: pw.Column(children: [
                 pw.Text('escom.ipn.mx',
-                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 9, fontWeight: pw.FontWeight.bold)),
                 pw.Text('ESCUELA SUPERIOR DE CÓMPUTO',
-                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 9, fontWeight: pw.FontWeight.bold)),
                 pw.Text('2  0  2  6',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ])),
             ],
           ),
@@ -392,7 +432,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           content: Text('Error al generar ficha: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
@@ -409,15 +450,25 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                 style: pw.TextStyle(
                     fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
             pw.Expanded(
-                child: pw.Text(value,
-                    style: const pw.TextStyle(fontSize: 9.5))),
+                child:
+                    pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
           ]),
         );
 
     final fecha = rev.fechaRevision!;
     const meses = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
     ];
     final fechaStr =
         '${fecha.day} de ${meses[fecha.month - 1]} de ${fecha.year}';
@@ -501,8 +552,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 8),
               pw.Text(
                 'Presentar este comprobante al momento de la revisión.',
-                style: pw.TextStyle(
-                    fontSize: 9, fontWeight: pw.FontWeight.bold),
+                style:
+                    pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 4),
               pw.Text(
@@ -560,8 +611,18 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     final fechaEtsEsp = item.fechaInicio.add(const Duration(days: 21));
     final fechaPago = item.fechaInicio.add(const Duration(days: 19));
     const meses = [
-      'enero','febrero','marzo','abril','mayo','junio',
-      'julio','agosto','septiembre','octubre','noviembre','diciembre'
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
     ];
     String fmtLong(DateTime d) =>
         '${d.day} de ${meses[d.month - 1]} de ${d.year}';
@@ -569,20 +630,28 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
     pw.Widget infoRow(String label, String value) => pw.Padding(
           padding: const pw.EdgeInsets.only(bottom: 3),
           child: pw.Row(children: [
-            pw.Text('$label ', style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-            pw.Expanded(child: pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
+            pw.Text('$label ',
+                style: pw.TextStyle(
+                    fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+            pw.Expanded(
+                child:
+                    pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
           ]),
         );
 
     pw.Widget fillField(String label) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text(label, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+            pw.Text(label,
+                style:
+                    pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 6),
             pw.Container(
               height: 14,
               decoration: const pw.BoxDecoration(
-                border: pw.Border(bottom: pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
+                border: pw.Border(
+                    bottom:
+                        pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
               ),
             ),
           ],
@@ -597,43 +666,57 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           build: (pw.Context ctx) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              pw.Center(child: pw.Column(children: [
+              pw.Center(
+                  child: pw.Column(children: [
                 pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
-                    style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 13, fontWeight: pw.FontWeight.bold)),
                 pw.Text('ESCOM',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.Text('ESCOMUNIDAD', style: const pw.TextStyle(fontSize: 10)),
               ])),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey500, thickness: 0.8),
               pw.SizedBox(height: 6),
-              pw.Center(child: pw.Column(children: [
+              pw.Center(
+                  child: pw.Column(children: [
                 pw.Text('ETS ESPECIAL — Evaluación a Título de Suficiencia',
-                    style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Semestre 2026/2/2', style: const pw.TextStyle(fontSize: 10)),
+                    style: pw.TextStyle(
+                        fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Semestre 2026/2/2',
+                    style: const pw.TextStyle(fontSize: 10)),
               ])),
               pw.SizedBox(height: 10),
-              pw.Text('Fecha límite para realizar el pago: ${fmtLong(fechaPago)}',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                  'Fecha límite para realizar el pago: ${fmtLong(fechaPago)}',
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 4),
-              pw.Text('Fecha de aplicación del ETS Especial: ${fmtLong(fechaEtsEsp)}',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                  'Fecha de aplicación del ETS Especial: ${fmtLong(fechaEtsEsp)}',
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
               pw.Text('Deberás realizar el pago del ETS especial en:',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 4),
               infoRow('Banco:', 'BBVA'),
               infoRow('Cuenta:', '0120599727'),
-              infoRow('Nombre:', 'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
+              infoRow('Nombre:',
+                  'INSTITUTO POLITÉCNICO NACIONAL R11 B00 IPN ING LIF ESCOM'),
               infoRow('Concepto:', 'Número de boleta'),
               infoRow('Monto:', '\$20.00 (Veinte pesos 00/100 M.N.)'),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text('Anota aquí los siguientes datos para poder hacer válido el pago:',
-                  style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                  'Anota aquí los siguientes datos para poder hacer válido el pago:',
+                  style: pw.TextStyle(
+                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 14),
               fillField('Boleta'),
               pw.SizedBox(height: 14),
@@ -645,18 +728,23 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 14),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text('Consulta horario y logística para la presentación de los ETS en:',
+              pw.Text(
+                  'Consulta horario y logística para la presentación de los ETS en:',
                   style: const pw.TextStyle(fontSize: 9)),
               pw.Text('https://uteycv.escom.ipn.mx/sacad/ets/',
                   style: pw.TextStyle(fontSize: 9, color: PdfColors.blue600)),
               pw.Spacer(),
-              pw.Center(child: pw.Column(children: [
+              pw.Center(
+                  child: pw.Column(children: [
                 pw.Text('escom.ipn.mx',
-                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 9, fontWeight: pw.FontWeight.bold)),
                 pw.Text('ESCUELA SUPERIOR DE CÓMPUTO',
-                    style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 9, fontWeight: pw.FontWeight.bold)),
                 pw.Text('2  0  2  6',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ])),
             ],
           ),
@@ -673,7 +761,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           content: Text('Error al generar ficha: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
@@ -687,16 +776,28 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           padding: const pw.EdgeInsets.only(bottom: 5),
           child: pw.Row(children: [
             pw.Text('$label ',
-                style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                style: pw.TextStyle(
+                    fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
             pw.Expanded(
-                child: pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
+                child:
+                    pw.Text(value, style: const pw.TextStyle(fontSize: 9.5))),
           ]),
         );
 
     final fecha = rev.fechaRevision!;
     const meses = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
     ];
     final fechaStr =
         '${fecha.day} de ${meses[fecha.month - 1]} de ${fecha.year}';
@@ -780,7 +881,8 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 8),
               pw.Text(
                 'Presentar este comprobante al momento de la revisión.',
-                style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                style:
+                    pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 4),
               pw.Text(
@@ -835,366 +937,383 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
             content: const Text('Solicitud de baja enviada al administrador'),
             backgroundColor: AppColors.warning,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         } else if (state is AlumnoBajaFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         } else if (state is AlumnoRevisionSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('Solicitud de revisión enviada al jefe de academia'),
+            content:
+                const Text('Solicitud de revisión enviada al jefe de academia'),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         } else if (state is AlumnoRevisionFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         } else if (state is AlumnoEtsEspSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         } else if (state is AlumnoEtsEspFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ));
         }
       },
       child: Scaffold(
-      backgroundColor: isDark ? AppColors.darkBgPrimary : AppColors.bgPrimary,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkBlueLight
-                          : AppColors.blueSurface,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 7,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isDark
-                                ? AppColors.darkBlueMid
-                                : AppColors.blueMid,
-                          ),
-                        ),
-                        const SizedBox(width: 7),
-                        Text(
-                          'MIS INSCRIPCIONES',
-                          style: AppTextStyles.labelCaps.copyWith(
-                            color: isDark
-                                ? AppColors.darkBlueMid
-                                : AppColors.blueMid,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                      .animate()
-                      .fadeIn(duration: 400.ms)
-                      .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                  const SizedBox(height: 12),
-                  BlocBuilder<AlumnoBloc, AlumnoState>(
-                    builder: (context, state) {
-                      final inscripciones =
-                          state is AlumnoInscripcionesSuccess
-                              ? state.inscripciones
-                              : <InscripcionItem>[];
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+        backgroundColor: isDark ? AppColors.darkBgPrimary : AppColors.bgPrimary,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBlueLight
+                            : AppColors.blueSurface,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Mis ',
-                                  style: AppTextStyles.displayLarge.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkTextPrimary
-                                        : AppColors.textPrimary,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'exámenes',
-                                  style: AppTextStyles.displayItalic.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkBlueMid
-                                        : AppColors.blueMid,
-                                  ),
-                                ),
-                              ],
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid,
                             ),
                           ),
-                          if (inscripciones.isNotEmpty)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                            // ── Botón ICS ──
-                            GestureDetector(
-                              onTap: _exportandoIcs
-                                  ? null
-                                  : () => _exportarIcs(inscripciones),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppColors.darkBlueLight
-                                      : AppColors.blueSurface,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isDark
-                                        ? AppColors.darkBlueMid.withOpacity(0.3)
-                                        : AppColors.blueLight,
+                          const SizedBox(width: 7),
+                          Text(
+                            'MIS INSCRIPCIONES',
+                            style: AppTextStyles.labelCaps.copyWith(
+                              color: isDark
+                                  ? AppColors.darkBlueMid
+                                  : AppColors.blueMid,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                        .animate()
+                        .fadeIn(duration: 400.ms)
+                        .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+                    const SizedBox(height: 12),
+                    BlocBuilder<AlumnoBloc, AlumnoState>(
+                      builder: (context, state) {
+                        final inscripciones =
+                            state is AlumnoInscripcionesSuccess
+                                ? state.inscripciones
+                                : <InscripcionItem>[];
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Mis ',
+                                    style: AppTextStyles.displayLarge.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkTextPrimary
+                                          : AppColors.textPrimary,
+                                    ),
                                   ),
-                                ),
-                                child: _exportandoIcs
-                                    ? SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                  TextSpan(
+                                    text: 'exámenes',
+                                    style: AppTextStyles.displayItalic.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkBlueMid
+                                          : AppColors.blueMid,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (inscripciones.isNotEmpty)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // ── Botón ICS ──
+                                  GestureDetector(
+                                    onTap: _exportandoIcs
+                                        ? null
+                                        : () => _exportarIcs(inscripciones),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? AppColors.darkBlueLight
+                                            : AppColors.blueSurface,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
                                           color: isDark
                                               ? AppColors.darkBlueMid
-                                              : AppColors.blueMid,
+                                                  .withOpacity(0.3)
+                                              : AppColors.blueLight,
                                         ),
-                                      )
-                                    : Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.calendar_month_outlined,
-                                              size: 16,
-                                              color: isDark
-                                                  ? AppColors.darkBlueMid
-                                                  : AppColors.blueMid),
-                                          const SizedBox(width: 6),
-                                          Text('ICS',
-                                              style: AppTextStyles.caption
-                                                  .copyWith(
+                                      ),
+                                      child: _exportandoIcs
+                                          ? SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
                                                 color: isDark
                                                     ? AppColors.darkBlueMid
                                                     : AppColors.blueMid,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12,
-                                              )),
-                                        ],
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // ── Botón PDF ──
-                            GestureDetector(
-                              onTap: _exportando
-                                  ? null
-                                  : () => _exportarPdf(inscripciones),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppColors.darkBlueLight
-                                      : AppColors.blueSurface,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isDark
-                                        ? AppColors.darkBlueMid
-                                            .withOpacity(0.3)
-                                        : AppColors.blueLight,
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                    Icons
+                                                        .calendar_month_outlined,
+                                                    size: 16,
+                                                    color: isDark
+                                                        ? AppColors.darkBlueMid
+                                                        : AppColors.blueMid),
+                                                const SizedBox(width: 6),
+                                                Text('ICS',
+                                                    style: AppTextStyles.caption
+                                                        .copyWith(
+                                                      color: isDark
+                                                          ? AppColors
+                                                              .darkBlueMid
+                                                          : AppColors.blueMid,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 12,
+                                                    )),
+                                              ],
+                                            ),
+                                    ),
                                   ),
-                                ),
-                                child: _exportando
-                                    ? SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                  const SizedBox(width: 8),
+                                  // ── Botón PDF ──
+                                  GestureDetector(
+                                    onTap: _exportando
+                                        ? null
+                                        : () => _exportarPdf(inscripciones),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? AppColors.darkBlueLight
+                                            : AppColors.blueSurface,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
                                           color: isDark
                                               ? AppColors.darkBlueMid
-                                              : AppColors.blueMid,
+                                                  .withOpacity(0.3)
+                                              : AppColors.blueLight,
                                         ),
-                                      )
-                                    : Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.picture_as_pdf_rounded,
-                                            size: 16,
-                                            color: isDark
-                                                ? AppColors.darkBlueMid
-                                                : AppColors.blueMid,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'PDF',
-                                            style:
-                                                AppTextStyles.caption.copyWith(
-                                              color: isDark
-                                                  ? AppColors.darkBlueMid
-                                                  : AppColors.blueMid,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
                                       ),
+                                      child: _exportando
+                                          ? SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: isDark
+                                                    ? AppColors.darkBlueMid
+                                                    : AppColors.blueMid,
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.picture_as_pdf_rounded,
+                                                  size: 16,
+                                                  color: isDark
+                                                      ? AppColors.darkBlueMid
+                                                      : AppColors.blueMid,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  'PDF',
+                                                  style: AppTextStyles.caption
+                                                      .copyWith(
+                                                    color: isDark
+                                                        ? AppColors.darkBlueMid
+                                                        : AppColors.blueMid,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  );
-                    },
-                  )
-                      .animate()
-                      .fadeIn(delay: 100.ms, duration: 500.ms)
-                      .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-            Expanded(
-              child: BlocBuilder<AlumnoBloc, AlumnoState>(
-                builder: (context, state) {
-                  if (state is AlumnoInscripcionesLoading) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: isDark
-                            ? AppColors.darkBlueMid
-                            : AppColors.blueMid,
-                        strokeWidth: 2.5,
-                      ),
-                    );
-                  }
-                  if (state is AlumnoInscripcionesFailure) {
-                    return Center(
-                      child: Text(state.message,
-                          style: AppTextStyles.bodyMuted.copyWith(
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary,
-                          )),
-                    );
-                  }
-                  if (state is AlumnoInscripcionesSuccess) {
-                    if (state.inscripciones.isEmpty) {
-                      return _EmptyState(isDark: isDark);
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                      itemCount: state.inscripciones.length,
-                      itemBuilder: (ctx, i) {
-                        final ins = state.inscripciones[i];
-                        final puedeEsp = _puedeEtsEspecial(ins);
-                        return _InscripcionCard(
-                          item: ins,
-                          index: i,
-                          isDark: isDark,
-                          onGenerarFicha: ins.estado == _kEstadoPendiente
-                              ? () => _generarFichaEts(ins)
-                              : null,
-                          onSolicitarBaja: ins.estado == _kEstadoConfirmada
-                              ? () => ctx.read<AlumnoBloc>().add(
-                                    AlumnoSolicitarBajaRequested(
-                                      perfil: state.perfil,
-                                      idInscripcion: ins.idInscripcion,
-                                    ),
-                                  )
-                              : null,
-                          onSolicitarRevision: ins.estado == _kEstadoCalificado &&
-                                  ins.revision == null
-                              ? () => ctx.read<AlumnoBloc>().add(
-                                    AlumnoSolicitarRevisionRequested(
-                                      perfil: state.perfil,
-                                      idInscripcion: ins.idInscripcion,
-                                    ),
-                                  )
-                              : null,
-                          onDescargarComprobante:
-                              ins.revision?.estado == _kRevAsignada
-                                  ? () => _generarComprobante(ins)
-                                  : null,
-                          onSolicitarEtsEspecial: puedeEsp
-                              ? () => ctx.read<AlumnoBloc>().add(
-                                    AlumnoSolicitarEtsEspecialRequested(
-                                      perfil: state.perfil,
-                                      idInscripcion: ins.idInscripcion,
-                                    ),
-                                  )
-                              : null,
-                          onGenerarFichaEtsEspecial: ins.etsEspecial != null &&
-                                  (ins.etsEspecial!.estado == _kEstadoPendiente ||
-                                   ins.etsEspecial!.estado == _kEstadoConfirmada)
-                              ? () => _generarFichaEtsEspecial(ins)
-                              : null,
-                          onSolicitarBajaEtsEspecial:
-                              ins.etsEspecial?.estado == _kEstadoConfirmada
-                                  ? () => ctx.read<AlumnoBloc>().add(
-                                        AlumnoSolicitarBajaEtsEspecialRequested(
-                                          perfil: state.perfil,
-                                          idEtsEspecial:
-                                              ins.etsEspecial!.idEtsEspecial,
-                                        ),
-                                      )
-                                  : null,
-                          onSolicitarRevisionEtsEspecial:
-                              ins.etsEspecial?.estado == _kEstadoCalificado &&
-                                      ins.etsEspecial?.revision == null
-                                  ? () => ctx.read<AlumnoBloc>().add(
-                                        AlumnoSolicitarRevisionEtsEspecialRequested(
-                                          perfil: state.perfil,
-                                          idEtsEspecial:
-                                              ins.etsEspecial!.idEtsEspecial,
-                                        ),
-                                      )
-                                  : null,
-                          onDescargarComprobanteEtsEspecial:
-                              ins.etsEspecial?.revision?.estado == _kRevAsignada
-                                  ? () => _generarComprobanteEtsEspecial(ins)
-                                  : null,
+                          ],
                         );
                       },
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+                    )
+                        .animate()
+                        .fadeIn(delay: 100.ms, duration: 500.ms)
+                        .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: BlocBuilder<AlumnoBloc, AlumnoState>(
+                  builder: (context, state) {
+                    if (state is AlumnoInscripcionesLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: isDark
+                              ? AppColors.darkBlueMid
+                              : AppColors.blueMid,
+                          strokeWidth: 2.5,
+                        ),
+                      );
+                    }
+                    if (state is AlumnoInscripcionesFailure) {
+                      return Center(
+                        child: Text(state.message,
+                            style: AppTextStyles.bodyMuted.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            )),
+                      );
+                    }
+                    if (state is AlumnoInscripcionesSuccess) {
+                      if (state.inscripciones.isEmpty) {
+                        return _EmptyState(isDark: isDark);
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                        itemCount: state.inscripciones.length,
+                        itemBuilder: (ctx, i) {
+                          final ins = state.inscripciones[i];
+                          final puedeEsp = _puedeEtsEspecial(ins);
+                          return _InscripcionCard(
+                            item: ins,
+                            index: i,
+                            isDark: isDark,
+                            onGenerarFicha: ins.estado == _kEstadoPendiente
+                                ? () => _generarFichaEts(ins)
+                                : null,
+                            onSolicitarBaja: ins.estado == _kEstadoConfirmada
+                                ? () => ctx.read<AlumnoBloc>().add(
+                                      AlumnoSolicitarBajaRequested(
+                                        perfil: state.perfil,
+                                        idInscripcion: ins.idInscripcion,
+                                      ),
+                                    )
+                                : null,
+                            onSolicitarRevision:
+                                ins.estado == _kEstadoCalificado &&
+                                        ins.revision == null
+                                    ? () => ctx.read<AlumnoBloc>().add(
+                                          AlumnoSolicitarRevisionRequested(
+                                            perfil: state.perfil,
+                                            idInscripcion: ins.idInscripcion,
+                                          ),
+                                        )
+                                    : null,
+                            onDescargarComprobante:
+                                ins.revision?.estado == _kRevAsignada
+                                    ? () => _generarComprobante(ins)
+                                    : null,
+                            onSolicitarEtsEspecial: puedeEsp
+                                ? () => ctx.read<AlumnoBloc>().add(
+                                      AlumnoSolicitarEtsEspecialRequested(
+                                        perfil: state.perfil,
+                                        idInscripcion: ins.idInscripcion,
+                                      ),
+                                    )
+                                : null,
+                            onGenerarFichaEtsEspecial:
+                                ins.etsEspecial != null &&
+                                        (ins.etsEspecial!.estado ==
+                                                _kEstadoPendiente ||
+                                            ins.etsEspecial!.estado ==
+                                                _kEstadoConfirmada)
+                                    ? () => _generarFichaEtsEspecial(ins)
+                                    : null,
+                            onSolicitarBajaEtsEspecial:
+                                ins.etsEspecial?.estado == _kEstadoConfirmada
+                                    ? () => ctx.read<AlumnoBloc>().add(
+                                          AlumnoSolicitarBajaEtsEspecialRequested(
+                                            perfil: state.perfil,
+                                            idEtsEspecial:
+                                                ins.etsEspecial!.idEtsEspecial,
+                                          ),
+                                        )
+                                    : null,
+                            onSolicitarRevisionEtsEspecial:
+                                ins.etsEspecial?.estado == _kEstadoCalificado &&
+                                        ins.etsEspecial?.revision == null
+                                    ? () => ctx.read<AlumnoBloc>().add(
+                                          AlumnoSolicitarRevisionEtsEspecialRequested(
+                                            perfil: state.perfil,
+                                            idEtsEspecial:
+                                                ins.etsEspecial!.idEtsEspecial,
+                                          ),
+                                        )
+                                    : null,
+                            onDescargarComprobanteEtsEspecial:
+                                ins.etsEspecial?.revision?.estado ==
+                                        _kRevAsignada
+                                    ? () => _generarComprobanteEtsEspecial(ins)
+                                    : null,
+                          );
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -1229,8 +1348,18 @@ class _InscripcionCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const months = [
-      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -1300,11 +1429,20 @@ class _InscripcionCard extends StatelessWidget {
     VoidCallback? onDescargar,
   }) {
     const meses = [
-      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic'
     ];
-    String fmtFecha(DateTime d) =>
-        '${d.day} ${meses[d.month - 1]} ${d.year} · '
+    String fmtFecha(DateTime d) => '${d.day} ${meses[d.month - 1]} ${d.year} · '
         '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
     if (revision == null) {
@@ -1368,8 +1506,7 @@ class _InscripcionCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -1423,8 +1560,7 @@ class _InscripcionCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.warning.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border:
-                Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+            border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
           ),
           child: Text('Revisión en proceso',
               style: AppTextStyles.caption.copyWith(
@@ -1575,8 +1711,7 @@ class _InscripcionCard extends StatelessWidget {
                   isDark: isDark,
                 ),
               if (onSolicitarBajaEtsEspecial != null) ...[
-                if (onGenerarFichaEtsEspecial != null)
-                  const SizedBox(width: 8),
+                if (onGenerarFichaEtsEspecial != null) const SizedBox(width: 8),
                 _CardButton(
                   label: 'Dar de baja',
                   icon: Icons.remove_circle_outline_rounded,
@@ -1622,8 +1757,7 @@ class _InscripcionCard extends StatelessWidget {
           children: [
             // ── Header ──────────────────────────────────────────────
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
               child: Row(
                 children: [
@@ -1637,8 +1771,8 @@ class _InscripcionCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -1896,9 +2030,8 @@ class _Row extends StatelessWidget {
         Expanded(
           child: Text(value,
               style: AppTextStyles.caption.copyWith(
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
+                color:
+                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontWeight: FontWeight.w500,
                 fontSize: 12,
               ),
@@ -1948,12 +2081,14 @@ class _EmptyState extends StatelessWidget {
                 )).animate().fadeIn(delay: 300.ms),
             const SizedBox(height: 8),
             Text('Busca un examen e inscríbete desde la pestaña de búsqueda.',
-                style: AppTextStyles.bodyMuted.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center).animate().fadeIn(delay: 380.ms),
+                    style: AppTextStyles.bodyMuted.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center)
+                .animate()
+                .fadeIn(delay: 380.ms),
           ],
         ),
       ),
