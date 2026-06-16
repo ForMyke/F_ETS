@@ -168,7 +168,7 @@ class ExamCard extends StatelessWidget {
                     icon: Icons.school_outlined,
                     label: 'Carrera',
                     value:
-                        '${exam.carrera} · Plan ${exam.plan} · Sem. ${exam.semestre}',
+                        '${exam.carrera} · ${exam.plan} · Sem. ${exam.semestre}',
                     isDark: isDark,
                   ),
                   const SizedBox(height: 12),
