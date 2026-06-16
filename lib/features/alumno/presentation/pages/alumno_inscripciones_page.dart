@@ -50,9 +50,46 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         .add(AlumnoInscripcionesLoaded(perfil: widget.perfil));
   }
 
+  // ── Helper: carga el logo desde assets ──────────────────────────────────
+  Future<pw.ImageProvider?> _loadLogo() async {
+    try {
+      final logoBytes = await rootBundle.load('assets/images/logo_escom.png');
+      return pw.MemoryImage(logoBytes.buffer.asUint8List());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ── Helper: encabezado centrado con logo (fichas y comprobantes) ─────────
+  pw.Widget _buildCenteredHeader({
+    required pw.ImageProvider? logo,
+    required List<pw.Widget> textChildren,
+  }) {
+    return pw.Center(
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          if (logo != null) ...[
+            pw.Image(logo, width: 44, height: 44),
+            pw.SizedBox(width: 12),
+          ],
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: textChildren,
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _exportarPdf(List<InscripcionItem> inscripciones) async {
     setState(() => _exportando = true);
     try {
+      // ── Cargar logo ──────────────────────────────────────────────────────
+      final logo = await _loadLogo();
+      // ────────────────────────────────────────────────────────────────────
+
       final pdf = pw.Document();
       final now = DateTime.now();
       final meses = [
@@ -88,21 +125,31 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(32),
           build: (pw.Context ctx) => [
-            // Encabezado
+            // ── Encabezado con logo ──────────────────────────────────
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text('ESCOM · IPN',
-                        style: pw.TextStyle(
-                            fontSize: 18,
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColors.blue900)),
-                    pw.Text('Comprobante de Inscripciones ETS',
-                        style: pw.TextStyle(
-                            fontSize: 11, color: PdfColors.grey700)),
+                    if (logo != null) ...[
+                      pw.Image(logo, width: 40, height: 40),
+                      pw.SizedBox(width: 10),
+                    ],
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('ESCOM · IPN',
+                            style: pw.TextStyle(
+                                fontSize: 18,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.blue900)),
+                        pw.Text('Comprobante de Inscripciones ETS',
+                            style: pw.TextStyle(
+                                fontSize: 11, color: PdfColors.grey700)),
+                      ],
+                    ),
                   ],
                 ),
                 pw.Text(fmtDate(now),
@@ -317,6 +364,10 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         );
 
     try {
+      // ── Cargar logo ────────────────────────────────────────────────
+      final logo = await _loadLogo();
+      // ──────────────────────────────────────────────────────────────
+
       final pdf = pw.Document();
       pdf.addPage(
         pw.Page(
@@ -325,17 +376,20 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           build: (pw.Context ctx) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // ── Encabezado ──────────────────────────────────────────
-              pw.Center(
-                  child: pw.Column(children: [
-                pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
-                    style: pw.TextStyle(
-                        fontSize: 13, fontWeight: pw.FontWeight.bold)),
-                pw.Text('ESCOM',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('ESCOMUNIDAD', style: const pw.TextStyle(fontSize: 10)),
-              ])),
+              // ── Encabezado con logo ──────────────────────────────
+              _buildCenteredHeader(
+                logo: logo,
+                textChildren: [
+                  pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
+                      style: pw.TextStyle(
+                          fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCOM',
+                      style: pw.TextStyle(
+                          fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCOMUNIDAD',
+                      style: const pw.TextStyle(fontSize: 10)),
+                ],
+              ),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey500, thickness: 0.8),
               pw.SizedBox(height: 6),
@@ -348,7 +402,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                     style: const pw.TextStyle(fontSize: 10)),
               ])),
               pw.SizedBox(height: 10),
-              // ── Texto informativo ───────────────────────────────────
+              // ── Texto informativo ──────────────────────────────
               pw.Text(
                   'Las inscripciones a ETS se realizarán los días 9, 10 y 11 de julio de 2026',
                   style: const pw.TextStyle(fontSize: 9.5)),
@@ -388,7 +442,7 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
                   style: pw.TextStyle(
                       fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 14),
-              // ── Campos para rellenar con pluma ──────────────────────
+              // ── Campos para rellenar con pluma ─────────────────
               fillField('Boleta'),
               pw.SizedBox(height: 14),
               fillField('Nombre Completo'),
@@ -476,6 +530,10 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')} hrs';
 
     try {
+      // ── Cargar logo ────────────────────────────────────────────────
+      final logo = await _loadLogo();
+      // ──────────────────────────────────────────────────────────────
+
       final pdf = pw.Document();
       pdf.addPage(
         pw.Page(
@@ -484,15 +542,17 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           build: (pw.Context ctx) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              pw.Center(
-                child: pw.Column(children: [
+              // ── Encabezado con logo ──────────────────────────────
+              _buildCenteredHeader(
+                logo: logo,
+                textChildren: [
                   pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
                       style: pw.TextStyle(
                           fontSize: 13, fontWeight: pw.FontWeight.bold)),
                   pw.Text('ESCOM · ESCOMUNIDAD',
                       style: pw.TextStyle(
                           fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                ]),
+                ],
               ),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey500, thickness: 0.8),
@@ -658,6 +718,10 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         );
 
     try {
+      // ── Cargar logo ────────────────────────────────────────────────
+      final logo = await _loadLogo();
+      // ──────────────────────────────────────────────────────────────
+
       final pdf = pw.Document();
       pdf.addPage(
         pw.Page(
@@ -666,16 +730,20 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           build: (pw.Context ctx) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              pw.Center(
-                  child: pw.Column(children: [
-                pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
-                    style: pw.TextStyle(
-                        fontSize: 13, fontWeight: pw.FontWeight.bold)),
-                pw.Text('ESCOM',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('ESCOMUNIDAD', style: const pw.TextStyle(fontSize: 10)),
-              ])),
+              // ── Encabezado con logo ──────────────────────────────
+              _buildCenteredHeader(
+                logo: logo,
+                textChildren: [
+                  pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
+                      style: pw.TextStyle(
+                          fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCOM',
+                      style: pw.TextStyle(
+                          fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('ESCOMUNIDAD',
+                      style: const pw.TextStyle(fontSize: 10)),
+                ],
+              ),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey500, thickness: 0.8),
               pw.SizedBox(height: 6),
@@ -805,6 +873,10 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')} hrs';
 
     try {
+      // ── Cargar logo ────────────────────────────────────────────────
+      final logo = await _loadLogo();
+      // ──────────────────────────────────────────────────────────────
+
       final pdf = pw.Document();
       pdf.addPage(
         pw.Page(
@@ -813,15 +885,17 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           build: (pw.Context ctx) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              pw.Center(
-                child: pw.Column(children: [
+              // ── Encabezado con logo ──────────────────────────────
+              _buildCenteredHeader(
+                logo: logo,
+                textChildren: [
                   pw.Text('INSTITUTO POLITÉCNICO NACIONAL',
                       style: pw.TextStyle(
                           fontSize: 13, fontWeight: pw.FontWeight.bold)),
                   pw.Text('ESCOM · ESCOMUNIDAD',
                       style: pw.TextStyle(
                           fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                ]),
+                ],
               ),
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey500, thickness: 0.8),
@@ -1405,7 +1479,6 @@ class _InscripcionCard extends StatelessWidget {
     }
   }
 
-  // Progreso desde inicio del mes actual hasta la fecha del ETS.
   double _calcProgress() {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, 1);
@@ -1755,7 +1828,7 @@ class _InscripcionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Column(
           children: [
-            // ── Header ──────────────────────────────────────────────
+            // ── Header ────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               color: isDark ? AppColors.darkBlueLight : AppColors.blueSurface,
@@ -1791,7 +1864,7 @@ class _InscripcionCard extends StatelessWidget {
               ),
             ),
 
-            // ── Barra de progreso temporal ───────────────────────────
+            // ── Barra de progreso temporal ──────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Column(
@@ -1844,7 +1917,7 @@ class _InscripcionCard extends StatelessWidget {
               ),
             ),
 
-            // ── Detalles ─────────────────────────────────────────────
+            // ── Detalles ────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -1884,7 +1957,7 @@ class _InscripcionCard extends StatelessWidget {
               ),
             ),
 
-            // ── Sección revisión ──────────────────────────────────────
+            // ── Sección revisión ────────────────────────────────
             if (item.estado == _kEstadoCalificado) ...[
               Divider(
                 height: 1,
@@ -1900,7 +1973,7 @@ class _InscripcionCard extends StatelessWidget {
               ),
             ],
 
-            // ── Sección ETS especial ───────────────────────────────────
+            // ── Sección ETS especial ────────────────────────────
             if (item.estado == _kEstadoCalificado &&
                 (item.etsEspecial != null ||
                     onSolicitarEtsEspecial != null)) ...[
@@ -1914,7 +1987,7 @@ class _InscripcionCard extends StatelessWidget {
               ),
             ],
 
-            // ── Acciones ─────────────────────────────────────────────
+            // ── Acciones ────────────────────────────────────────
             if (onGenerarFicha != null || onSolicitarBaja != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
