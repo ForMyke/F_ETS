@@ -36,7 +36,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
         .select(Cols.nombre)
         .eq(Cols.estado, ColValues.estadoActivo)
         .limit(1)
-        .single();
+        .maybeSingle();
 
     final Map<String, int> byCarrera = {};
     final Set<String> salones = {};
@@ -60,7 +60,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
 
     return DashboardStatsModel(
       totalExams: examsResponse.length,
-      periodoNombre: periodoResponse[Cols.nombre] as String,
+      periodoNombre: periodoResponse?[Cols.nombre] as String? ?? 'Sin periodo activo',
       examsByCarrera: byCarrera,
       proximoExamen: proximo,
       salonesEnUso: salones.length,

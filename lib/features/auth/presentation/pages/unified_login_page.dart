@@ -139,7 +139,16 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage>
           _mostrarError('Dominio de correo no reconocido.');
       }
     } catch (e) {
-      _mostrarError(e.toString().replaceAll('Exception: ', ''));
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('invalid login') ||
+          msg.contains('invalid credentials') ||
+          msg.contains('credenciales incorrectas') ||
+          msg.contains('no account') ||
+          msg.contains('email not confirmed')) {
+        _mostrarError('No encontramos una cuenta con esos datos. Verifica tu correo y contraseña.');
+      } else {
+        _mostrarError(e.toString().replaceAll('Exception: ', ''));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

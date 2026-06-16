@@ -24,8 +24,22 @@ class JefesAdminPage extends StatelessWidget {
   }
 }
 
-class _JefesAdminView extends StatelessWidget {
+class _JefesAdminView extends StatefulWidget {
   const _JefesAdminView();
+
+  @override
+  State<_JefesAdminView> createState() => _JefesAdminViewState();
+}
+
+class _JefesAdminViewState extends State<_JefesAdminView> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +130,54 @@ class _JefesAdminView extends StatelessWidget {
                       .animate()
                       .fadeIn(delay: 100.ms, duration: 500.ms)
                       .slideY(begin: 0.2, curve: Curves.easeOutCubic),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  // Buscador
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkBgSurface : AppColors.bgSurface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? AppColors.darkBorder : AppColors.borderLight,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+                      style: AppTextStyles.body.copyWith(
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar por nombre o academia…',
+                        hintStyle: AppTextStyles.body.copyWith(
+                          color: isDark ? AppColors.darkTextMuted : AppColors.textHint,
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                          size: 20,
+                        ),
+                        suffixIcon: _query.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  _searchCtrl.clear();
+                                  setState(() => _query = '');
+                                },
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                                  size: 18,
+                                ),
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 150.ms, duration: 400.ms),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -147,23 +208,30 @@ class _JefesAdminView extends StatelessWidget {
                     );
                   }
                   if (state is JefesAdminSuccess) {
-                    if (state.jefes.isEmpty) {
+                    final filtered = _query.isEmpty
+                        ? state.jefes
+                        : state.jefes.where((j) {
+                            final nombre = j.nombreCompleto.toLowerCase();
+                            final academia = (j.nombreAcademia ?? '').toLowerCase();
+                            return nombre.contains(_query) || academia.contains(_query);
+                          }).toList();
+                    if (filtered.isEmpty) {
                       return _EmptyState(isDark: isDark);
                     }
                     return ListView.builder(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-                      itemCount: state.jefes.length,
+                      itemCount: filtered.length,
                       itemBuilder: (_, i) => _JefeTile(
-                        jefe: state.jefes[i],
+                        jefe: filtered[i],
                         index: i,
                         isDark: isDark,
                         onDelete: () => _confirmDelete(
                           context,
                           isDark,
-                          state.jefes[i],
+                          filtered[i],
                           () => context.read<JefesAdminBloc>().add(
                                 JefeAdminDeleted(
-                                    idJefe: state.jefes[i].idJefe),
+                                    idJefe: filtered[i].idJefe),
                               ),
                         ),
                       ),
