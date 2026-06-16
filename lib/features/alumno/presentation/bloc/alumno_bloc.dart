@@ -100,8 +100,9 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
   ) async {
     emit(AlumnoInscripcionesLoading(perfil: event.perfil));
     try {
-      final inscripciones =
-          await dataSource.getMisInscripciones(event.perfil.idAlumno);
+      final inscripciones = await dataSource
+          .getMisInscripcionesConRevisiones(event.perfil.idAlumno);
+
       emit(AlumnoInscripcionesSuccess(
         perfil: event.perfil,
         inscripciones: inscripciones,

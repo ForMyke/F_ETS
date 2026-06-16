@@ -21,49 +21,63 @@ class InscripcionModel extends InscripcionItem {
   });
 
   factory InscripcionModel.fromJson(Map<String, dynamic> json) {
-    final ets = (json['ets'] as Map<String, dynamic>?) ?? {};
-    final salonMap = (ets['salon'] as Map<String, dynamic>?) ?? {};
-    final cm = (ets['carrera_materia'] as Map<String, dynamic>?) ?? {};
-    final fechaInicio = DateTime.parse(
-        ets['fechahorainicio'] as String? ?? '2000-01-01');
-    final hora =
-        '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}';
+        double? parseDouble(dynamic value) {
+            if (value == null) return null;
+            if (value is num) return value.toDouble();
+            return double.tryParse(value.toString());
+        }
 
-    // revisionets: 1:N returned as array, UNIQUE → 0 or 1 element
-    final revList = (json['revisionets'] as List<dynamic>?) ?? [];
-    final revMap = revList.isNotEmpty
-        ? revList.first as Map<String, dynamic>
-        : null;
+        Map<String, dynamic>? firstMap(dynamic value) {
+            if (value == null) return null;
 
-    // etsespecial: same 1:N pattern
-    final espList = (json['etsespecial'] as List<dynamic>?) ?? [];
-    final espMap = espList.isNotEmpty
-        ? espList.first as Map<String, dynamic>
-        : null;
+            if (value is List) {
+            if (value.isEmpty) return null;
+            final first = value.first;
+            return first is Map<String, dynamic> ? first : null;
+            }
 
-    return InscripcionModel(
-      idInscripcion: json['id_inscripcionets'] as String? ?? '',
-      idEts: json['id_ets'] as String? ?? '',
-      materia: ((cm['materia'] as Map<String, dynamic>?)
-              ?['nombre'] as String?) ??
-          '',
-      carrera: ((cm['carrera'] as Map<String, dynamic>?)
-              ?['acronimo'] as String?) ??
-          '',
-      salon: salonMap['codigo'] as String? ?? '',
-      edificio: ((salonMap['edificio'] as Map<String, dynamic>?)
-              ?['numero'])
-          ?.toString() ??
-          '',
-      fechaInicio: fechaInicio,
-      hora: hora,
-      turno: ets['turno'] as String? ?? '',
-      estado: json['estado'] as String? ?? '',
-      calificacion: (json['calificacion'] as num?)?.toDouble(),
-      resultado: json['resultado'] as String?,
-      revision: revMap != null ? RevisionItem.fromJson(revMap) : null,
-      etsEspecial:
-          espMap != null ? EtsEspecialModel.fromJson(espMap) : null,
-    );
-  }
+            if (value is Map<String, dynamic>) {
+            return value;
+            }
+
+            return null;
+        }
+
+        final ets = (json['ets'] as Map<String, dynamic>?) ?? {};
+        final salonMap = (ets['salon'] as Map<String, dynamic>?) ?? {};
+        final cm = (ets['carrera_materia'] as Map<String, dynamic>?) ?? {};
+
+        final fechaInicio = DateTime.parse(
+            ets['fechahorainicio'] as String? ?? '2000-01-01',
+        );
+
+        final hora =
+            '${fechaInicio.hour.toString().padLeft(2, '0')}:${fechaInicio.minute.toString().padLeft(2, '0')}';
+
+        final revMap = firstMap(json['revisionets']);
+        final espMap = firstMap(json['etsespecial']);
+
+        return InscripcionModel(
+            idInscripcion: json['id_inscripcionets'] as String? ?? '',
+            idEts: json['id_ets'] as String? ?? '',
+            materia:
+                ((cm['materia'] as Map<String, dynamic>?)?['nombre'] as String?) ?? '',
+            carrera:
+                ((cm['carrera'] as Map<String, dynamic>?)?['acronimo'] as String?) ??
+                    '',
+            salon: salonMap['codigo'] as String? ?? '',
+            edificio:
+                ((salonMap['edificio'] as Map<String, dynamic>?)?['numero'])
+                        ?.toString() ??
+                    '',
+            fechaInicio: fechaInicio,
+            hora: hora,
+            turno: ets['turno'] as String? ?? '',
+            estado: json['estado'] as String? ?? '',
+            calificacion: parseDouble(json['calificacion']),
+            resultado: json['resultado'] as String?,
+            revision: revMap != null ? RevisionItem.fromJson(revMap) : null,
+            etsEspecial: espMap != null ? EtsEspecialModel.fromJson(espMap) : null,
+        );
+    }
 }

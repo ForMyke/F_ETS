@@ -69,10 +69,12 @@ class JefeBloc extends Bloc<JefeEvent, JefeState> {
         alumnos: alumnos,
       ));
     } catch (e) {
+      print('DEBUG getAlumnosInscritos error: $e');
+
       emit(JefeAlumnosFailure(
         perfil: event.perfil,
         idEts: event.idEts,
-        message: 'Error al cargar alumnos.',
+        message: 'Error al cargar alumnos: $e',
       ));
     }
   }

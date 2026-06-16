@@ -44,6 +44,10 @@ abstract class AlumnoRemoteDataSource {
 
   Future<List<InscripcionItem>> getMisInscripciones(String idAlumno);
 
+  Future<List<InscripcionItem>> getMisInscripcionesConRevisiones(
+    String idAlumno,
+  );
+
   Future<void> solicitarBaja(String idInscripcion);
 
   Future<void> solicitarRevision(String idInscripcion);
@@ -294,6 +298,7 @@ class AlumnoRemoteDataSourceImpl implements AlumnoRemoteDataSource {
   // Carga inscripciones con datos de revisión y ETS especial.
   // Requiere ejecutar scripts/add_revision_flow.sql y add_ets_especial_flow.sql
   // en Supabase antes de usar este método.
+  @override
   Future<List<InscripcionItem>> getMisInscripcionesConRevisiones(
       String idAlumno) async {
     final res = await client

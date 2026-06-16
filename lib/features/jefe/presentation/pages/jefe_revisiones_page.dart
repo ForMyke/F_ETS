@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import 'package:etsAndroid/features/jefe/data/datasources/jefe_remote_datasource.dart';
+import 'package:etsAndroid/features/notificaciones/data/datasources/notificaciones_datasource.dart';
 
 // Revisión estado constants
 const String _kSolicitada = 'solicitada';
@@ -479,20 +480,64 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
     required String lugar,
   }) async {
     try {
-      await Supabase.instance.client.from('revisionets').update({
+      final client = Supabase.instance.client;
+
+      await client.from('revisionets').update({
         'estado': _kAsignada,
         'fecha_revision': fechaRevision.toIso8601String(),
         if (lugar.isNotEmpty) 'lugar': lugar,
       }).eq('id_revision', idRevision);
+
+      try {
+        final revRes = await client
+            .from('revisionets')
+            .select('id_inscripcion')
+            .eq('id_revision', idRevision)
+            .maybeSingle();
+
+        final idInscripcion = revRes?['id_inscripcion'] as String?;
+
+        if (idInscripcion != null) {
+          final insRes = await client
+              .from('inscripcionets')
+              .select('id_alumno, ets(carrera_materia(materia(nombre)))')
+              .eq('id_inscripcionets', idInscripcion)
+              .maybeSingle();
+
+          final alumnoId = insRes?['id_alumno'] as String?;
+          final materia =
+              (insRes?['ets']?['carrera_materia']?['materia']?['nombre']
+                      as String?) ??
+                  'ETS';
+
+          final fechaTexto =
+              '${fechaRevision.day}/${fechaRevision.month}/${fechaRevision.year} '
+              '${fechaRevision.hour.toString().padLeft(2, '0')}:'
+              '${fechaRevision.minute.toString().padLeft(2, '0')}';
+
+          if (alumnoId != null) {
+            await crearNotificacion(
+              client,
+              receptorId: alumnoId,
+              tipo: 'revision_asignada',
+              mensaje: lugar.isNotEmpty
+                  ? 'Tu revisión de $materia fue asignada para el $fechaTexto en $lugar.'
+                  : 'Tu revisión de $materia fue asignada para el $fechaTexto.',
+              refId: idInscripcion,
+            );
+          }
+        }
+      } catch (_) {}
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: const Text('Revisión asignada correctamente'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
+
       _cargar();
     } catch (e) {
       if (mounted) {
@@ -500,8 +545,7 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
           content: const Text('Error al asignar la revisión'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
@@ -634,19 +678,63 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
     required double calificacion,
   }) async {
     try {
-      await Supabase.instance.client.from('revisionets').update({
+      final client = Supabase.instance.client;
+
+      await client.from('revisionets').update({
         'estado': _kCalificada,
         'calificacion': calificacion,
       }).eq('id_revision', idRevision);
+
+      try {
+        final revRes = await client
+            .from('revisionets')
+            .select('id_inscripcion')
+            .eq('id_revision', idRevision)
+            .maybeSingle();
+
+        final idInscripcion = revRes?['id_inscripcion'] as String?;
+
+        if (idInscripcion != null) {
+          final insRes = await client
+              .from('inscripcionets')
+              .select('id_alumno, ets(carrera_materia(materia(nombre)))')
+              .eq('id_inscripcionets', idInscripcion)
+              .maybeSingle();
+
+          final alumnoId = insRes?['id_alumno'] as String?;
+          final materia =
+              (insRes?['ets']?['carrera_materia']?['materia']?['nombre']
+                      as String?) ??
+                  'ETS';
+
+          await client.from('inscripcionets').update({
+            'calificacion': calificacion,
+            'resultado': calificacion >= 6.0 ? 'aprobado' : 'reprobado',
+            'estado': 'calificado',
+          }).eq('id_inscripcionets', idInscripcion);
+
+          if (alumnoId != null) {
+            await crearNotificacion(
+              client,
+              receptorId: alumnoId,
+              tipo: 'revision_calificada',
+              mensaje:
+                  'Tu revisión de $materia fue calificada con ${calificacion.toStringAsFixed(1)}.',
+              refId: idInscripcion,
+            );
+          }
+        }
+      } catch (_) {}
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: const Text('Calificación de revisión guardada'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
+
       _cargar();
     } catch (e) {
       if (mounted) {
@@ -654,8 +742,7 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
           content: const Text('Error al guardar la calificación'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
@@ -830,24 +917,63 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
   }
 
   Future<void> _calificarEtsEsp({
-    required String idEtsEspecial,
-    required double calificacion,
+  required String idEtsEspecial,
+  required double calificacion,
   }) async {
     try {
-      await Supabase.instance.client.from('etsespecial').update({
+      final client = Supabase.instance.client;
+
+      await client.from('etsespecial').update({
         'estado': 'calificado',
         'calificacion': calificacion,
         'resultado': calificacion >= 6.0 ? 'aprobado' : 'reprobado',
       }).eq('id_ets_especial', idEtsEspecial);
+
+      try {
+        final espRes = await client
+            .from('etsespecial')
+            .select(
+              'id_inscripcion_orig, inscripcionets(id_alumno, ets(carrera_materia(materia(nombre))))',
+            )
+            .eq('id_ets_especial', idEtsEspecial)
+            .maybeSingle();
+
+        final idInscripcion = espRes?['id_inscripcion_orig'] as String?;
+        final ins = espRes?['inscripcionets'];
+        final alumnoId = ins?['id_alumno'] as String?;
+        final materia =
+            (ins?['ets']?['carrera_materia']?['materia']?['nombre'] as String?) ??
+                'ETS';
+
+        if (idInscripcion != null) {
+          await client.from('inscripcionets').update({
+            'calificacion': calificacion,
+            'resultado': calificacion >= 6.0 ? 'aprobado' : 'reprobado',
+            'estado': 'calificado',
+          }).eq('id_inscripcionets', idInscripcion);
+        }
+
+        if (alumnoId != null) {
+          await crearNotificacion(
+            client,
+            receptorId: alumnoId,
+            tipo: 'ets_especial_calificado',
+            mensaje:
+                'Tu ETS especial de $materia fue calificado con ${calificacion.toStringAsFixed(1)}.',
+            refId: idInscripcion ?? idEtsEspecial,
+          );
+        }
+      } catch (_) {}
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: const Text('ETS especial calificado'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
+
       _cargar();
     } catch (e) {
       if (mounted) {
@@ -855,8 +981,7 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
           content: const Text('Error al calificar el ETS especial'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
@@ -1105,20 +1230,68 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
     required String lugar,
   }) async {
     try {
-      await Supabase.instance.client.from('revisionetsespecial').update({
+      final client = Supabase.instance.client;
+
+      await client.from('revisionetsespecial').update({
         'estado': _kAsignada,
         'fecha_revision': fechaRevision.toIso8601String(),
         if (lugar.isNotEmpty) 'lugar': lugar,
       }).eq('id_revision_esp', idRevision);
+
+      try {
+        final revRes = await client
+            .from('revisionetsespecial')
+            .select('id_ets_especial')
+            .eq('id_revision_esp', idRevision)
+            .maybeSingle();
+
+        final idEtsEspecial = revRes?['id_ets_especial'] as String?;
+
+        if (idEtsEspecial != null) {
+          final espRes = await client
+              .from('etsespecial')
+              .select(
+                'id_inscripcion_orig, inscripcionets(id_alumno, ets(carrera_materia(materia(nombre))))',
+              )
+              .eq('id_ets_especial', idEtsEspecial)
+              .maybeSingle();
+
+          final idInscripcion = espRes?['id_inscripcion_orig'] as String?;
+          final ins = espRes?['inscripcionets'];
+          final alumnoId = ins?['id_alumno'] as String?;
+          final materia =
+              (ins?['ets']?['carrera_materia']?['materia']?['nombre']
+                      as String?) ??
+                  'ETS';
+
+          final fechaTexto =
+              '${fechaRevision.day}/${fechaRevision.month}/${fechaRevision.year} '
+              '${fechaRevision.hour.toString().padLeft(2, '0')}:'
+              '${fechaRevision.minute.toString().padLeft(2, '0')}';
+
+          if (alumnoId != null) {
+            await crearNotificacion(
+              client,
+              receptorId: alumnoId,
+              tipo: 'revision_especial_asignada',
+              mensaje: lugar.isNotEmpty
+                  ? 'Tu revisión de ETS especial de $materia fue asignada para el $fechaTexto en $lugar.'
+                  : 'Tu revisión de ETS especial de $materia fue asignada para el $fechaTexto.',
+              refId: idInscripcion ?? idEtsEspecial,
+            );
+          }
+        }
+      } catch (_) {}
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: const Text('Revisión asignada correctamente'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
+
       _cargar();
     } catch (e) {
       if (mounted) {
@@ -1126,8 +1299,7 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
           content: const Text('Error al asignar la revisión'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
@@ -1261,19 +1433,75 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
     required double calificacion,
   }) async {
     try {
-      await Supabase.instance.client.from('revisionetsespecial').update({
+      final client = Supabase.instance.client;
+
+      await client.from('revisionetsespecial').update({
         'estado': _kCalificada,
         'calificacion': calificacion,
       }).eq('id_revision_esp', idRevision);
+
+      try {
+        final revRes = await client
+            .from('revisionetsespecial')
+            .select('id_ets_especial')
+            .eq('id_revision_esp', idRevision)
+            .maybeSingle();
+
+        final idEtsEspecial = revRes?['id_ets_especial'] as String?;
+
+        if (idEtsEspecial != null) {
+          final espRes = await client
+              .from('etsespecial')
+              .select(
+                'id_inscripcion_orig, inscripcionets(id_alumno, ets(carrera_materia(materia(nombre))))',
+              )
+              .eq('id_ets_especial', idEtsEspecial)
+              .maybeSingle();
+
+          final idInscripcion = espRes?['id_inscripcion_orig'] as String?;
+          final ins = espRes?['inscripcionets'];
+          final alumnoId = ins?['id_alumno'] as String?;
+          final materia =
+              (ins?['ets']?['carrera_materia']?['materia']?['nombre']
+                      as String?) ??
+                  'ETS';
+
+          await client.from('etsespecial').update({
+            'estado': 'calificado',
+            'calificacion': calificacion,
+            'resultado': calificacion >= 6.0 ? 'aprobado' : 'reprobado',
+          }).eq('id_ets_especial', idEtsEspecial);
+
+          if (idInscripcion != null) {
+            await client.from('inscripcionets').update({
+              'calificacion': calificacion,
+              'resultado': calificacion >= 6.0 ? 'aprobado' : 'reprobado',
+              'estado': 'calificado',
+            }).eq('id_inscripcionets', idInscripcion);
+          }
+
+          if (alumnoId != null) {
+            await crearNotificacion(
+              client,
+              receptorId: alumnoId,
+              tipo: 'revision_especial_calificada',
+              mensaje:
+                  'Tu revisión de ETS especial de $materia fue calificada con ${calificacion.toStringAsFixed(1)}.',
+              refId: idInscripcion ?? idEtsEspecial,
+            );
+          }
+        }
+      } catch (_) {}
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: const Text('Calificación de revisión guardada'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
+
       _cargar();
     } catch (e) {
       if (mounted) {
@@ -1281,8 +1509,7 @@ class _JefeRevisionesPageState extends State<JefeRevisionesPage>
           content: const Text('Error al guardar la calificación'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     }
