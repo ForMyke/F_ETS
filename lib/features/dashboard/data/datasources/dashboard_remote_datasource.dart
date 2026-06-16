@@ -36,7 +36,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
         .select(Cols.nombre)
         .eq(Cols.estado, ColValues.estadoActivo)
         .limit(1)
-        .single();
+        .maybeSingle();
 
     final Map<String, int> byCarrera = {};
     final Set<String> salones = {};
@@ -44,23 +44,26 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     final now = DateTime.now();
 
     for (final exam in examsResponse) {
-      final acronimo = exam[Tables.carreraMateria][Tables.carrera]
-          [Cols.acronimo] as String;
+      final cm = exam[Tables.carreraMateria] as Map<String, dynamic>?;
+      final carreraMap = cm?[Tables.carrera] as Map<String, dynamic>?;
+      final acronimo = carreraMap?[Cols.acronimo] as String? ?? 'Otro';
       byCarrera[acronimo] = (byCarrera[acronimo] ?? 0) + 1;
 
-      salones.add(exam[Cols.idSalon] as String);
+      final salonId = exam[Cols.idSalon] as String?;
+      if (salonId != null) salones.add(salonId);
 
-      final fecha = DateTime.parse(exam[Cols.fechaHoraInicio] as String);
-      if (fecha.isAfter(now)) {
-        if (proximo == null || fecha.isBefore(proximo)) {
-          proximo = fecha;
+      final rawFecha = exam[Cols.fechaHoraInicio] as String?;
+      if (rawFecha != null) {
+        final fecha = DateTime.tryParse(rawFecha);
+        if (fecha != null && fecha.isAfter(now)) {
+          if (proximo == null || fecha.isBefore(proximo)) proximo = fecha;
         }
       }
     }
 
     return DashboardStatsModel(
       totalExams: examsResponse.length,
-      periodoNombre: periodoResponse[Cols.nombre] as String,
+      periodoNombre: periodoResponse?[Cols.nombre] as String? ?? 'Sin periodo activo',
       examsByCarrera: byCarrera,
       proximoExamen: proximo,
       salonesEnUso: salones.length,

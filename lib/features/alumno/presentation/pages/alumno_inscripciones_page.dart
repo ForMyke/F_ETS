@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -7,6 +8,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:etsAndroid/core/util/platform_file.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import 'package:etsAndroid/features/alumno/domain/entities/alumno_profile.dart';
@@ -267,11 +269,14 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         ),
       );
 
-      await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename:
-            'inscripciones_${widget.perfil.boleta}_${now.millisecondsSinceEpoch}.pdf',
-      );
+      final pdfBytes = await pdf.save();
+      final fname =
+          'inscripciones_${widget.perfil.boleta}_${now.millisecondsSinceEpoch}.pdf';
+      if (kIsWeb) {
+        await Printing.sharePdf(bytes: pdfBytes, filename: fname);
+      } else {
+        await openBytesAsFile(fname, pdfBytes, 'application/pdf');
+      }
     } finally {
       if (mounted) setState(() => _exportando = false);
     }
@@ -313,10 +318,17 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
       buf.writeln('END:VCALENDAR');
 
       final bytes = Uint8List.fromList(utf8.encode(buf.toString()));
-      await Share.shareXFiles(
-        [XFile.fromData(bytes, mimeType: 'text/calendar', name: 'mis_ets.ics')],
-        subject: 'Mis ETS — ESCOM IPN',
-      );
+      if (kIsWeb) {
+        await Share.shareXFiles(
+          [
+            XFile.fromData(bytes,
+                mimeType: 'text/calendar', name: 'mis_ets.ics')
+          ],
+          subject: 'Mis ETS — ESCOM IPN',
+        );
+      } else {
+        await openBytesAsFile('mis_ets.ics', bytes, 'text/calendar');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -476,10 +488,12 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         ),
       );
 
-      await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'Ficha_ETS.pdf',
-      );
+      final pdfBytes = await pdf.save();
+      if (kIsWeb) {
+        await Printing.sharePdf(bytes: pdfBytes, filename: 'Ficha_ETS.pdf');
+      } else {
+        await openBytesAsFile('Ficha_ETS.pdf', pdfBytes, 'application/pdf');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -640,10 +654,14 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         ),
       );
 
-      await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'Comprobante_Revision_ETS.pdf',
-      );
+      final pdfBytes = await pdf.save();
+      if (kIsWeb) {
+        await Printing.sharePdf(
+            bytes: pdfBytes, filename: 'Comprobante_Revision_ETS.pdf');
+      } else {
+        await openBytesAsFile(
+            'Comprobante_Revision_ETS.pdf', pdfBytes, 'application/pdf');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -819,10 +837,14 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         ),
       );
 
-      await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'Ficha_ETS_Especial.pdf',
-      );
+      final pdfBytes = await pdf.save();
+      if (kIsWeb) {
+        await Printing.sharePdf(
+            bytes: pdfBytes, filename: 'Ficha_ETS_Especial.pdf');
+      } else {
+        await openBytesAsFile(
+            'Ficha_ETS_Especial.pdf', pdfBytes, 'application/pdf');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -983,10 +1005,15 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
         ),
       );
 
-      await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'Comprobante_Revision_ETS_Especial.pdf',
-      );
+      final pdfBytes = await pdf.save();
+      if (kIsWeb) {
+        await Printing.sharePdf(
+            bytes: pdfBytes,
+            filename: 'Comprobante_Revision_ETS_Especial.pdf');
+      } else {
+        await openBytesAsFile('Comprobante_Revision_ETS_Especial.pdf',
+            pdfBytes, 'application/pdf');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -1628,19 +1655,23 @@ class _InscripcionCard extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: AppColors.warning.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border:
+                  Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+            ),
+            child: Text('Revisión en proceso',
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.warning,
+                )),
           ),
-          child: Text('Revisión en proceso',
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: AppColors.warning,
-              )),
         ),
       ],
     );
@@ -1679,19 +1710,22 @@ class _InscripcionCard extends StatelessWidget {
         label = estado;
     }
     return Row(children: [
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+      Flexible(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Text(label,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: color,
+              )),
         ),
-        child: Text(label,
-            style: AppTextStyles.caption.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
-            )),
       ),
     ]);
   }
@@ -1773,8 +1807,10 @@ class _InscripcionCard extends StatelessWidget {
         if (onGenerarFichaEtsEspecial != null ||
             onSolicitarBajaEtsEspecial != null) ...[
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               if (onGenerarFichaEtsEspecial != null)
                 _CardButton(
@@ -1783,8 +1819,7 @@ class _InscripcionCard extends StatelessWidget {
                   onTap: onGenerarFichaEtsEspecial!,
                   isDark: isDark,
                 ),
-              if (onSolicitarBajaEtsEspecial != null) ...[
-                if (onGenerarFichaEtsEspecial != null) const SizedBox(width: 8),
+              if (onSolicitarBajaEtsEspecial != null)
                 _CardButton(
                   label: 'Dar de baja',
                   icon: Icons.remove_circle_outline_rounded,
@@ -1792,7 +1827,6 @@ class _InscripcionCard extends StatelessWidget {
                   isDark: isDark,
                   isDestructive: true,
                 ),
-              ],
             ],
           ),
         ],
@@ -1991,8 +2025,10 @@ class _InscripcionCard extends StatelessWidget {
             if (onGenerarFicha != null || onSolicitarBaja != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     if (onGenerarFicha != null)
                       _CardButton(
@@ -2001,8 +2037,7 @@ class _InscripcionCard extends StatelessWidget {
                         onTap: onGenerarFicha!,
                         isDark: isDark,
                       ),
-                    if (onSolicitarBaja != null) ...[
-                      if (onGenerarFicha != null) const SizedBox(width: 8),
+                    if (onSolicitarBaja != null)
                       _CardButton(
                         label: 'Solicitar baja',
                         icon: Icons.remove_circle_outline_rounded,
@@ -2010,7 +2045,6 @@ class _InscripcionCard extends StatelessWidget {
                         isDark: isDark,
                         isDestructive: true,
                       ),
-                    ],
                   ],
                 ),
               ),

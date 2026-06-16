@@ -85,6 +85,8 @@ class AlumnoBloc extends Bloc<AlumnoEvent, AlumnoState> {
       );
       emit(AlumnoExamsSuccess(perfil: event.perfil, exams: exams));
     } catch (e) {
+      // ignore: avoid_print
+      print('DEBUG getExamsDisponibles error: $e');
       emit(AlumnoExamsFailure(
         perfil: event.perfil,
         message: 'Error al cargar exámenes.',
