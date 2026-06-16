@@ -72,7 +72,7 @@ class _NotificationButtonState extends State<NotificationButton> {
         return;
       }
 
-      await NotificationService.instance.scheduleExamNotification(
+      final scheduled = await NotificationService.instance.scheduleExamNotification(
         id: _notifId,
         materia: widget.materia,
         salon: widget.salon,
@@ -82,10 +82,14 @@ class _NotificationButtonState extends State<NotificationButton> {
 
       if (mounted) {
         setState(() {
-          _isScheduled = true;
+          _isScheduled = scheduled;
           _isLoading = false;
         });
-        _showSnack('Recordatorio programado para un día antes', success: true);
+        if (scheduled) {
+          _showSnack('Recordatorio programado para un día antes', success: true);
+        } else {
+          _showSnack('Ya no se puede programar: la fecha de recordatorio ya pasó', success: false);
+        }
       }
     }
   }

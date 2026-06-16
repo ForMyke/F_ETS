@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:flutter/foundation.dart';
@@ -16,6 +17,12 @@ class NotificationService {
     if (kIsWeb || _initialized) return;
 
     tz_data.initializeTimeZones();
+    try {
+      final localTz = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(localTz));
+    } catch (_) {
+      // Si falla la detección, se queda con la zona por defecto (UTC).
+    }
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings(
@@ -42,7 +49,7 @@ class NotificationService {
     return true;
   }
 
-  Future<void> scheduleExamNotification({
+  Future<bool> scheduleExamNotification({
     required int id,
     required String materia,
     required String salon,
@@ -50,7 +57,7 @@ class NotificationService {
     required DateTime examDate,
     int daysBefore = 1,
   }) async {
-    if (kIsWeb) return;
+    if (kIsWeb) return false;
     await init();
 
     final notifyDate = examDate.subtract(Duration(days: daysBefore));
@@ -63,7 +70,7 @@ class NotificationService {
       0,
     );
 
-    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
+    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return false;
 
     const androidDetails = AndroidNotificationDetails(
       'ets_exams',
@@ -90,6 +97,7 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
+    return true;
   }
 
   Future<void> cancelNotification(int id) async {

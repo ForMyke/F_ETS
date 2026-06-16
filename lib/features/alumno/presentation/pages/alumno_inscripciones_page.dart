@@ -395,20 +395,22 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           ]),
         );
 
-    pw.Widget fillField(String label) => pw.Column(
+    pw.Widget fillField(String label, String value) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(label,
                 style:
                     pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 6),
+            pw.SizedBox(height: 4),
             pw.Container(
-              height: 14,
+              width: double.infinity,
+              padding: const pw.EdgeInsets.only(bottom: 4),
               decoration: const pw.BoxDecoration(
                 border: pw.Border(
                     bottom:
                         pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
               ),
+              child: pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
             ),
           ],
         );
@@ -487,19 +489,13 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text(
-                  'Anota aqui los siguientes datos para poder hacer valido el pago:',
-                  style: pw.TextStyle(
-                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              fillField('Boleta', widget.perfil.boleta),
               pw.SizedBox(height: 14),
-              // ── Campos para rellenar con pluma ─────────────────
-              fillField('Boleta'),
+              fillField('Nombre Completo', widget.perfil.nombreCompleto),
               pw.SizedBox(height: 14),
-              fillField('Nombre Completo'),
+              fillField('Unidad de Aprendizaje a presentar ETS', item.materia),
               pw.SizedBox(height: 14),
-              fillField('Unidad de Aprendizaje a presentar ETS'),
-              pw.SizedBox(height: 14),
-              fillField('Turno a presentar ETS'),
+              fillField('Turno a presentar ETS', item.turno),
               pw.SizedBox(height: 14),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
@@ -754,20 +750,22 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
           ]),
         );
 
-    pw.Widget fillField(String label) => pw.Column(
+    pw.Widget fillField(String label, String value) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(label,
                 style:
                     pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 6),
+            pw.SizedBox(height: 4),
             pw.Container(
-              height: 14,
+              width: double.infinity,
+              padding: const pw.EdgeInsets.only(bottom: 4),
               decoration: const pw.BoxDecoration(
                 border: pw.Border(
                     bottom:
                         pw.BorderSide(width: 0.8, color: PdfColors.grey700)),
               ),
+              child: pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
             ),
           ],
         );
@@ -836,18 +834,13 @@ class _AlumnoInscripcionesPageState extends State<AlumnoInscripcionesPage> {
               pw.SizedBox(height: 8),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
-              pw.Text(
-                  'Anota aquí los siguientes datos para poder hacer válido el pago:',
-                  style: pw.TextStyle(
-                      fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+              fillField('Boleta', widget.perfil.boleta),
               pw.SizedBox(height: 14),
-              fillField('Boleta'),
+              fillField('Nombre Completo', widget.perfil.nombreCompleto),
               pw.SizedBox(height: 14),
-              fillField('Nombre Completo'),
+              fillField('Unidad de Aprendizaje a presentar ETS', item.materia),
               pw.SizedBox(height: 14),
-              fillField('Unidad de Aprendizaje a presentar ETS'),
-              pw.SizedBox(height: 14),
-              fillField('Turno a presentar ETS'),
+              fillField('Turno a presentar ETS', item.turno),
               pw.SizedBox(height: 14),
               pw.Divider(color: PdfColors.grey400, thickness: 0.5),
               pw.SizedBox(height: 6),
@@ -2057,8 +2050,7 @@ class _InscripcionCard extends StatelessWidget {
             ],
 
             // ── Acciones ────────────────────────────────────────
-            if (onGenerarFicha != null || onSolicitarBaja != null)
-              Padding(
+            Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
                 child: Wrap(
                   alignment: WrapAlignment.end,
