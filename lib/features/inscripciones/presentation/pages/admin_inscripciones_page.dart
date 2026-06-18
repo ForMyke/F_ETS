@@ -405,8 +405,13 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                       children: [
                         const Icon(Icons.hourglass_empty_rounded, size: 14),
                         const SizedBox(width: 6),
-                        Text('Pendientes'
-                            '${_pendientes.isEmpty ? '' : ' (${_pendientes.length})'}'),
+                        Flexible(
+                          child: Text(
+                            'Pendientes'
+                            '${_pendientes.isEmpty ? '' : ' (${_pendientes.length})'}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -416,8 +421,13 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                       children: [
                         const Icon(Icons.exit_to_app_rounded, size: 14),
                         const SizedBox(width: 6),
-                        Text('Bajas'
-                            '${_bajas.isEmpty ? '' : ' (${_bajas.length})'}'),
+                        Flexible(
+                          child: Text(
+                            'Bajas'
+                            '${_bajas.isEmpty ? '' : ' (${_bajas.length})'}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -427,8 +437,13 @@ class _AdminInscripcionesPageState extends State<AdminInscripcionesPage>
                       children: [
                         const Icon(Icons.star_outline_rounded, size: 14),
                         const SizedBox(width: 6),
-                        Text('ETS Esp.'
-                            '${_especiales.isEmpty ? '' : ' (${_especiales.length})'}'),
+                        Flexible(
+                          child: Text(
+                            'ETS Esp.'
+                            '${_especiales.isEmpty ? '' : ' (${_especiales.length})'}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),

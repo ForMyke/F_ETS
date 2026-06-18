@@ -1555,6 +1555,7 @@ class _InscripcionCard extends StatelessWidget {
     required RevisionItem? revision,
     VoidCallback? onSolicitar,
     VoidCallback? onDescargar,
+    bool showDisabledSolicitar = false,
   }) {
     const meses = [
       'ene',
@@ -1623,6 +1624,15 @@ class _InscripcionCard extends StatelessWidget {
               color: AppColors.success,
             ),
           ),
+          if (showDisabledSolicitar) ...[
+            const Spacer(),
+            _CardButton(
+              label: 'Solicitar',
+              icon: Icons.edit_note_rounded,
+              onTap: null,
+              isDark: isDark,
+            ),
+          ],
         ],
       );
     }
@@ -1677,10 +1687,23 @@ class _InscripcionCard extends StatelessWidget {
               isDark: isDark,
             ),
           ],
+          if (showDisabledSolicitar) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: _CardButton(
+                label: 'Solicitar',
+                icon: Icons.edit_note_rounded,
+                onTap: null,
+                isDark: isDark,
+              ),
+            ),
+          ],
         ],
       );
     }
 
+    // estado == 'solicitada' (en proceso)
     return Row(
       children: [
         Flexible(
@@ -1701,6 +1724,15 @@ class _InscripcionCard extends StatelessWidget {
                 )),
           ),
         ),
+        if (showDisabledSolicitar) ...[
+          const SizedBox(width: 8),
+          _CardButton(
+            label: 'Solicitar',
+            icon: Icons.edit_note_rounded,
+            onTap: null,
+            isDark: isDark,
+          ),
+        ],
       ],
     );
   }
@@ -1830,6 +1862,7 @@ class _InscripcionCard extends StatelessWidget {
             revision: esp.revision,
             onSolicitar: onSolicitarRevisionEtsEspecial,
             onDescargar: onDescargarComprobanteEtsEspecial,
+            showDisabledSolicitar: true,
           ),
         ],
         if (onGenerarFichaEtsEspecial != null ||
@@ -2096,26 +2129,31 @@ class _InscripcionCard extends StatelessWidget {
 class _CardButton extends StatelessWidget {
   final String label;
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isDark;
   final bool isDestructive;
 
   const _CardButton({
     required this.label,
     required this.icon,
-    required this.onTap,
+    this.onTap,
     required this.isDark,
     this.isDestructive = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive
-        ? AppColors.error
-        : (isDark ? AppColors.darkBlueMid : AppColors.blueMid);
-    final bg = isDestructive
-        ? AppColors.error.withValues(alpha: 0.08)
-        : (isDark ? AppColors.darkBlueLight : AppColors.blueSurface);
+    final disabled = onTap == null;
+    final color = disabled
+        ? (isDark ? AppColors.darkTextMuted : AppColors.textMuted)
+        : isDestructive
+            ? AppColors.error
+            : (isDark ? AppColors.darkBlueMid : AppColors.blueMid);
+    final bg = disabled
+        ? Colors.transparent
+        : isDestructive
+            ? AppColors.error.withValues(alpha: 0.08)
+            : (isDark ? AppColors.darkBlueLight : AppColors.blueSurface);
 
     return GestureDetector(
       onTap: onTap,
@@ -2124,7 +2162,8 @@ class _CardButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(
+              color: color.withValues(alpha: disabled ? 0.2 : 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

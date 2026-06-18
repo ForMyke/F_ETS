@@ -864,28 +864,6 @@ class _JefeAlumnosPageState extends State<JefeAlumnosPage> {
                           index: i,
                           isDark: isDark,
                           onCalificar: () {
-                            final fechaPermitida =
-                                widget.etsItem.fechaInicio.add(const Duration(days: 1));
-
-                            if (DateTime.now().isBefore(fechaPermitida)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Podrás capturar calificaciones a partir del '
-                                    '${fechaPermitida.day}/${fechaPermitida.month}/${fechaPermitida.year} '
-                                    '${fechaPermitida.hour.toString().padLeft(2, '0')}:'
-                                    '${fechaPermitida.minute.toString().padLeft(2, '0')} hrs.',
-                                  ),
-                                  backgroundColor: AppColors.warning,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
                             _showCalificacionDialog(context, alumnos[i], alumnos, isDark);
                           },
                         ),
